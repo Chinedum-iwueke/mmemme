@@ -143,7 +143,9 @@ Implemented in the Expo app, operations console, seed data and storage/RLS migra
 - Filters return deterministic results and never imply live availability.
 - Private verification documents cannot be fetched through a public or customer session.
 
-### Engineering milestone 3 — First booking request
+### Engineering milestone 3 — First booking request (implemented)
+
+Implemented on 21 July 2026 with an authenticated structured request form, client request UUID, idempotent server-owned submission operation, customer booking list and timeline, and an operations claim/contact/decline queue.
 
 **Mobile**
 
@@ -170,7 +172,9 @@ Implemented in the Expo app, operations console, seed data and storage/RLS migra
 - Invalid package/vendor combinations and unpublished vendors are rejected server-side.
 - The first request appears in operations and customer timelines with the same correlation ID.
 
-### Engineering milestone 4 — Quote creation and acceptance
+### Engineering milestone 4 — Quote creation and acceptance (implemented)
+
+Implemented on 21 July 2026 with retained quote revisions, package snapshots, inclusions, exclusions, payment schedule, expiry, cancellation consequences, vendor-availability attestation and an idempotent customer acceptance operation.
 
 **Operations console**
 
@@ -192,7 +196,9 @@ Implemented in the Expo app, operations console, seed data and storage/RLS migra
 - Accepting a quote twice produces one state transition and one payable amount.
 - Historical quote content remains unchanged after vendor/package edits.
 
-### Engineering milestone 5 — Paystack sandbox booking confirmation
+### Engineering milestone 5 — Paystack sandbox booking confirmation (implemented)
+
+Implemented on 21 July 2026 with reusable hosted sandbox checkout, deep-link return, authoritative webhook confirmation, server-side Paystack verification, receipts, three-entry reconciliation, held payout creation and finance exception visibility. Deployment still requires Paystack test credentials and `PAYMENTS_SANDBOX_ENABLED=true`; real payments remain separately gated.
 
 **Mobile and server**
 

@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { colors, Eyebrow, PrimaryButton, TrustBadge } from "../../src/components/ui";
 import { useAuth } from "../../src/lib/auth";
 import { getVendor, type Vendor } from "../../src/lib/vendors";
@@ -10,8 +10,8 @@ const naira=(kobo:number)=>`₦${Math.round(kobo/100).toLocaleString("en-NG")}`;
 export default function VendorDetail(){
   const {id,request}=useLocalSearchParams<{id:string;request?:string}>();const {user}=useAuth();const [vendor,setVendor]=useState<Vendor|null>(null);const [loading,setLoading]=useState(true);const [error,setError]=useState("");
   useEffect(()=>{getVendor(id).then((data)=>{if(!data)setError("This vendor is unavailable or no longer published.");setVendor(data);}).catch(()=>setError("We could not load this vendor. Check your connection and try again.")).finally(()=>setLoading(false));},[id]);
-  useEffect(()=>{if(request==="1"&&user&&vendor)Alert.alert("You’re signed in","Your place is saved. The structured booking-request form is the next engineering milestone.");},[request,user,vendor]);
-  const beginRequest=()=>{if(!user){router.push({pathname:"/auth",params:{next:`/vendor/${id}?request=1`,intent:`request ${vendor?.name??"this vendor"}`}});return;}Alert.alert("Ready to request","The booking-request form is delivered in engineering milestone 3.");};
+  useEffect(()=>{if(request==="1"&&user&&vendor)router.replace({pathname:"/request/[vendorId]",params:{vendorId:id}});},[request,user,vendor,id]);
+  const beginRequest=()=>{if(!user){router.push({pathname:"/auth",params:{next:`/vendor/${id}?request=1`,intent:`request ${vendor?.name??"this vendor"}`}});return;}router.push({pathname:"/request/[vendorId]",params:{vendorId:id}});};
   if(loading)return <SafeAreaView style={styles.safe}><View style={styles.state}><ActivityIndicator color={colors.plum}/><Text>Loading verified details…</Text></View></SafeAreaView>;
   if(error||!vendor)return <SafeAreaView style={styles.safe}><View style={styles.state}><Ionicons name="alert-circle-outline" size={32} color={colors.coral}/><Text accessibilityRole="alert" style={styles.errorTitle}>{error}</Text><PrimaryButton onPress={()=>router.back()}>Return to vendors</PrimaryButton></View></SafeAreaView>;
   const checked=vendor.verification?[vendor.verification.identity_checked&&"Identity",vendor.verification.contact_checked&&"Contact",vendor.verification.bank_name_checked&&"Bank account name",vendor.verification.authority_checked&&"Business authority",vendor.verification.portfolio_checked&&"Portfolio",vendor.verification.references_checked&&"References",vendor.verification.physical_site_checked&&"Physical operating site"].filter(Boolean) as string[]:[];

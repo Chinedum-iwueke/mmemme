@@ -71,8 +71,10 @@ export const canTransitionPayout = (from: PayoutStatus, to: PayoutStatus) =>
 
 export const BookingRequestInput = z.object({
   vendorId: z.string().uuid(),
-  packageId: z.string().uuid().optional(),
+  packageId: z.string().uuid().nullable(),
   weddingBriefId: z.string().uuid(),
+  clientRequestId: z.string().uuid(),
+  guestCount: z.number().int().min(10).max(5000),
   requirements: z.string().trim().min(20).max(2000),
 });
 
@@ -82,6 +84,11 @@ export const QuoteInput = z.object({
   depositAmountKobo: z.number().int().positive(),
   expiresAt: z.string().datetime(),
   termsVersion: z.string().min(1),
+  cancellationSummary: z.string().trim().min(20).max(1500),
+  inclusions: z.array(z.string().trim().min(1)),
+  exclusions: z.array(z.string().trim().min(1)),
+  paymentSchedule: z.string().trim().min(5).max(500),
+  availabilityConfirmed: z.literal(true),
 }).refine((value) => value.depositAmountKobo <= value.totalAmountKobo, {
   message: "Deposit cannot exceed quote total", path: ["depositAmountKobo"],
 });

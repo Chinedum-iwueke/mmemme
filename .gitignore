@@ -2,6 +2,7 @@ node_modules/
 .expo/
 .next/
 dist/
+dist-verify-*/
 coverage/
 *.tsbuildinfo
 .env
@@ -9,3 +10,4 @@ coverage/
 .DS_Store
 npm-debug.log*
 supabase/.temp/
+supabase/.branches/

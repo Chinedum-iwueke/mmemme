@@ -6,7 +6,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  if (Deno.env.get("PAYMENTS_LIVE_ENABLED") !== "true") return json({ error: "Live payments are gated", code: "PAYMENT_GATE_CLOSED" }, 503);
+  if (Deno.env.get("PAYMENTS_SANDBOX_ENABLED") !== "true" && Deno.env.get("PAYMENTS_LIVE_ENABLED") !== "true") return json({ error: "Payments are gated", code: "PAYMENT_GATE_CLOSED" }, 503);
 
   const authorization = request.headers.get("Authorization") ?? "";
   const client = userClient(authorization);
@@ -23,6 +23,12 @@ Deno.serve(async (request) => {
   if (booking.status !== "accepted_awaiting_payment") return json({ error: "Booking is not ready for payment" }, 409);
   if (new Date(quote.expires_at) <= new Date()) return json({ error: "Quote has expired" }, 409);
 
+  const { data: existing } = await admin.from("payments").select("provider_reference,authorization_url").eq("quote_id",quote.id).in("status",["initiated","pending"]).maybeSingle();
+  if (existing?.authorization_url) return json({ authorizationUrl:existing.authorization_url,reference:existing.provider_reference,reused:true });
+  const { data: profile } = await admin.from("profiles").select("email").eq("id",user.id).single();
+  const email = user.email ?? profile?.email;
+  if (!email) return json({ error:"A receipt email is required before payment" },400);
+
   const reference = `mm_${crypto.randomUUID().replaceAll("-", "")}`;
   const { error: insertError } = await admin.from("payments").insert({
     booking_id: booking.id, quote_id: quote.id, customer_id: user.id, provider: "paystack",
@@ -33,13 +39,13 @@ Deno.serve(async (request) => {
   const response = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
     headers: { Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ email: user.email, amount: quote.deposit_amount_kobo, currency: "NGN", reference, metadata: { booking_id: booking.id, quote_id: quote.id } }),
+    body: JSON.stringify({ email, amount: quote.deposit_amount_kobo, currency: "NGN", reference, callback_url:`mmemme://booking/${booking.id}`, metadata: { booking_id: booking.id, quote_id: quote.id } }),
   });
   const result = await response.json();
   if (!response.ok || !result.status) {
     await admin.from("payments").update({ status: "failed", raw_provider_status: result.message ?? "initialize_failed" }).eq("provider_reference", reference);
     return json({ error: "Payment provider unavailable" }, 502);
   }
-  await admin.from("payments").update({ status: "pending" }).eq("provider_reference", reference);
+  await admin.from("payments").update({ status: "pending",authorization_url:result.data.authorization_url }).eq("provider_reference", reference);
   return json({ authorizationUrl: result.data.authorization_url, accessCode: result.data.access_code, reference });
 });
