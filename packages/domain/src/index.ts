@@ -1,0 +1,92 @@
+import { z } from "zod";
+
+export const VendorCategory = z.enum(["venue", "caterer"]);
+export type VendorCategory = z.infer<typeof VendorCategory>;
+
+export const WeddingBrief = z.object({
+  weddingDate: z.string().date(),
+  area: z.string().trim().min(2).max(80),
+  guestCount: z.number().int().min(10).max(5000),
+  budgetMinKobo: z.number().int().nonnegative(),
+  budgetMaxKobo: z.number().int().positive(),
+  priorities: z.array(VendorCategory).min(1).max(2),
+}).refine((value) => value.budgetMaxKobo >= value.budgetMinKobo, {
+  message: "Maximum budget must be greater than or equal to minimum budget",
+  path: ["budgetMaxKobo"],
+});
+export type WeddingBrief = z.infer<typeof WeddingBrief>;
+
+export const BookingStatus = z.enum([
+  "requested", "operations_review", "quote_ready",
+  "accepted_awaiting_payment", "confirmed", "service_due",
+  "fulfilled", "completed", "declined", "expired", "cancelled", "disputed",
+]);
+export type BookingStatus = z.infer<typeof BookingStatus>;
+
+export const PaymentStatus = z.enum([
+  "initiated", "pending", "succeeded", "failed",
+  "partially_refunded", "refunded", "charged_back",
+]);
+export type PaymentStatus = z.infer<typeof PaymentStatus>;
+
+export const PayoutStatus = z.enum([
+  "held", "eligible", "processing", "paid", "failed", "reversed",
+]);
+export type PayoutStatus = z.infer<typeof PayoutStatus>;
+
+const bookingTransitions: Record<BookingStatus, readonly BookingStatus[]> = {
+  requested: ["operations_review", "declined", "cancelled"],
+  operations_review: ["quote_ready", "declined", "cancelled"],
+  quote_ready: ["accepted_awaiting_payment", "expired", "cancelled"],
+  accepted_awaiting_payment: ["confirmed", "expired", "cancelled"],
+  confirmed: ["service_due", "cancelled", "disputed"],
+  service_due: ["fulfilled", "cancelled", "disputed"],
+  fulfilled: ["completed", "disputed"],
+  disputed: ["fulfilled", "completed", "cancelled"],
+  completed: [], declined: [], expired: [], cancelled: [],
+};
+
+const paymentTransitions: Record<PaymentStatus, readonly PaymentStatus[]> = {
+  initiated: ["pending", "succeeded", "failed"],
+  pending: ["succeeded", "failed"],
+  succeeded: ["partially_refunded", "refunded", "charged_back"],
+  partially_refunded: ["refunded", "charged_back"],
+  failed: [], refunded: [], charged_back: [],
+};
+
+const payoutTransitions: Record<PayoutStatus, readonly PayoutStatus[]> = {
+  held: ["eligible", "reversed"],
+  eligible: ["processing", "reversed"],
+  processing: ["paid", "failed"],
+  failed: ["processing", "reversed"],
+  paid: ["reversed"], reversed: [],
+};
+
+export const canTransitionBooking = (from: BookingStatus, to: BookingStatus) =>
+  bookingTransitions[from].includes(to);
+export const canTransitionPayment = (from: PaymentStatus, to: PaymentStatus) =>
+  paymentTransitions[from].includes(to);
+export const canTransitionPayout = (from: PayoutStatus, to: PayoutStatus) =>
+  payoutTransitions[from].includes(to);
+
+export const BookingRequestInput = z.object({
+  vendorId: z.string().uuid(),
+  packageId: z.string().uuid().optional(),
+  weddingBriefId: z.string().uuid(),
+  requirements: z.string().trim().min(20).max(2000),
+});
+
+export const QuoteInput = z.object({
+  bookingId: z.string().uuid(),
+  totalAmountKobo: z.number().int().positive(),
+  depositAmountKobo: z.number().int().positive(),
+  expiresAt: z.string().datetime(),
+  termsVersion: z.string().min(1),
+}).refine((value) => value.depositAmountKobo <= value.totalAmountKobo, {
+  message: "Deposit cannot exceed quote total", path: ["depositAmountKobo"],
+});
+
+export const InitializePaymentInput = z.object({
+  bookingId: z.string().uuid(),
+  quoteId: z.string().uuid(),
+});

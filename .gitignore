@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.DS_Store
+npm-debug.log*
+supabase/.temp/
