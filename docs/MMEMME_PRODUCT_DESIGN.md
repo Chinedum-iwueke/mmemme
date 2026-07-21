@@ -92,7 +92,9 @@ Real-money booking uses the same implementation but remains disabled until the c
 - A clean checkout can install dependencies, create the local database, seed it and pass all checks using documented commands.
 - Development, staging and production secrets are separate; no service-role or Paystack secret enters a client bundle.
 
-### Engineering milestone 1 — Authentication and customer identity
+### Engineering milestone 1 — Authentication and customer identity (implemented)
+
+Implemented in the Expo app and Supabase migration on 21 July 2026. Deployment still requires configuring the Supabase SMS provider, app redirect URLs and an MFA-enrolled admin account in each environment.
 
 **Mobile**
 
@@ -116,7 +118,9 @@ Real-money booking uses the same implementation but remains disabled until the c
 - Invalid, expired and repeatedly requested OTPs show recoverable states without revealing whether another account exists.
 - Customer A cannot read or modify Customer B’s profile or data.
 
-### Engineering milestone 2 — Persisted discovery and wedding brief
+### Engineering milestone 2 — Persisted discovery and wedding brief (implemented)
+
+Implemented in the Expo app, operations console, seed data and storage/RLS migration on 21 July 2026. The migration and seed must be applied to the target Supabase project before the app can use the live catalogue.
 
 **Mobile**
 

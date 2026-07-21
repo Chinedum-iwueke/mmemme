@@ -1,0 +1,8 @@
+.span-row { grid-column: 1 / -1; margin-top: 4px; }
+.span-row summary { cursor: pointer; color: var(--plum); font-weight: 800; }
+.span-row h3 { margin: 24px 0 0; }
+.package-form { grid-template-columns: 1.2fr repeat(3, .7fr) 1.5fr auto; align-items: end; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.package-form button { min-width: 120px; }
+.package-description { min-width: 180px; }
+@media (max-width: 1100px) { .package-form { grid-template-columns: 1fr 1fr; } .package-description { grid-column: 1 / -1; } }
+@media (max-width: 600px) { .package-form { grid-template-columns: 1fr; } }
