@@ -1,3 +1,13 @@
+insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,email_change,raw_user_meta_data)
+values('00000000-0000-0000-0000-000000000000','90000000-0000-4000-8000-000000000001','authenticated','authenticated','ops@mmemme.local',crypt('MmemmeDemo!2026',gen_salt('bf')),now(),now(),now(),'','','','',jsonb_build_object('full_name','Demo Operations'))
+on conflict(id) do update set encrypted_password=excluded.encrypted_password;
+update public.profiles set full_name='Demo Operations',email='ops@mmemme.local',is_admin=true where id='90000000-0000-4000-8000-000000000001';
+
+insert into auth.users(instance_id,id,aud,role,email,encrypted_password,email_confirmed_at,created_at,updated_at,confirmation_token,recovery_token,email_change_token_new,email_change,raw_user_meta_data)
+values('00000000-0000-0000-0000-000000000000','90000000-0000-4000-8000-000000000002','authenticated','authenticated','reviewer@mmemme.local',crypt('MmemmeReview!2026',gen_salt('bf')),now(),now(),now(),'','','','',jsonb_build_object('full_name','Demo Finance Reviewer'))
+on conflict(id) do update set encrypted_password=excluded.encrypted_password;
+update public.profiles set full_name='Demo Finance Reviewer',email='reviewer@mmemme.local',is_admin=true where id='90000000-0000-4000-8000-000000000002';
+
 insert into public.vendors(id,name,category,area,description,capacity_min,capacity_max,price_from_kobo,verification_status,verification_expires_at,published)
 values
   ('10000000-0000-4000-8000-000000000001','Lagoon House','venue','Victoria Island','A waterfront celebration venue with indoor and outdoor ceremony options.',100,350,280000000,'approved','2027-07-12T00:00:00Z',false),

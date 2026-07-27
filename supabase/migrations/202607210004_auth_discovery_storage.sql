@@ -14,7 +14,7 @@ create trigger create_profile_after_signup after insert on auth.users
 for each row execute function public.handle_new_auth_user();
 
 create or replace function public.prevent_profile_privilege_escalation() returns trigger language plpgsql as $$ begin
-  if new.is_admin <> old.is_admin and not public.is_admin() then
+  if new.is_admin <> old.is_admin and current_user not in ('postgres','service_role','supabase_admin') and not public.is_admin() then
     raise exception 'admin privileges cannot be changed by this user';
   end if;
   new.updated_at = now();

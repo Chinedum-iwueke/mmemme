@@ -17,8 +17,32 @@ sql_paths = ["./seed.sql"]
 enabled = true
 site_url = "mmemme://auth"
 
+[auth.sms]
+enable_signup = true
+enable_confirmations = false
+
+[auth.sms.test_otp]
+2348012345678 = "123456"
+
+# A provider must be enabled for GoTrue to expose phone auth locally. The
+# pre-defined test number above is intercepted before any Twilio request.
+[auth.sms.twilio]
+enabled = true
+account_sid = "AC00000000000000000000000000000000"
+message_service_sid = "MG00000000000000000000000000000000"
+auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
+
 [functions.initialize-payment]
 verify_jwt = true
 
 [functions.paystack-webhook]
+verify_jwt = false
+
+[functions.process-refund]
+verify_jwt = true
+
+[functions.demo-confirm-payment]
+verify_jwt = true
+
+[functions.dispatch-notifications]
 verify_jwt = false

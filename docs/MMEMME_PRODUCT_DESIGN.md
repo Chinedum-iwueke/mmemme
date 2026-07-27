@@ -226,7 +226,12 @@ Implemented on 21 July 2026 with reusable hosted sandbox checkout, deep-link ret
 
 This milestone is the first usable engineering MVP: a fresh tester can sign in and complete a seeded venue or catering booking end to end in Paystack sandbox while operations issues the quote through the console.
 
-### Engineering milestone 6 — Booking management and beta safety
+### Engineering milestone 6 — Booking management and beta safety (implemented)
+
+Implemented on 27 July 2026 with customer support and safety management,
+cancellation previews and requests, dual-approved refunds, disputes and evidence,
+fulfillment/reviews, notification preferences and reminders, operations safety
+queues, reconciliation, audit search, Sentry hooks and funnel-event storage.
 
 **Customer app**
 
@@ -251,7 +256,14 @@ This milestone is the first usable engineering MVP: a fresh tester can sign in a
 - Staging passes the full request → quote → sandbox payment → confirmation → cancellation/refund and fulfillment/review suites.
 - No critical authorization, privacy or financial defect remains.
 
-### Engineering milestone 7 — Closed-beta release
+### Engineering milestone 7 — Closed-beta release preparation (code complete)
+
+Implemented on 27 July 2026 with production-safe feature flags, EAS closed-test
+profiles, local phone-OTP and payment simulation, deterministic demo accounts,
+release/incident/rollback procedures, monitoring hooks and a repeatable
+end-to-end smoke test. Store setup, production infrastructure and live-money
+activation remain blocked by the external gates below and cannot be completed
+inside the repository.
 
 - Complete a controlled live-money rehearsal only after Paystack, legal, accounting, privacy and cancellation gates pass.
 - Configure production Supabase, Edge Functions, secrets, monitoring, backups, TestFlight and Play closed testing.

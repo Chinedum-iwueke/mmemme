@@ -1,13 +1,150 @@
 import { supabase } from "./supabase";
 
-export type BookingListItem={id:string;vendor_id:string;event_date:string;guest_count:number;requirements:string;status:string;created_at:string;correlation_id:string;vendorName:string};
-export type Quote={id:string;booking_id:string;revision:number;total_amount_kobo:number;deposit_amount_kobo:number;expires_at:string;accepted_at:string|null;package_name_snapshot:string;inclusions:string[];exclusions:string[];payment_schedule:string;cancellation_summary:string;terms_version:string};
-export type Payment={id:string;provider_reference:string;amount_kobo:number;status:string;paid_at:string|null};
-export type BookingDetail=BookingListItem&{quotes:Quote[];payments:Payment[];transitions:Array<{id:string;previous_state:string|null;new_state:string;reason:string;created_at:string}>};
+export type BookingListItem = {
+  id: string;
+  vendor_id: string;
+  event_date: string;
+  guest_count: number;
+  requirements: string;
+  status: string;
+  created_at: string;
+  correlation_id: string;
+  vendorName: string;
+};
+export type Quote = {
+  id: string;
+  booking_id: string;
+  revision: number;
+  total_amount_kobo: number;
+  deposit_amount_kobo: number;
+  expires_at: string;
+  accepted_at: string | null;
+  package_name_snapshot: string;
+  inclusions: string[];
+  exclusions: string[];
+  payment_schedule: string;
+  cancellation_summary: string;
+  terms_version: string;
+};
+export type Payment = {
+  id: string;
+  provider_reference: string;
+  amount_kobo: number;
+  status: string;
+  paid_at: string | null;
+};
+export type BookingDetail = BookingListItem & {
+  quotes: Quote[];
+  payments: Payment[];
+  transitions: Array<{
+    id: string;
+    previous_state: string | null;
+    new_state: string;
+    reason: string;
+    created_at: string;
+  }>;
+};
 
-export async function latestBrief(){const {data,error}=await supabase.from("wedding_briefs").select("id,wedding_date,guest_count,area").order("updated_at",{ascending:false}).limit(1).maybeSingle();if(error)throw error;return data;}
-export async function submitRequest(input:{vendorId:string;packageId:string|null;briefId:string;requirements:string;guestCount:number;clientRequestId:string}){const {data,error}=await supabase.rpc("submit_booking_request",{p_vendor_id:input.vendorId,p_package_id:input.packageId,p_wedding_brief_id:input.briefId,p_requirements:input.requirements,p_guest_count:input.guestCount,p_client_request_id:input.clientRequestId});if(error)throw error;return data as {id:string};}
-export async function listBookings(){const {data,error}=await supabase.from("bookings").select("id,vendor_id,event_date,guest_count,requirements,status,created_at,correlation_id").order("created_at",{ascending:false});if(error)throw error;const vendorIds=[...new Set((data??[]).map(b=>b.vendor_id))];const {data:vendors}=vendorIds.length?await supabase.from("vendors").select("id,name").in("id",vendorIds):{data:[]};return (data??[]).map(b=>({...b,vendorName:vendors?.find(v=>v.id===b.vendor_id)?.name??"Vendor"})) as BookingListItem[];}
-export async function getBooking(id:string):Promise<BookingDetail|null>{const booking=(await listBookings()).find(b=>b.id===id);if(!booking)return null;const [{data:quotes},{data:payments},{data:transitions}]=await Promise.all([supabase.from("quotes").select("id,booking_id,revision,total_amount_kobo,deposit_amount_kobo,expires_at,accepted_at,package_name_snapshot,inclusions,exclusions,payment_schedule,cancellation_summary,terms_version").eq("booking_id",id).order("revision",{ascending:false}),supabase.from("payments").select("id,provider_reference,amount_kobo,status,paid_at").eq("booking_id",id).order("created_at",{ascending:false}),supabase.from("state_transition_events").select("id,previous_state,new_state,reason,created_at").eq("entity_type","booking").eq("entity_id",id).order("created_at")]);return {...booking,quotes:(quotes??[]) as Quote[],payments:(payments??[]) as Payment[],transitions:transitions??[]};}
-export async function acceptQuote(bookingId:string,quoteId:string){const {error}=await supabase.rpc("accept_quote",{p_booking_id:bookingId,p_quote_id:quoteId});if(error)throw error;}
-export async function initializePayment(bookingId:string,quoteId:string){const {data,error}=await supabase.functions.invoke("initialize-payment",{body:{bookingId,quoteId}});if(error)throw error;if(data?.error)throw new Error(data.error);return data as {authorizationUrl:string;reference:string};}
+export async function latestBrief() {
+  const { data, error } = await supabase
+    .from("wedding_briefs")
+    .select("id,wedding_date,guest_count,area")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+export async function submitRequest(input: {
+  vendorId: string;
+  packageId: string | null;
+  briefId: string;
+  requirements: string;
+  guestCount: number;
+  clientRequestId: string;
+}) {
+  const { data, error } = await supabase.rpc("submit_booking_request", {
+    p_vendor_id: input.vendorId,
+    p_package_id: input.packageId,
+    p_wedding_brief_id: input.briefId,
+    p_requirements: input.requirements,
+    p_guest_count: input.guestCount,
+    p_client_request_id: input.clientRequestId,
+  });
+  if (error) throw error;
+  return data as { id: string };
+}
+export async function listBookings() {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(
+      "id,vendor_id,event_date,guest_count,requirements,status,created_at,correlation_id",
+    )
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  const vendorIds = [...new Set((data ?? []).map((b) => b.vendor_id))];
+  const { data: vendors } = vendorIds.length
+    ? await supabase.from("vendors").select("id,name").in("id", vendorIds)
+    : { data: [] };
+  return (data ?? []).map((b) => ({
+    ...b,
+    vendorName: vendors?.find((v) => v.id === b.vendor_id)?.name ?? "Vendor",
+  })) as BookingListItem[];
+}
+export async function getBooking(id: string): Promise<BookingDetail | null> {
+  const booking = (await listBookings()).find((b) => b.id === id);
+  if (!booking) return null;
+  const [{ data: quotes }, { data: payments }, { data: transitions }] =
+    await Promise.all([
+      supabase
+        .from("quotes")
+        .select(
+          "id,booking_id,revision,total_amount_kobo,deposit_amount_kobo,expires_at,accepted_at,package_name_snapshot,inclusions,exclusions,payment_schedule,cancellation_summary,terms_version",
+        )
+        .eq("booking_id", id)
+        .order("revision", { ascending: false }),
+      supabase
+        .from("payments")
+        .select("id,provider_reference,amount_kobo,status,paid_at")
+        .eq("booking_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("state_transition_events")
+        .select("id,previous_state,new_state,reason,created_at")
+        .eq("entity_type", "booking")
+        .eq("entity_id", id)
+        .order("created_at"),
+    ]);
+  return {
+    ...booking,
+    quotes: (quotes ?? []) as Quote[],
+    payments: (payments ?? []) as Payment[],
+    transitions: transitions ?? [],
+  };
+}
+export async function acceptQuote(bookingId: string, quoteId: string) {
+  const { error } = await supabase.rpc("accept_quote", {
+    p_booking_id: bookingId,
+    p_quote_id: quoteId,
+  });
+  if (error) throw error;
+}
+export async function initializePayment(bookingId: string, quoteId: string) {
+  const { data, error } = await supabase.functions.invoke(
+    "initialize-payment",
+    { body: { bookingId, quoteId } },
+  );
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data as { authorizationUrl: string; reference: string };
+}
+
+export async function demoConfirmPayment(bookingId: string, quoteId: string) {
+  const { data, error } = await supabase.functions.invoke(
+    "demo-confirm-payment",
+    { body: { bookingId, quoteId } },
+  );
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}

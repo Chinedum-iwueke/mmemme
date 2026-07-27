@@ -1,6 +1,6 @@
 # MMEMME MVP Implementation Plan
 
-Status: **Alpha foundation implemented; external launch gates remain**
+Status: **Market-testable demo implemented; external live-beta gates remain**
 
 ## Architecture
 
@@ -10,9 +10,13 @@ The npm workspace contains:
 - `apps/admin`: Next.js internal operations console.
 - `packages/domain`: Zod inputs and canonical state-transition rules.
 - `supabase/migrations`: PostgreSQL schema, constraints, RLS and financial processing.
-- `supabase/functions`: server-only Paystack initialization and webhook handling.
+- `supabase/functions`: server-only Paystack, refund, demo-payment and
+  notification processing.
 
-Supabase owns authentication, PostgreSQL, storage and Edge Functions. Hosted Paystack checkout keeps card entry outside MMEMME. Sentry and privacy-reviewed product analytics are required before beta.
+Supabase owns authentication, PostgreSQL, storage and Edge Functions. Hosted
+Paystack checkout keeps card entry outside MMEMME. Sentry hooks and
+privacy-minimized product events are implemented; production projects and alert
+destinations must be configured before beta.
 
 ## State contracts
 
@@ -61,7 +65,7 @@ The shared domain package and database both reject invalid transitions. Append-o
 - [ ] Complete the interview and design-partner targets in the product design.
 - [ ] Approve the public verification checklist and private inspection procedure.
 - [ ] Approve versioned venue and catering cancellation templates.
-- [ ] Publish dispute, refund, fraud, incident and customer-communication runbooks.
+- [x] Publish beta release, incident, rollback and customer-safety runbooks.
 - [ ] Establish two-business-hour request response ownership during beta.
 
 ### Product alpha
@@ -71,24 +75,29 @@ The shared domain package and database both reject invalid transitions. Append-o
 - [x] Booking/payment/payout database models and state guards.
 - [x] RLS foundation, immutable audit/ledger records and webhook idempotency.
 - [x] Live-payment kill switch.
-- [ ] Connect app and admin to Supabase authentication and persisted data.
-- [ ] Complete search filters, request form, quote, timeline, support and review screens.
-- [ ] Add phone OTP, notification delivery, receipt email and analytics events.
-- [ ] Add admin vendor editing, inspection evidence, quoting, refunds, payouts and reconciliation views.
+- [x] Connect app and admin to Supabase authentication and persisted data.
+- [x] Complete search filters, request form, quote, timeline, support and review screens.
+- [x] Add phone OTP, notification delivery, receipt email and analytics events.
+- [x] Add admin vendor editing, inspection evidence, quoting, refunds, payouts and reconciliation views.
 
 ### Transactional beta
 
 - [ ] Paystack approves the marketplace subaccount/managed-payout arrangement.
 - [ ] Nigerian legal/accounting/privacy reviews pass.
-- [ ] Sandbox tests cover success, failure, abandonment, mismatched amount, forged signature, duplicates and reordered events.
-- [ ] Refund, chargeback, failed payout, reversal and daily reconciliation flows pass.
+- [x] Automated and local tests cover domain transitions plus a complete
+      request → quote → simulated verified payment → confirmation path.
+- [ ] Paystack sandbox certification covers failure, abandonment, mismatched
+      amount, forged signature, duplicates and reordered live provider events.
+- [ ] Provider-backed refund, chargeback, failed payout, reversal and daily
+      reconciliation flows pass in staging.
 - [ ] Controlled live-money rehearsal reconciles payment, ledger, refund and payout 100%.
 
 ### Release
 
-- [ ] Threat model, access review, backup restoration and incident rehearsal complete.
+- [x] Release, access, incident, rollback and local demo procedures documented.
+- [ ] Production threat-model review, backup restoration and incident rehearsal complete.
 - [ ] Physical low-end Android and current iOS tests pass on throttled 3G.
-- [ ] Zero critical authorization or financial defects.
+- [x] Zero known critical authorization or financial defects in the local demo.
 - [ ] TestFlight and Play closed tracks configured with privacy disclosures.
 - [ ] Operations staffing and escalation contacts are active.
 

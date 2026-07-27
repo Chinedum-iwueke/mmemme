@@ -55,5 +55,6 @@ begin
   return v_payment.id;
 end $$;
 revoke all on function public.process_successful_payment(text,bigint,text,text) from public, anon, authenticated;
+grant execute on function public.process_successful_payment(text,bigint,text,text) to service_role;
 
 create unique index one_payout_per_payment on public.payouts(payment_id);
