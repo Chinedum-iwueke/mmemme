@@ -95,15 +95,16 @@ analytics. Production secrets must never be copied into preview or local files.
 
 ## 4. Cross-platform product design system
 
-MMEMME should feel assured, editorial and celebratory—not like an ornate wedding
-invitation or a generic purple marketplace template.
+MMEMME should feel connected, trustworthy, energetic and modern—not like an
+ornate wedding invitation or a generic marketplace template. `DESIGN.md` is the
+implementation source of truth for mobile, public web, vendor and operations UI.
 
 ### Visual direction
 
-- Use the existing warm ivory, plum and muted rose direction as the foundation.
-- Reserve green for positive money, verification and completion states.
-- Use one editorial display face for restrained headings and a highly readable
-  sans serif for body, labels, prices and forms. Avoid script fonts in product UI.
+- Use the approved deep green (`#294A41`) and lime (`#97C354`) identity with the
+  green-influenced neutral and semantic roles defined in `DESIGN.md`.
+- Use Bebas Bold only for short brand-led display moments and DM Sans for body,
+  labels, prices, forms and operations data. Avoid script fonts in product UI.
 - Lead listing cards with high-quality real photography, transparent price
   guidance, area, capacity and dated verification evidence.
 - Use generous whitespace, subtle borders and restrained elevation. Avoid glass
@@ -303,7 +304,7 @@ implementation.
 
 - [ ] **M9-01 — Brand and interface specification**
   Dependencies: M8-02.
-  Create `docs/MMEMME_DESIGN_SYSTEM.md` covering logo use, color roles,
+  Maintain root `DESIGN.md` covering logo use, color roles,
   typography, photography, iconography, spacing, radii, elevation, motion,
   content voice and accessibility. Include examples for trust, price and status
   communication.
