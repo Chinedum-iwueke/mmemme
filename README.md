@@ -5,8 +5,12 @@ MMEMME is a managed native marketplace for Lagos couples booking verified weddin
 ## Workspace
 
 - `apps/mobile` — Expo React Native customer app
+- `apps/web` — Next.js public website and customer web foundation
 - `apps/admin` — Next.js internal operations console
 - `packages/domain` — shared schemas and state-transition rules
+- `packages/database` — generated Supabase schema types
+- `packages/config` — validated environment and feature-flag contracts
+- `packages/tokens` — platform-neutral design primitives
 - `supabase` — PostgreSQL schema, RLS policies, and payment Edge Functions
 - `docs` — product, implementation, and operations documentation
 
@@ -14,13 +18,16 @@ MMEMME is a managed native marketplace for Lagos couples booking verified weddin
 
 ```bash
 cp .env.example .env.local
-npm install
-npm run test
-npm run typecheck
+npm ci
+npm run db:start
+npm run db:types:check
+npm run quality
 npm run dev:mobile
 ```
 
-Run the admin separately with `npm run dev:admin`.
+Run the public web app with `npm run dev:web` and operations separately with
+`npm run dev:admin`. `npm run bootstrap` is the single clean-checkout quality
+command after local environment values and Docker are available.
 
 ## Supabase setup
 

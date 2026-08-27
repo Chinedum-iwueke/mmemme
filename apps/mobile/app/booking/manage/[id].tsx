@@ -309,9 +309,11 @@ export default function ManageBooking() {
             <PrimaryButton
               disabled={busy || review.trim().length < 20}
               onPress={() =>
-                run(() =>
-                  submitReview(id, user!.id, booking.vendor_id, rating, review),
-                )
+                run(() => {
+                  if (!booking.vendor_id)
+                    throw new Error("This vendor is no longer available for review.");
+                  return submitReview(id, user!.id, booking.vendor_id, rating, review);
+                })
               }
             >
               Submit verified review

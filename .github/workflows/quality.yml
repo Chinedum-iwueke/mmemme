@@ -1,0 +1,57 @@
+name: quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_MMEMME_ENV: test
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key-placeholder-at-least-20
+      NEXT_PUBLIC_REQUESTS_ENABLED: "false"
+      EXPO_PUBLIC_MMEMME_ENV: test
+      EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key-placeholder-at-least-20
+      EXPO_PUBLIC_REQUESTS_ENABLED: "false"
+      EXPO_PUBLIC_PAYMENTS_SANDBOX_ENABLED: "false"
+      EXPO_PUBLIC_PAYMENTS_LIVE_ENABLED: "false"
+      EXPO_PUBLIC_DEMO_MODE: "false"
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder-at-least-20
+      MMEMME_ENV: test
+      REQUESTS_ENABLED: "false"
+      PAYMENTS_SANDBOX_ENABLED: "false"
+      PAYMENTS_LIVE_ENABLED: "false"
+      PAYMENTS_DEMO_MODE: "false"
+      ADMIN_REQUIRE_AAL2: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run sql:lint
+      - run: npm run secrets:check
+      - run: npm run boundaries:check
+      - run: npm run production:safety
+      - run: npm run build
+      - run: npm run expo:doctor
+      - run: npm audit --audit-level=high
+  schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:start
+      - run: npm run db:types:check

@@ -97,3 +97,15 @@ export const InitializePaymentInput = z.object({
   bookingId: z.string().uuid(),
   quoteId: z.string().uuid(),
 });
+
+export const RefundInput=z.object({refundId:z.string().uuid()});
+export const ApiErrorCode=z.enum(["INVALID_REQUEST","UNAUTHORIZED","FORBIDDEN","NOT_FOUND","CONFLICT","FEATURE_DISABLED","PAYMENT_GATE_CLOSED","PROVIDER_UNAVAILABLE","INTERNAL_ERROR"]);
+export type ApiErrorCode=z.infer<typeof ApiErrorCode>;
+export const ApiError=z.object({ok:z.literal(false),error:z.object({code:ApiErrorCode,message:z.string(),correlationId:z.string().uuid()})});
+export const InitializePaymentResponse=z.object({ok:z.literal(true),data:z.object({authorizationUrl:z.string().url(),reference:z.string().min(1),reused:z.boolean().optional()}),correlationId:z.string().uuid()});
+export type InitializePaymentResponse=z.infer<typeof InitializePaymentResponse>;
+
+export function safeApiMessage(code:ApiErrorCode){
+  const messages:Record<ApiErrorCode,string>={INVALID_REQUEST:"Check the information and try again.",UNAUTHORIZED:"Sign in to continue.",FORBIDDEN:"You do not have permission to do that.",NOT_FOUND:"We could not find that record.",CONFLICT:"This action is no longer available. Refresh and try again.",FEATURE_DISABLED:"This feature is not available yet.",PAYMENT_GATE_CLOSED:"Payments are temporarily unavailable.",PROVIDER_UNAVAILABLE:"The payment provider is temporarily unavailable.",INTERNAL_ERROR:"We could not complete that action. Try again or contact support."};
+  return messages[code];
+}

@@ -1,8 +1,9 @@
 import { supabase } from "./supabase";
+import { ApiError, InitializePaymentResponse } from "@mmemme/domain";
 
 export type BookingListItem = {
   id: string;
-  vendor_id: string;
+  vendor_id: string | null;
   event_date: string;
   guest_count: number;
   requirements: string;
@@ -65,7 +66,8 @@ export async function submitRequest(input: {
 }) {
   const { data, error } = await supabase.rpc("submit_booking_request", {
     p_vendor_id: input.vendorId,
-    p_package_id: input.packageId,
+    // Supabase generation cannot express nullable PostgreSQL function arguments.
+    p_package_id: input.packageId as string,
     p_wedding_brief_id: input.briefId,
     p_requirements: input.requirements,
     p_guest_count: input.guestCount,
@@ -135,8 +137,11 @@ export async function initializePayment(bookingId: string, quoteId: string) {
     { body: { bookingId, quoteId } },
   );
   if (error) throw error;
-  if (data?.error) throw new Error(data.error);
-  return data as { authorizationUrl: string; reference: string };
+  const success=InitializePaymentResponse.safeParse(data);
+  if(success.success)return success.data.data;
+  const failure=ApiError.safeParse(data);
+  if(failure.success)throw new Error(failure.data.error.message);
+  throw new Error("Payment service returned an invalid response.");
 }
 
 export async function demoConfirmPayment(bookingId: string, quoteId: string) {

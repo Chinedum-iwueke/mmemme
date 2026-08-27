@@ -1,0 +1,59 @@
+:root {
+  --deep: #294a41;
+  --lime: #97c354;
+  --canvas: #fbfcf8;
+  --ink: #15231f;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "DM Sans", sans-serif;
+}
+main {
+  min-height: 100vh;
+}
+nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 24px clamp(20px, 5vw, 64px);
+  color: var(--deep);
+}
+section {
+  max-width: 900px;
+  padding: clamp(64px, 12vw, 150px) clamp(20px, 8vw, 100px);
+}
+.eyebrow {
+  color: var(--deep);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+h1 {
+  font-family: "Arial Narrow", sans-serif;
+  font-size: clamp(52px, 9vw, 100px);
+  line-height: 0.94;
+  text-transform: uppercase;
+  margin: 16px 0;
+}
+section > p {
+  max-width: 60ch;
+  font-size: 18px;
+  line-height: 1.55;
+}
+button {
+  min-height: 48px;
+  margin-top: 20px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--deep);
+  color: white;
+  font-weight: 700;
+}
+button:disabled {
+  opacity: 0.62;
+}

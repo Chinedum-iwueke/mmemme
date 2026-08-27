@@ -1,15 +1,16 @@
 import "react-native-url-polyfill/auto";
 import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@mmemme/database";
 import { AppState, Platform } from "react-native";
 import { secureStorage } from "./secure-storage";
+import {parseEnvironment,PublicMobileEnvironment} from "@mmemme/config";
 
-const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-export const isSupabaseConfigured = Boolean(url && anonKey);
+export const mobileEnvironment=parseEnvironment(PublicMobileEnvironment,process.env,"mobile public");
+export const isSupabaseConfigured = true;
 
-export const supabase = createClient(
-  url ?? "https://invalid.localhost",
-  anonKey ?? "missing-anon-key",
+export const supabase = createClient<Database>(
+  mobileEnvironment.EXPO_PUBLIC_SUPABASE_URL,
+  mobileEnvironment.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   {
     auth: {
       storage: Platform.OS === "web" ? undefined : secureStorage,

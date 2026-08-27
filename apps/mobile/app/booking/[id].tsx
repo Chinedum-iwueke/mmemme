@@ -20,6 +20,7 @@ import {
   initializePayment,
   type BookingDetail,
 } from "../../src/lib/bookings";
+import { mobileEnvironment } from "../../src/lib/supabase";
 
 const money = (k: number) => `₦${Math.round(k / 100).toLocaleString("en-NG")}`;
 const label = (v: string) => v.replaceAll("_", " ");
@@ -197,7 +198,7 @@ export default function BookingScreen() {
                     ? "Opening secure checkout…"
                     : `Pay ${money(quote.deposit_amount_kobo)} deposit`}
                 </PrimaryButton>
-                {process.env.EXPO_PUBLIC_DEMO_MODE === "true" && (
+                {mobileEnvironment.EXPO_PUBLIC_DEMO_MODE && (
                   <PrimaryButton
                     style={{ backgroundColor: colors.coral }}
                     disabled={busy}

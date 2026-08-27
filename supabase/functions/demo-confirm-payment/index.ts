@@ -8,8 +8,8 @@ const json = (body: unknown, status = 200) =>
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS")
     return new Response("ok", { headers: corsHeaders });
-  if (Deno.env.get("PAYMENTS_DEMO_MODE") !== "true")
-    return json({ error: "Demo payment mode is disabled" }, 404);
+  if (Deno.env.get("MMEMME_ENV") === "production" || Deno.env.get("PAYMENTS_DEMO_MODE") !== "true")
+    return json({ ok:false,error:{code:"FEATURE_DISABLED",message:"This feature is not available.",correlationId:crypto.randomUUID()} }, 404);
   const auth = request.headers.get("Authorization") ?? "";
   const {
     data: { user },

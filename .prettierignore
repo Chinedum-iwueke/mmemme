@@ -1,0 +1,13 @@
+node_modules
+.next
+.expo
+dist
+dist-verify-*
+coverage
+*.tsbuildinfo
+docs/*.pdf
+docs/*.png
+package-lock.json
+packages/database/src/database.generated.ts
+supabase/migrations/*.sql
+supabase/seed.sql

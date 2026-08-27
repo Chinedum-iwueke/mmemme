@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.0.78"],
+  output: "standalone",
+  transpilePackages: ["@mmemme/config", "@mmemme/database", "@mmemme/domain", "@mmemme/tokens"],
 };
 
 export default nextConfig;

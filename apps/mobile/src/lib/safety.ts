@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { supabase } from "./supabase";
+import type { Json } from "@mmemme/database";
 
 export async function getBookingSafety(bookingId: string) {
   const [
@@ -191,6 +192,6 @@ export async function track(
         customer_id: user.id,
         booking_id: bookingId,
         name,
-        properties,
+        properties:properties as Json,
       });
 }

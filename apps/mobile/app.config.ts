@@ -1,3 +1,7 @@
+import { parseEnvironment, PublicMobileEnvironment } from "@mmemme/config";
+
+parseEnvironment(PublicMobileEnvironment, process.env, "mobile public");
+
 export default {
   name: "MMEMME",
   slug: "mmemme",
@@ -19,7 +23,7 @@ export default {
   android: {
     package: "ng.mmemme.app",
     adaptiveIcon: {
-      backgroundColor: "#FFF9F3",
+      backgroundColor: "#FBFCF8",
     },
   },
   experiments: {

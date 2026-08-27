@@ -251,7 +251,7 @@ after M8-01 measures the prototype debt and the available human review capacity.
 
 Goal: turn the demo repository into a repeatable, maintainable production base.
 
-- [ ] **M8-01 — Current-state audit and debt register**
+- [x] **M8-01 — Current-state audit and debt register**
   Dependencies: none.
   Inventory demo-only branches, hard-coded dates/addresses, generated files,
   untyped Supabase results, dependency advisories, missing tests and incomplete
@@ -260,7 +260,7 @@ Goal: turn the demo repository into a repeatable, maintainable production base.
   Acceptance: every known release blocker is either scheduled below or explicitly
   deferred with rationale.
 
-- [ ] **M8-02 — Workspace and application boundaries**
+- [x] **M8-02 — Workspace and application boundaries**
   Dependencies: M8-01.
   Scaffold `apps/web`; move shared code only where two real consumers exist;
   create `packages/tokens` and `packages/config`; keep web, mobile and operations
@@ -268,7 +268,7 @@ Goal: turn the demo repository into a repeatable, maintainable production base.
   Acceptance: all three apps build from a clean checkout and no client imports
   admin/server-only code.
 
-- [ ] **M8-03 — Generated database types and typed server contracts**
+- [x] **M8-03 — Generated database types and typed server contracts**
   Dependencies: M8-02.
   Generate Supabase types in CI, type all queries and Edge Function payloads, add
   shared request/response schemas and eliminate material `any` usage from booking,
@@ -276,7 +276,7 @@ Goal: turn the demo repository into a repeatable, maintainable production base.
   Acceptance: schema drift fails CI and malformed server input receives a stable
   machine-readable error code plus safe customer message.
 
-- [ ] **M8-04 — Tooling and continuous integration**
+- [x] **M8-04 — Tooling and continuous integration**
   Dependencies: M8-02.
   Add ESLint, Prettier check, unit/integration test projects, SQL lint, Expo Doctor,
   web/admin builds, secret scanning, migration verification and dependency audit
@@ -285,7 +285,7 @@ Goal: turn the demo repository into a repeatable, maintainable production base.
   type, formatting error, unsafe migration and secret fixture each fail the
   appropriate check.
 
-- [ ] **M8-05 — Environment and feature-flag contract**
+- [x] **M8-05 — Environment and feature-flag contract**
   Dependencies: M8-03.
   Validate environment variables at startup, document owners, distinguish public
   and server-only values, and implement centrally audited flags for requests,
