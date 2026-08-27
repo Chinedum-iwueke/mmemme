@@ -2,6 +2,11 @@
 
 Status: **Market-testable demo implemented; external live-beta gates remain**
 
+The detailed execution backlog for the production mobile app, public/customer web
+app, operations console and launch is maintained in
+[`MMEMME_CODEX_IMPLEMENTATION_BACKLOG.md`](./MMEMME_CODEX_IMPLEMENTATION_BACKLOG.md).
+This file remains the concise architecture, policy and release-gate summary.
+
 ## Architecture
 
 The npm workspace contains:
