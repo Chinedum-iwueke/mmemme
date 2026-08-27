@@ -1,6 +1,6 @@
 # MMEMME MVP Implementation Plan
 
-Status: **Market-testable demo implemented; external live-beta gates remain**
+Status: **Demo implemented; production/100-person pilot backlog defined; external gates remain**
 
 The detailed execution backlog for the production mobile app, public/customer web
 app, operations console and launch is maintained in
@@ -12,6 +12,8 @@ This file remains the concise architecture, policy and release-gate summary.
 The npm workspace contains:
 
 - `apps/mobile`: Expo Router native customer app.
+- `apps/web`: Next.js public website, full customer booking web app and responsive
+  vendor onboarding/verification workspace.
 - `apps/admin`: Next.js internal operations console.
 - `packages/domain`: Zod inputs and canonical state-transition rules.
 - `supabase/migrations`: PostgreSQL schema, constraints, RLS and financial processing.
@@ -97,6 +99,17 @@ The shared domain package and database both reject invalid transitions. Append-o
       reconciliation flows pass in staging.
 - [ ] Controlled live-money rehearsal reconciles payment, ledger, refund and payout 100%.
 
+### Vendor onboarding
+
+- [ ] Vendors can create web accounts with verified contact details.
+- [ ] Vendors can submit category-specific credentials, private evidence, owned
+      media, draft profiles and packages with autosaved progress.
+- [ ] RLS and storage tests isolate every vendor application and credential.
+- [ ] Operations can request changes, record physical inspection, approve, reject,
+      suspend, expire and publish without SQL.
+- [ ] Approved identity/bank verification provider integration stores references
+      and result summaries rather than unapproved raw NIN/BVN values.
+
 ### Release
 
 - [x] Release, access, incident, rollback and local demo procedures documented.
@@ -105,6 +118,12 @@ The shared domain package and database both reject invalid transitions. Append-o
 - [x] Zero known critical authorization or financial defects in the local demo.
 - [ ] TestFlight and Play closed tracks configured with privacy disclosures.
 - [ ] Operations staffing and escalation contacts are active.
+- [ ] Public/customer/vendor web, private operations, production Supabase/Functions,
+      email/SMS, monitoring and iOS/Android closed releases are live.
+- [ ] Production-like capacity test passes the 100-person pilot workload with 2×
+      provider and infrastructure quota headroom.
+- [ ] Production rolls out through 5 → 20 → 50 → 100 invited participants with a
+      go/hold decision after each stage.
 
 ## Test matrix
 

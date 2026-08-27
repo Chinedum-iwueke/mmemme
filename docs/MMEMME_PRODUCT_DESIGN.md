@@ -44,6 +44,8 @@ Payments are not described as escrow. Payment pages remain disabled until Paysta
 - Hosted checkout return state.
 - Booking timeline, receipt and MMEMME support thread.
 - Cancellation, dispute and verified review flows.
+- Vendor web sign-up, credential application, draft listing and verification
+  status/corrections.
 - Internal operations dashboard, queues, vendor verification, quoting, ledger and audit history.
 
 ## Interaction principles
@@ -56,9 +58,31 @@ Payments are not described as escrow. Payment pages remain disabled until Paysta
 - All controls have labels, 44px minimum targets and visible focus/pressed states.
 - Reduced motion is respected. Images are responsive, compressed and never autoplay.
 
+## Vendor MVP experience
+
+Venues and caterers can create a responsive web account, submit a versioned
+verification application, upload private credentials and owned portfolio media,
+build a draft profile/package, respond to requested changes and track inspection,
+approval and expiry. Uploading evidence never means approval: MMEMME operations
+reviews the application, completes the physical inspection and controls final
+verification and publication.
+
+Private credentials are isolated from public listing media. MMEMME stores
+provider references and verification results rather than raw NIN/BVN values
+unless qualified Nigerian counsel and an approved provider explicitly authorize
+the collection and security design.
+
+There is no vendor native app in this MVP. Vendors do not directly confirm
+bookings, chat with customers, initiate payouts or override quotes; founders keep
+those transaction operations during the first 100-person pilot.
+
 ## Not in the MVP
 
-Abuja, diaspora or non-NGN payments, other event types, planners as a product persona, staffing/jobs, vendor self-service, live calendars, vendor-to-customer chat, subscriptions, promoted listings, automated ranking or matching, independent escrow, Flutterwave and automated dispute decisions.
+Abuja, diaspora or non-NGN payments, other event types, planners as a product
+persona, staffing/jobs, a vendor native app, vendor-controlled booking/payment
+operations, live calendars, vendor-to-customer chat, subscriptions, promoted
+listings, automated ranking or matching, independent escrow, Flutterwave and
+automated dispute decisions.
 
 ## Implementation roadmap to first MVP
 
@@ -370,8 +394,11 @@ The engineering milestones above produce the initial app. The following founder-
 
 **Market execution**
 
-- Admit 30 qualified Lagos couples in small weekly cohorts.
+- Admit invited customers and vendor applicants in cumulative cohorts of 5, 20,
+  50 and at least 100 people, recording role and qualification separately.
 - Keep supply capped at 10 verified venues and 15 verified caterers.
+- Let vendors enter their own application and draft listing data; keep MMEMME
+  review, physical inspection, publication and transaction operations controlled.
 - Observe every first-cohort customer without guiding the interface; record surprises and rescue actions.
 - Review funnel conversion, response time, booking value, contribution margin, leakage and support burden weekly.
 - Ship only fixes that improve trust, completed bookings or operational safety. Defer broader marketplace features.
@@ -380,7 +407,8 @@ The engineering milestones above produce the initial app. The following founder-
 
 - 10 paid bookings through MMEMME.
 - At least 5 fulfilled services with reconciled payouts.
-- Zero unresolved critical fund discrepancies.
+- Zero unresolved critical fund, authorization, data-loss or credential-privacy
+  discrepancy.
 - Five permissioned customer or vendor references.
 - A reproducible native-app demo and cohort-based investor scorecard.
 - A written decision on the next bottleneck to automate, based on observed operations rather than the original feature list.
@@ -389,4 +417,9 @@ The engineering milestones above produce the initial app. The following founder-
 
 Before paid beta: interview 20 couples, 10 venues, 10 caterers and 5 planners; obtain five couple design partners; conditionally onboard 10 venues and 15 caterers; test the guided brief and quote flow; document every rejection and pricing objection.
 
-The eight-week closed beta targets 30 qualified couples and 10 paid bookings. The formal fundraising process begins only after 10 paid bookings, 5 fulfilled services, reconciled payouts, no critical fund discrepancy and five permissioned references.
+The controlled pilot expands in cumulative cohorts of 5, 20, 50 and at least 100
+invited participants across customer and vendor roles. Cohort reporting separates
+roles and qualified customer demand. The initial commercial evidence target
+remains at least 10 paid bookings, 5 fulfilled services, reconciled payouts, no
+critical fund or credential-privacy discrepancy and five permissioned references
+before a formal fundraising process.
