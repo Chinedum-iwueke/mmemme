@@ -157,22 +157,38 @@ export function Pagination({
   page,
   pages,
   onPage,
+  current,
+  total,
+  hrefForPage,
 }: {
-  page: number;
-  pages: number;
+  page?: number;
+  pages?: number;
   onPage?: (page: number) => void;
+  current?: number;
+  total?: number;
+  hrefForPage?: (page: number) => string;
 }) {
+  const active = current ?? page ?? 1;
+  const count = total ?? pages ?? 1;
+  const Control = ({ target, children }: { target: number; children: ReactNode }) =>
+    hrefForPage ? (
+      target < 1 || target > count ? (
+        <span aria-disabled="true">{children}</span>
+      ) : (
+        <a href={hrefForPage(target)}>{children}</a>
+      )
+    ) : (
+      <button disabled={target < 1 || target > count} onClick={() => onPage?.(target)}>
+        {children}
+      </button>
+    );
   return (
     <nav aria-label="Pagination" className="mm-pagination">
-      <button disabled={page <= 1} onClick={() => onPage?.(page - 1)}>
-        Previous
-      </button>
+      <Control target={active - 1}>Previous</Control>
       <span aria-live="polite">
-        Page {page} of {pages}
+        Page {active} of {count}
       </span>
-      <button disabled={page >= pages} onClick={() => onPage?.(page + 1)}>
-        Next
-      </button>
+      <Control target={active + 1}>Next</Control>
     </nav>
   );
 }

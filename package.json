@@ -32,7 +32,7 @@
     "sql:lint": "node scripts/check-migrations.mjs",
     "secrets:check": "node scripts/check-secrets.mjs",
     "boundaries:check": "node scripts/check-boundaries.mjs",
-    "production:safety": "node scripts/check-production-safety.mjs",
+    "production:safety": "node scripts/check-production-safety.mjs && node scripts/check-public-web.mjs",
     "tokens:check": "npm run check -w @mmemme/tokens",
     "native-ui:check": "node scripts/check-native-ui.mjs",
     "expo:doctor": "npx expo-doctor@latest apps/mobile",

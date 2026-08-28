@@ -351,14 +351,14 @@ the public discovery and booking journeys on web and mobile.
 Goal: ship a fast public-facing site that explains MMEMME and immediately enables
 vendor discovery.
 
-- [ ] **M10-01 — Public shell and navigation**
+- [x] **M10-01 — Public shell and navigation**
       Dependencies: M9-03.
       Implement responsive header, mobile navigation, footer, skip link, contact and
       legal navigation, persistent but non-obstructive sign-in/bookings access.
       Acceptance: complete keyboard navigation, no horizontal overflow and no content
       hidden behind fixed UI at all target widths.
 
-- [ ] **M10-02 — Search-first home page**
+- [x] **M10-02 — Search-first home page**
       Dependencies: M10-01.
       Build an editorial hero with wedding date/area/category search, curated venue
       and caterer sections, verification explanation, how booking works, real proof
@@ -367,7 +367,7 @@ vendor discovery.
       Acceptance: a guest reaches relevant results in one primary action; marketing
       content remains useful with JavaScript disabled where practical.
 
-- [ ] **M10-03 — Category and search results**
+- [x] **M10-03 — Category and search results**
       Dependencies: M10-02, M8-03.
       Add indexable venue and caterer pages, URL-backed filters, sort limited to
       explicit non-promoted rules, pagination, result count and mobile filter sheet.
@@ -375,7 +375,7 @@ vendor discovery.
       Acceptance: copied URLs reproduce results; only approved published supply is
       visible; filters never imply live availability.
 
-- [ ] **M10-04 — Public vendor profiles**
+- [x] **M10-04 — Public vendor profiles**
       Dependencies: M10-03.
       Implement responsive gallery, optimized images, summary facts, price guidance,
       capacity, area, packages, inclusions, verification evidence/date/expiry,
@@ -384,7 +384,7 @@ vendor discovery.
       inaccessible, expired verification is visibly disclosed and images do not
       cause layout shifts.
 
-- [ ] **M10-05 — Marketing and trust pages**
+- [x] **M10-05 — Marketing and trust pages**
       Dependencies: M10-01.
       Create How It Works, Verification & Safety, For Vendors, About, Contact, Privacy,
       Terms, Refund/Cancellation and Dispute pages. Legal text remains versioned and
@@ -392,14 +392,14 @@ vendor discovery.
       Acceptance: all required footer links resolve, versions are recorded and
       structured content is readable on small screens.
 
-- [ ] **M10-06 — Search visibility and sharing**
+- [x] **M10-06 — Search visibility and sharing**
       Dependencies: M10-03, M10-04.
       Add page metadata, canonical URLs, sitemap, robots policy, Open Graph images,
       structured data where accurate, redirects and branded 404/500 states.
       Acceptance: metadata tests pass; preview is no-index; production excludes
       authenticated/private routes from indexing.
 
-- [ ] **M10-07 — Public performance budget**
+- [x] **M10-07 — Public performance budget**
       Dependencies: M10-02 through M10-06.
       Optimize responsive images, fonts, caching and client bundles. Reserve layout
       space and defer non-critical analytics.

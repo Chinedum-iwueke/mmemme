@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mmemme/config": "*",
+    "@mmemme/database": "*",
     "@mmemme/domain": "*",
     "@mmemme/tokens": "*",
     "@supabase/ssr": "^0.12.3",
