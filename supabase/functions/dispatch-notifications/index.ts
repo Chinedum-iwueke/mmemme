@@ -25,30 +25,23 @@ Deno.serve(async (request) => {
   }
   const { data: rows } = await admin
     .from("customer_notifications")
-    .select(
-      "id,customer_id,booking_id,title,body,deep_link,push_status,email_status",
-    )
+    .select("id,customer_id,booking_id,title,body,deep_link,push_status,email_status")
     .or("push_status.eq.pending,email_status.eq.pending")
     .limit(100);
   for (const row of rows ?? []) {
-    const [{ data: prefs }, { data: tokens }, { data: profile }] =
-      await Promise.all([
-        admin
-          .from("notification_preferences")
-          .select("*")
-          .eq("customer_id", row.customer_id)
-          .maybeSingle(),
-        admin
-          .from("push_tokens")
-          .select("token")
-          .eq("customer_id", row.customer_id)
-          .eq("active", true),
-        admin
-          .from("profiles")
-          .select("email")
-          .eq("id", row.customer_id)
-          .single(),
-      ]);
+    const [{ data: prefs }, { data: tokens }, { data: profile }] = await Promise.all([
+      admin
+        .from("notification_preferences")
+        .select("*")
+        .eq("customer_id", row.customer_id)
+        .maybeSingle(),
+      admin
+        .from("push_tokens")
+        .select("token")
+        .eq("customer_id", row.customer_id)
+        .eq("active", true),
+      admin.from("profiles").select("email").eq("id", row.customer_id).single(),
+    ]);
     let pushStatus = "disabled",
       emailStatus = "disabled";
     if (prefs?.push_enabled && tokens?.length) {
@@ -72,11 +65,7 @@ Deno.serve(async (request) => {
       });
       pushStatus = response.ok ? "sent" : "failed";
     }
-    if (
-      prefs?.email_enabled &&
-      profile?.email &&
-      Deno.env.get("RESEND_API_KEY")
-    ) {
+    if (prefs?.email_enabled && profile?.email && Deno.env.get("RESEND_API_KEY")) {
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {

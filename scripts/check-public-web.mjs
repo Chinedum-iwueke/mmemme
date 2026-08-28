@@ -15,10 +15,16 @@ if (!legal.includes("draft-2026-08-28")) throw new Error("Legal version must be 
 const cssBytes = fs.statSync("apps/web/app/styles.css").size;
 if (cssBytes > 35_000)
   throw new Error(`Public CSS exceeds 35 KB source budget (${cssBytes} bytes)`);
-const clientFiles = ["apps/web/components/public/mobile-nav.tsx"];
+const clientFiles = [
+  "apps/web/components/public/mobile-nav.tsx",
+  "apps/web/components/customer/account-nav.tsx",
+  "apps/web/components/customer/shortlist-button.tsx",
+  "apps/web/lib/supabase/browser.ts",
+  "apps/web/lib/supabase/rest.ts",
+];
 const clientBytes = clientFiles.reduce((total, file) => total + fs.statSync(file).size, 0);
-if (clientBytes > 8_000)
-  throw new Error(`Public shell client code exceeds 8 KB source budget (${clientBytes} bytes)`);
+if (clientBytes > 18_000)
+  throw new Error(`Public shell client code exceeds 18 KB source budget (${clientBytes} bytes)`);
 if (process.env.MMEMME_ENV === "production") {
   if (process.env.NEXT_PUBLIC_LEGAL_CONTENT_STATUS !== "approved")
     throw new Error("Production requires counsel-approved legal content");

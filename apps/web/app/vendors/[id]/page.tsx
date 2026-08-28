@@ -92,11 +92,8 @@ export default async function VendorPage({ params, searchParams }: Props) {
           <p className="availability-note">
             Availability is not live. MMEMME confirms your date and final terms after your request.
           </p>
-          <Link
-            className="button primary wide-button"
-            href={`/login?next=${encodeURIComponent(`/vendors/${vendor.id}/request`)}`}
-          >
-            Sign in to request this vendor
+          <Link className="button primary wide-button" href={`/vendors/${vendor.id}/request`}>
+            Request this vendor
           </Link>
         </div>
       </section>

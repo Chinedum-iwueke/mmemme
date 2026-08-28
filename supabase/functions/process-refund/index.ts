@@ -2,32 +2,30 @@ import { corsHeaders } from "../_shared/cors.ts";
 import { adminClient, userClient } from "../_shared/supabase.ts";
 import { failure, RefundRequest, success } from "../_shared/api.ts";
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
-  if (request.method !== "POST") return failure("INVALID_REQUEST",405);
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (request.method !== "POST") return failure("INVALID_REQUEST", 405);
   const auth = request.headers.get("Authorization") ?? "";
   const userApi = userClient(auth);
   const {
     data: { user },
   } = await userApi.auth.getUser();
-  if (!user) return failure("UNAUTHORIZED",401);
+  if (!user) return failure("UNAUTHORIZED", 401);
   const admin = adminClient();
   const { data: profile } = await admin
     .from("profiles")
     .select("is_admin")
     .eq("id", user.id)
     .single();
-  if (!profile?.is_admin) return failure("FORBIDDEN",403);
-  const parsed=RefundRequest.safeParse(await request.json().catch(()=>null));
-  if(!parsed.success)return failure("INVALID_REQUEST",400);
-  const {refundId}=parsed.data;
+  if (!profile?.is_admin) return failure("FORBIDDEN", 403);
+  const parsed = RefundRequest.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return failure("INVALID_REQUEST", 400);
+  const { refundId } = parsed.data;
   const { data: r } = await admin
     .from("refunds")
     .select("id,amount_kobo,status,payments(provider_reference)")
     .eq("id", refundId)
     .single();
-  if (!r || r.status !== "approved")
-    return failure("CONFLICT",409);
+  if (!r || r.status !== "approved") return failure("CONFLICT", 409);
   await admin
     .from("refunds")
     .update({ status: "processing", updated_at: new Date().toISOString() })
@@ -67,15 +65,13 @@ Deno.serve(async (request) => {
         failure_reason: result.message ?? "Refund initialization failed",
       })
       .eq("id", r.id);
-    return failure("PROVIDER_UNAVAILABLE",502);
+    return failure("PROVIDER_UNAVAILABLE", 502);
   }
   await admin
     .from("refunds")
     .update({
-      provider_reference: String(
-        result.data?.id ?? result.data?.refund_reference ?? "",
-      ),
+      provider_reference: String(result.data?.id ?? result.data?.refund_reference ?? ""),
     })
     .eq("id", r.id);
-  return success({status:"processing"});
+  return success({ status: "processing" });
 });

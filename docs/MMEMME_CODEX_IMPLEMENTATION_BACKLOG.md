@@ -414,21 +414,21 @@ an accessible, indexable and production-quality public site.
 
 Goal: deliver the complete mobile booking capability in a resilient web app.
 
-- [ ] **M11-01 — Web authentication and session recovery**
+- [x] **M11-01 — Web authentication and session recovery**
       Dependencies: M8-05, M9-03, M10-03.
       Implement Nigerian phone OTP, resend/rate-limit states, profile completion,
       secure cookies, sign-out and return-to-intent after authentication.
       Acceptance: authentication returns the customer to the exact saved/requested
       action; sessions work across tabs without exposing tokens to logs.
 
-- [ ] **M11-02 — Wedding brief and shortlist**
+- [x] **M11-02 — Wedding brief and shortlist**
       Dependencies: M11-01.
       Implement autosaved five-question brief, skip-to-browse, edit flow, shortlist
       and graceful local draft recovery. Reconcile anonymous state after sign-in.
       Acceptance: refresh, back navigation, brief edits and temporary network failure
       do not lose work or duplicate records.
 
-- [ ] **M11-03 — Web booking request**
+- [x] **M11-03 — Web booking request**
       Dependencies: M11-02, M10-04.
       Implement package selection, guest count, requirements, date confirmation and
       the explicit “availability not yet confirmed” acknowledgement. Use the same
@@ -436,7 +436,7 @@ Goal: deliver the complete mobile booking capability in a resilient web app.
       Acceptance: retries create one request; invalid vendor/package combinations
       fail server-side; success appears in web, mobile and operations immediately.
 
-- [ ] **M11-04 — Customer booking workspace**
+- [x] **M11-04 — Customer booking workspace**
       Dependencies: M11-03.
       Build booking list, detail, human-readable timeline, quote, revision history,
       expiry, terms acceptance, receipt and next actions. Provide useful desktop
@@ -444,21 +444,21 @@ Goal: deliver the complete mobile booking capability in a resilient web app.
       Acceptance: all states have a clear primary action or explanation; stale quote
       acceptance is rejected and refreshed.
 
-- [ ] **M11-05 — Hosted checkout and recovery**
+- [x] **M11-05 — Hosted checkout and recovery**
       Dependencies: M11-04, M15-02.
       Launch Paystack hosted checkout, handle abandonment and return, poll/subscribe
       for authoritative confirmation and recover after tab close or network loss.
       Acceptance: a return URL never confirms value; one successful provider event
       produces one payment, ledger set, payout and confirmation.
 
-- [ ] **M11-06 — Web support and safety**
+- [x] **M11-06 — Web support and safety**
       Dependencies: M11-04, M15-03.
       Implement booking support, cancellation preview/request, refund status, dispute
       opening/evidence, fulfillment confirmation and eligible verified review.
       Acceptance: uploads enforce type/size/access; every exception state has a clear
       customer explanation and operations rescue path.
 
-- [ ] **M11-07 — Cross-device continuity**
+- [x] **M11-07 — Cross-device continuity**
       Dependencies: M11-01 through M11-06.
       Ensure a request started on web can continue on mobile and vice versa. Resolve
       cached/draft conflict explicitly and deep-link notifications to the correct

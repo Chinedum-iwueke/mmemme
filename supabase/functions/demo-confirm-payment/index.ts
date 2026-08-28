@@ -6,10 +6,19 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (Deno.env.get("MMEMME_ENV") === "production" || Deno.env.get("PAYMENTS_DEMO_MODE") !== "true")
-    return json({ ok:false,error:{code:"FEATURE_DISABLED",message:"This feature is not available.",correlationId:crypto.randomUUID()} }, 404);
+    return json(
+      {
+        ok: false,
+        error: {
+          code: "FEATURE_DISABLED",
+          message: "This feature is not available.",
+          correlationId: crypto.randomUUID(),
+        },
+      },
+      404,
+    );
   const auth = request.headers.get("Authorization") ?? "";
   const {
     data: { user },
@@ -51,15 +60,12 @@ Deno.serve(async (request) => {
     .select("id")
     .single();
   if (error) return json({ error: error.message }, 500);
-  const { error: processError } = await admin.rpc(
-    "process_successful_payment",
-    {
-      p_reference: reference,
-      p_amount_kobo: q.deposit_amount_kobo,
-      p_event_key: `charge.success:${reference}`,
-      p_event_hash: "local-demo",
-    },
-  );
+  const { error: processError } = await admin.rpc("process_successful_payment", {
+    p_reference: reference,
+    p_amount_kobo: q.deposit_amount_kobo,
+    p_event_key: `charge.success:${reference}`,
+    p_event_hash: "local-demo",
+  });
   return processError
     ? json({ error: processError.message }, 500)
     : json({ paymentId: p.id, reference, status: "succeeded" });

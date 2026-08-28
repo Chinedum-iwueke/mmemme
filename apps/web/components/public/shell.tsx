@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountNav } from "../customer/account-nav";
 import { MobileNav } from "./mobile-nav";
 export function Header() {
   return (
@@ -16,12 +17,7 @@ export function Header() {
           <Link href="/how-it-works">How it works</Link>
           <Link href="/verification">Verification</Link>
         </nav>
-        <div className="account-nav">
-          <Link href="/bookings">My bookings</Link>
-          <Link className="nav-action" href="/login">
-            Sign in
-          </Link>
-        </div>
+        <AccountNav />
         <MobileNav />
       </div>
     </header>

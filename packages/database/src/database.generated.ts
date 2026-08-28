@@ -297,6 +297,38 @@ export type Database = {
           },
         ]
       }
+      customer_drafts: {
+        Row: {
+          brief: Json
+          customer_id: string
+          revision: number
+          source_device_id: string
+          updated_at: string
+        }
+        Insert: {
+          brief?: Json
+          customer_id: string
+          revision?: number
+          source_device_id: string
+          updated_at?: string
+        }
+        Update: {
+          brief?: Json
+          customer_id?: string
+          revision?: number
+          source_device_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_drafts_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_notifications: {
         Row: {
           body: string
@@ -310,6 +342,7 @@ export type Database = {
           push_status: string
           read_at: string | null
           title: string
+          web_path: string | null
         }
         Insert: {
           body: string
@@ -323,6 +356,7 @@ export type Database = {
           push_status?: string
           read_at?: string | null
           title: string
+          web_path?: string | null
         }
         Update: {
           body?: string
@@ -336,6 +370,7 @@ export type Database = {
           push_status?: string
           read_at?: string | null
           title?: string
+          web_path?: string | null
         }
         Relationships: [
           {
@@ -1181,6 +1216,39 @@ export type Database = {
           },
         ]
       }
+      shortlist_items: {
+        Row: {
+          created_at: string
+          customer_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shortlist_items_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shortlist_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       state_transition_events: {
         Row: {
           actor_id: string | null
@@ -1578,6 +1646,26 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "cancellations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_customer_draft: {
+        Args: {
+          p_brief: Json
+          p_expected_revision: number
+          p_source_device_id: string
+        }
+        Returns: {
+          brief: Json
+          customer_id: string
+          revision: number
+          source_device_id: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "customer_drafts"
           isOneToOne: true
           isSetofReturn: false
         }

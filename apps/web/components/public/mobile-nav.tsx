@@ -22,6 +22,8 @@ export function MobileNav() {
           <Link href="/how-it-works">How it works</Link>
           <Link href="/verification">Verification</Link>
           <Link href="/for-vendors">For vendors</Link>
+          <Link href="/brief">Wedding brief</Link>
+          <Link href="/shortlist">Shortlist</Link>
           <Link href="/bookings">My bookings</Link>
           <Link className="nav-action" href="/login">
             Sign in

@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -19,8 +20,10 @@ import {
   DraftBrief,
   emptyBrief,
   persistBrief,
+  readAccountDraft,
   readDraftBrief,
   writeDraftBrief,
+  syncAccountDraft,
 } from "../src/lib/brief-store";
 
 const steps = [
@@ -69,11 +72,25 @@ export default function BriefScreen() {
   }, [step, value, brief]);
 
   useEffect(() => {
-    readDraftBrief().then((draft) => {
-      if (draft) setBrief(draft);
-      setLoading(false);
-    });
-  }, []);
+    Promise.all([readDraftBrief(), user ? readAccountDraft() : Promise.resolve(null)]).then(
+      ([draft, account]) => {
+        if (draft && account && JSON.stringify(draft) !== JSON.stringify(account.brief))
+          Alert.alert("Brief changed on another device", "Choose which version to continue.", [
+            { text: "Use this device", onPress: () => setBrief(draft) },
+            {
+              text: "Use account version",
+              onPress: () => {
+                setBrief(account.brief);
+                writeDraftBrief(account.brief);
+              },
+            },
+          ]);
+        else if (account) setBrief(account.brief);
+        else if (draft) setBrief(draft);
+        setLoading(false);
+      },
+    );
+  }, [user]);
   useEffect(() => {
     if (!loading) writeDraftBrief(brief);
   }, [brief, loading]);
@@ -94,6 +111,8 @@ export default function BriefScreen() {
     setError("");
     try {
       await persistBrief(user.id, brief);
+      const account = await readAccountDraft();
+      await syncAccountDraft(brief, account?.revision ?? 1);
       router.replace({ pathname: "/", params: { brief: "saved" } });
     } catch {
       setError(

@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { PublicVendor } from "../../lib/marketplace";
 import { dateLabel, money } from "../../lib/marketplace";
 import { Icon } from "./icons";
+import { ShortlistButton } from "../customer/shortlist-button";
 
 export function SearchForm({
   category,
@@ -56,6 +57,7 @@ export function VendorCard({ vendor, returnTo }: { vendor: PublicVendor; returnT
   const href = `/vendors/${vendor.id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`;
   return (
     <article className="vendor-card">
+      <ShortlistButton vendorId={vendor.id} />
       <Link aria-label={`View ${vendor.name}`} className="vendor-image" href={href}>
         {vendor.imageUrl ? (
           <Image
