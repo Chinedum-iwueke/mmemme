@@ -1,0 +1,267 @@
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.mm-button,
+.mm-pagination button {
+  min-height: var(--mm-target-minimum);
+  border-radius: var(--mm-radius-md);
+  padding: 0 var(--mm-space-5);
+  border: 1px solid transparent;
+  font:
+    600 var(--mm-type-size-label) var(--mm-type-family-ui),
+    sans-serif;
+  cursor: pointer;
+  transition:
+    background var(--mm-motion-duration-fast),
+    border-color var(--mm-motion-duration-fast),
+    color var(--mm-motion-duration-fast);
+}
+.mm-button:focus-visible,
+.mm-link:focus-visible,
+.mm-field :is(input, select):focus-visible,
+.mm-pagination button:focus-visible {
+  outline: 3px solid var(--mm-semantic-focus-ring);
+  outline-offset: 2px;
+}
+.mm-button:disabled,
+.mm-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.mm-button--primary {
+  background: var(--mm-semantic-action-primary);
+  color: var(--mm-semantic-action-primary-text);
+}
+.mm-button--accent {
+  background: var(--mm-semantic-action-accent);
+  color: var(--mm-semantic-action-accent-text);
+}
+.mm-button--secondary {
+  background: var(--mm-semantic-surface);
+  color: var(--mm-semantic-action-primary);
+  border-color: var(--mm-semantic-action-primary);
+}
+.mm-button--ghost {
+  background: transparent;
+  color: var(--mm-semantic-action-primary);
+}
+.mm-button--danger {
+  background: var(--mm-semantic-error);
+  color: white;
+}
+.mm-link {
+  color: var(--mm-semantic-action-primary);
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+.mm-field {
+  display: grid;
+  gap: var(--mm-space-2);
+  font:
+    600 var(--mm-type-size-label) var(--mm-type-family-ui),
+    sans-serif;
+}
+.mm-field :is(input, select) {
+  min-height: var(--mm-target-large);
+  border: 1px solid var(--mm-semantic-border-strong);
+  border-radius: var(--mm-radius-md);
+  padding: 0 var(--mm-space-4);
+  background: var(--mm-semantic-surface);
+  color: var(--mm-semantic-text-primary);
+  font:
+    400 var(--mm-type-size-body) var(--mm-type-family-ui),
+    sans-serif;
+}
+.mm-field small {
+  color: var(--mm-semantic-text-secondary);
+  font-weight: 400;
+}
+.mm-field .mm-field__error {
+  color: var(--mm-semantic-error);
+  font-weight: 600;
+}
+.mm-field [aria-invalid="true"] {
+  border-color: var(--mm-semantic-error);
+}
+.mm-currency {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.mm-currency small {
+  font-size: 0.78em;
+  color: var(--mm-semantic-text-secondary);
+}
+.mm-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--mm-space-2);
+  border-radius: var(--mm-radius-sm);
+  background: var(--mm-semantic-surface-subtle);
+  color: var(--mm-semantic-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.mm-badge--trust {
+  background: var(--mm-semantic-trust-surface);
+  color: var(--mm-semantic-trust-text);
+}
+.mm-badge--info {
+  background: var(--mm-semantic-info-surface);
+  color: var(--mm-semantic-info);
+}
+.mm-badge--success {
+  background: var(--mm-semantic-success-surface);
+  color: var(--mm-semantic-success);
+}
+.mm-badge--warning {
+  background: var(--mm-semantic-warning-surface);
+  color: var(--mm-semantic-warning);
+}
+.mm-badge--error {
+  background: var(--mm-semantic-error-surface);
+  color: var(--mm-semantic-error);
+}
+.mm-card {
+  border: 1px solid var(--mm-semantic-border-default);
+  border-radius: var(--mm-radius-lg);
+  padding: var(--mm-space-6);
+  background: var(--mm-semantic-surface);
+  box-shadow: var(--mm-elevation-1);
+}
+.mm-card--interactive {
+  cursor: pointer;
+  transition:
+    border-color var(--mm-motion-duration-fast),
+    box-shadow var(--mm-motion-duration-fast);
+}
+.mm-card--interactive:hover {
+  border-color: var(--mm-semantic-border-strong);
+  box-shadow: var(--mm-elevation-2);
+}
+.mm-image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  border-radius: var(--mm-radius-lg);
+  background: var(--mm-semantic-surface-subtle);
+}
+.mm-image img {
+  object-fit: cover;
+}
+.mm-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mm-space-2);
+  padding: 0;
+  list-style: none;
+}
+.mm-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mm-space-4);
+}
+.mm-pagination button {
+  background: var(--mm-semantic-surface);
+  border-color: var(--mm-semantic-border-strong);
+  color: var(--mm-semantic-action-primary);
+}
+.mm-skeleton {
+  height: 120px;
+  border-radius: var(--mm-radius-lg);
+  background: linear-gradient(
+    90deg,
+    var(--mm-neutral-50),
+    var(--mm-neutral-100),
+    var(--mm-neutral-50)
+  );
+  background-size: 200% 100%;
+  animation: mm-shimmer 1.2s linear infinite;
+}
+.mm-state {
+  border: 1px solid var(--mm-semantic-border-default);
+  border-radius: var(--mm-radius-lg);
+  padding: var(--mm-space-6);
+}
+.mm-state h3,
+.mm-state p {
+  margin-top: 0;
+}
+.mm-state--error,
+.mm-form-error {
+  border-color: var(--mm-semantic-error-border);
+  background: var(--mm-semantic-error-surface);
+  color: var(--mm-semantic-error);
+}
+.mm-form-error {
+  border: 1px solid;
+  border-radius: var(--mm-radius-md);
+  padding: var(--mm-space-4);
+}
+.mm-form-error p {
+  margin-bottom: 0;
+}
+.mm-dialog,
+.mm-sheet {
+  max-width: 560px;
+  border: 0;
+  border-radius: var(--mm-radius-xl);
+  padding: var(--mm-space-6);
+  background: var(--mm-semantic-surface);
+  color: var(--mm-semantic-text-primary);
+  box-shadow: var(--mm-elevation-3);
+}
+.mm-dialog::backdrop,
+.mm-sheet::backdrop {
+  background: rgba(21, 35, 31, 0.55);
+}
+.mm-sheet {
+  width: min(calc(100% - 32px), 680px);
+  max-height: 85vh;
+  overflow: auto;
+  margin: auto auto 16px;
+}
+.mm-toast {
+  position: fixed;
+  right: var(--mm-space-6);
+  bottom: var(--mm-space-6);
+  z-index: var(--mm-z-index-toast);
+  max-width: 360px;
+  padding: var(--mm-space-4);
+  border-radius: var(--mm-radius-md);
+  background: var(--mm-semantic-info-surface);
+  color: var(--mm-semantic-info);
+  box-shadow: var(--mm-elevation-2);
+}
+.mm-toast--success {
+  background: var(--mm-semantic-success-surface);
+  color: var(--mm-semantic-success);
+}
+.mm-toast--error {
+  background: var(--mm-semantic-error-surface);
+  color: var(--mm-semantic-error);
+}
+@keyframes mm-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mm-button,
+  .mm-card--interactive {
+    transition: none;
+  }
+  .mm-skeleton {
+    animation: none;
+  }
+}

@@ -1,17 +1,11 @@
-:root {
-  --deep: #294a41;
-  --lime: #97c354;
-  --canvas: #fbfcf8;
-  --ink: #15231f;
-}
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
-  background: var(--canvas);
-  color: var(--ink);
-  font-family: "DM Sans", sans-serif;
+  background: var(--mm-semantic-canvas);
+  color: var(--mm-semantic-text-primary);
+  font-family: var(--mm-type-family-ui), sans-serif;
 }
 main {
   min-height: 100vh;
@@ -20,20 +14,20 @@ nav {
   display: flex;
   justify-content: space-between;
   padding: 24px clamp(20px, 5vw, 64px);
-  color: var(--deep);
+  color: var(--mm-brand-deep-green);
 }
 section {
   max-width: 900px;
   padding: clamp(64px, 12vw, 150px) clamp(20px, 8vw, 100px);
 }
 .eyebrow {
-  color: var(--deep);
+  color: var(--mm-brand-deep-green);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 h1 {
-  font-family: "Arial Narrow", sans-serif;
+  font-family: var(--mm-type-family-display), "Arial Narrow", sans-serif;
   font-size: clamp(52px, 9vw, 100px);
   line-height: 0.94;
   text-transform: uppercase;
@@ -50,7 +44,7 @@ button {
   padding: 0 20px;
   border: 0;
   border-radius: 10px;
-  background: var(--deep);
+  background: var(--mm-semantic-action-primary);
   color: white;
   font-weight: 700;
 }

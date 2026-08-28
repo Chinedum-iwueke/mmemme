@@ -61,9 +61,7 @@ export default function RequestScreen() {
         params: { id: booking.id, created: "1" },
       });
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "We could not submit your request.",
-      );
+      setError(e instanceof Error ? e.message : "We could not submit your request.");
       setBusy(false);
     }
   };
@@ -78,10 +76,7 @@ export default function RequestScreen() {
     );
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView
-        contentContainerStyle={s.content}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
@@ -96,8 +91,7 @@ export default function RequestScreen() {
           <View style={s.notice}>
             <Text style={s.noticeTitle}>Create your wedding brief first</Text>
             <Text style={s.muted}>
-              Your date and guest plan are needed before operations can confirm
-              availability.
+              Your date and guest plan are needed before operations can confirm availability.
             </Text>
             <PrimaryButton onPress={() => router.replace("/brief")}>
               Create wedding brief
@@ -139,7 +133,7 @@ export default function RequestScreen() {
               value={requirements}
               onChangeText={setRequirements}
               placeholder="Tell us about service style, dietary needs, access times or must-haves…"
-              placeholderTextColor="#887580"
+              placeholderTextColor={colors.placeholder}
               style={[s.input, s.textarea]}
             />
             <Pressable
@@ -148,14 +142,10 @@ export default function RequestScreen() {
               onPress={() => setAck(!ack)}
               style={s.ack}
             >
-              <Ionicons
-                name={ack ? "checkbox" : "square-outline"}
-                size={25}
-                color={colors.plum}
-              />
+              <Ionicons name={ack ? "checkbox" : "square-outline"} size={25} color={colors.plum} />
               <Text style={s.ackText}>
-                I understand this is a request. The vendor’s availability is not
-                confirmed until MMEMME issues a quote.
+                I understand this is a request. The vendor’s availability is not confirmed until
+                MMEMME issues a quote.
               </Text>
             </Pressable>
             {!!error && (
@@ -164,12 +154,7 @@ export default function RequestScreen() {
               </Text>
             )}
             <PrimaryButton
-              disabled={
-                busy ||
-                !ack ||
-                requirements.trim().length < 20 ||
-                Number(guests) < 10
-              }
+              disabled={busy || !ack || requirements.trim().length < 20 || Number(guests) < 10}
               onPress={submit}
             >
               {busy ? "Submitting once…" : "Submit booking request"}
@@ -249,8 +234,8 @@ const s = StyleSheet.create({
   },
   ackText: { flex: 1, color: colors.ink, lineHeight: 20 },
   error: {
-    color: "#9B1C31",
-    backgroundColor: "#FDECEF",
+    color: colors.error,
+    backgroundColor: colors.errorSurface,
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,

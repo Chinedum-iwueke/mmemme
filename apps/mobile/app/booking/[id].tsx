@@ -21,9 +21,9 @@ import {
   type BookingDetail,
 } from "../../src/lib/bookings";
 import { mobileEnvironment } from "../../src/lib/supabase";
+import { BookingStatus, presentStatus } from "@mmemme/domain";
 
 const money = (k: number) => `₦${Math.round(k / 100).toLocaleString("en-NG")}`;
-const label = (v: string) => v.replaceAll("_", " ");
 export default function BookingScreen() {
   const { id, created } = useLocalSearchParams<{
     id: string;
@@ -77,9 +77,7 @@ export default function BookingScreen() {
       );
       await load();
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Checkout could not be opened.",
-      );
+      setError(e instanceof Error ? e.message : "Checkout could not be opened.");
     } finally {
       setBusy(false);
     }
@@ -115,6 +113,7 @@ export default function BookingScreen() {
       </SafeAreaView>
     );
   const succeeded = booking.payments.find((p) => p.status === "succeeded");
+  const bookingCopy = presentStatus("booking", booking.status);
   return (
     <SafeAreaView style={s.safe}>
       <ScrollView contentContainerStyle={s.content}>
@@ -128,11 +127,7 @@ export default function BookingScreen() {
         </Pressable>
         {created === "1" && (
           <View style={s.success}>
-            <Ionicons
-              name="checkmark-circle"
-              size={23}
-              color={colors.success}
-            />
+            <Ionicons name="checkmark-circle" size={23} color={colors.success} />
             <Text style={s.successText}>Your request was submitted once.</Text>
           </View>
         )}
@@ -143,20 +138,8 @@ export default function BookingScreen() {
         </Text>
         <View style={s.statusCard}>
           <Text style={s.statusLabel}>Current status</Text>
-          <Text style={s.status}>{label(booking.status)}</Text>
-          <Text style={s.explain}>
-            {booking.status === "requested"
-              ? "MMEMME will contact the vendor and confirm your date, package and final terms."
-              : booking.status === "operations_review"
-                ? "Operations is confirming availability and the complete terms."
-                : booking.status === "quote_ready"
-                  ? "Review the complete quote below before accepting."
-                  : booking.status === "accepted_awaiting_payment"
-                    ? "Complete checkout. Only verified payment confirmation will confirm the booking."
-                    : booking.status === "confirmed"
-                      ? "Your deposit is verified and the booking is confirmed."
-                      : "Open the timeline below for details."}
-          </Text>
+          <Text style={s.status}>{bookingCopy.label}</Text>
+          <Text style={s.explain}>{bookingCopy.description}</Text>
         </View>
         {quote && (
           <View style={s.quote}>
@@ -167,9 +150,7 @@ export default function BookingScreen() {
               </View>
               <Text style={s.total}>{money(quote.total_amount_kobo)}</Text>
             </View>
-            <Text style={s.deposit}>
-              {money(quote.deposit_amount_kobo)} deposit due
-            </Text>
+            <Text style={s.deposit}>{money(quote.deposit_amount_kobo)} deposit due</Text>
             <Text style={s.expiry}>
               Expires {new Date(quote.expires_at).toLocaleString("en-NG")}
             </Text>
@@ -180,8 +161,8 @@ export default function BookingScreen() {
             <Text style={s.sectionTitle}>Cancellation consequences</Text>
             <Text style={s.body}>{quote.cancellation_summary}</Text>
             <Text style={s.terms}>
-              Terms version {quote.terms_version}. Acceptance is recorded with
-              your account and timestamp.
+              Terms version {quote.terms_version}. Acceptance is recorded with your account and
+              timestamp.
             </Text>
             {booking.status === "quote_ready" && (
               <PrimaryButton
@@ -215,12 +196,10 @@ export default function BookingScreen() {
           <View style={s.pending}>
             <ActivityIndicator color={colors.plum} />
             <View style={{ flex: 1 }}>
-              <Text style={s.pendingTitle}>
-                Payment confirmation is authoritative
-              </Text>
+              <Text style={s.pendingTitle}>Payment confirmation is authoritative</Text>
               <Text style={s.body}>
-                Returning from checkout does not confirm this booking. This
-                screen refreshes until Paystack’s signed webhook is verified.
+                Returning from checkout does not confirm this booking. This screen refreshes until
+                Paystack’s signed webhook is verified.
               </Text>
             </View>
           </View>
@@ -243,9 +222,7 @@ export default function BookingScreen() {
         )}
         <PrimaryButton
           style={{ marginTop: 16 }}
-          onPress={() =>
-            router.push({ pathname: "/booking/manage/[id]", params: { id } })
-          }
+          onPress={() => router.push({ pathname: "/booking/manage/[id]", params: { id } })}
         >
           Support, cancellation and safety
         </PrimaryButton>
@@ -258,11 +235,13 @@ export default function BookingScreen() {
                 {i < booking.transitions.length - 1 && <View style={s.stem} />}
               </View>
               <View style={{ flex: 1, paddingBottom: 20 }}>
-                <Text style={s.eventTitle}>{label(t.new_state)}</Text>
-                <Text style={s.body}>{t.reason}</Text>
-                <Text style={s.date}>
-                  {new Date(t.created_at).toLocaleString("en-NG")}
+                <Text style={s.eventTitle}>
+                  {BookingStatus.safeParse(t.new_state).success
+                    ? presentStatus("booking", BookingStatus.parse(t.new_state)).label
+                    : "Booking updated"}
                 </Text>
+                <Text style={s.body}>{t.reason}</Text>
+                <Text style={s.date}>{new Date(t.created_at).toLocaleString("en-NG")}</Text>
               </View>
             </View>
           ))}
@@ -309,7 +288,7 @@ const s = StyleSheet.create({
   success: {
     flexDirection: "row",
     gap: 8,
-    backgroundColor: "#E6F4EE",
+    backgroundColor: colors.successSurface,
     padding: 12,
     borderRadius: 14,
     marginBottom: 18,
@@ -372,16 +351,16 @@ const s = StyleSheet.create({
   pending: {
     flexDirection: "row",
     gap: 14,
-    backgroundColor: "#FFF2D5",
+    backgroundColor: colors.warningSurface,
     padding: 17,
     borderRadius: 18,
     marginTop: 15,
   },
-  pendingTitle: { fontWeight: "900", color: "#68470D", marginBottom: 4 },
+  pendingTitle: { fontWeight: "900", color: colors.warning, marginBottom: 4 },
   receipt: {
     flexDirection: "row",
     gap: 13,
-    backgroundColor: "#E6F4EE",
+    backgroundColor: colors.successSurface,
     padding: 17,
     borderRadius: 18,
     marginTop: 15,
@@ -404,8 +383,8 @@ const s = StyleSheet.create({
   },
   date: { fontSize: 11, color: colors.muted, marginTop: 4 },
   error: {
-    color: "#9B1C31",
-    backgroundColor: "#FDECEF",
+    color: colors.error,
+    backgroundColor: colors.errorSurface,
     padding: 12,
     borderRadius: 12,
     marginTop: 14,

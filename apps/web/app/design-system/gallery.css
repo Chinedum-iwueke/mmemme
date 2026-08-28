@@ -1,0 +1,63 @@
+.gallery {
+  max-width: 1280px;
+  margin: auto;
+  padding: clamp(24px, 5vw, 64px);
+  font-family: var(--mm-type-family-ui), sans-serif;
+  background: var(--mm-semantic-canvas);
+  color: var(--mm-semantic-text-primary);
+}
+.gallery > header {
+  max-width: 760px;
+  margin-bottom: var(--mm-space-12);
+}
+.gallery__eyebrow {
+  color: var(--mm-brand-deep-green);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.gallery h1 {
+  font-family: var(--mm-type-family-display), "Arial Narrow", sans-serif;
+  font-size: clamp(48px, 8vw, 80px);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.gallery__sections {
+  display: grid;
+  gap: var(--mm-space-12);
+}
+.gallery__sections > section {
+  display: grid;
+  gap: var(--mm-space-5);
+  border-top: 1px solid var(--mm-semantic-border-default);
+  padding-top: var(--mm-space-8);
+}
+.gallery__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mm-space-3);
+  align-items: center;
+}
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: var(--mm-space-5);
+}
+.gallery .mm-card .mm-currency {
+  display: block;
+  font-size: 24px;
+  margin: 8px 0;
+}
+@media (max-width: 599px) {
+  .gallery {
+    padding: 20px;
+  }
+  .gallery__row > .mm-button {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

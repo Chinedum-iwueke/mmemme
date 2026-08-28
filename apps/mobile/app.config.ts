@@ -23,7 +23,8 @@ export default {
   android: {
     package: "ng.mmemme.app",
     adaptiveIcon: {
-      backgroundColor: "#FBFCF8",
+      // Mirrors tokens.neutral[25]; Expo config cannot import the JSON-backed token package.
+      backgroundColor: "#fbfcf8",
     },
   },
   experiments: {

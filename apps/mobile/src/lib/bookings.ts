@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { ApiError, InitializePaymentResponse } from "@mmemme/domain";
+import type { BookingStatus, PaymentStatus } from "@mmemme/domain";
 
 export type BookingListItem = {
   id: string;
@@ -7,7 +8,7 @@ export type BookingListItem = {
   event_date: string;
   guest_count: number;
   requirements: string;
-  status: string;
+  status: BookingStatus;
   created_at: string;
   correlation_id: string;
   vendorName: string;
@@ -31,7 +32,7 @@ export type Payment = {
   id: string;
   provider_reference: string;
   amount_kobo: number;
-  status: string;
+  status: PaymentStatus;
   paid_at: string | null;
 };
 export type BookingDetail = BookingListItem & {
@@ -79,9 +80,7 @@ export async function submitRequest(input: {
 export async function listBookings() {
   const { data, error } = await supabase
     .from("bookings")
-    .select(
-      "id,vendor_id,event_date,guest_count,requirements,status,created_at,correlation_id",
-    )
+    .select("id,vendor_id,event_date,guest_count,requirements,status,created_at,correlation_id")
     .order("created_at", { ascending: false });
   if (error) throw error;
   const vendorIds = [...new Set((data ?? []).map((b) => b.vendor_id))];
@@ -96,27 +95,26 @@ export async function listBookings() {
 export async function getBooking(id: string): Promise<BookingDetail | null> {
   const booking = (await listBookings()).find((b) => b.id === id);
   if (!booking) return null;
-  const [{ data: quotes }, { data: payments }, { data: transitions }] =
-    await Promise.all([
-      supabase
-        .from("quotes")
-        .select(
-          "id,booking_id,revision,total_amount_kobo,deposit_amount_kobo,expires_at,accepted_at,package_name_snapshot,inclusions,exclusions,payment_schedule,cancellation_summary,terms_version",
-        )
-        .eq("booking_id", id)
-        .order("revision", { ascending: false }),
-      supabase
-        .from("payments")
-        .select("id,provider_reference,amount_kobo,status,paid_at")
-        .eq("booking_id", id)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("state_transition_events")
-        .select("id,previous_state,new_state,reason,created_at")
-        .eq("entity_type", "booking")
-        .eq("entity_id", id)
-        .order("created_at"),
-    ]);
+  const [{ data: quotes }, { data: payments }, { data: transitions }] = await Promise.all([
+    supabase
+      .from("quotes")
+      .select(
+        "id,booking_id,revision,total_amount_kobo,deposit_amount_kobo,expires_at,accepted_at,package_name_snapshot,inclusions,exclusions,payment_schedule,cancellation_summary,terms_version",
+      )
+      .eq("booking_id", id)
+      .order("revision", { ascending: false }),
+    supabase
+      .from("payments")
+      .select("id,provider_reference,amount_kobo,status,paid_at")
+      .eq("booking_id", id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("state_transition_events")
+      .select("id,previous_state,new_state,reason,created_at")
+      .eq("entity_type", "booking")
+      .eq("entity_id", id)
+      .order("created_at"),
+  ]);
   return {
     ...booking,
     quotes: (quotes ?? []) as Quote[],
@@ -132,23 +130,21 @@ export async function acceptQuote(bookingId: string, quoteId: string) {
   if (error) throw error;
 }
 export async function initializePayment(bookingId: string, quoteId: string) {
-  const { data, error } = await supabase.functions.invoke(
-    "initialize-payment",
-    { body: { bookingId, quoteId } },
-  );
+  const { data, error } = await supabase.functions.invoke("initialize-payment", {
+    body: { bookingId, quoteId },
+  });
   if (error) throw error;
-  const success=InitializePaymentResponse.safeParse(data);
-  if(success.success)return success.data.data;
-  const failure=ApiError.safeParse(data);
-  if(failure.success)throw new Error(failure.data.error.message);
+  const success = InitializePaymentResponse.safeParse(data);
+  if (success.success) return success.data.data;
+  const failure = ApiError.safeParse(data);
+  if (failure.success) throw new Error(failure.data.error.message);
   throw new Error("Payment service returned an invalid response.");
 }
 
 export async function demoConfirmPayment(bookingId: string, quoteId: string) {
-  const { data, error } = await supabase.functions.invoke(
-    "demo-confirm-payment",
-    { body: { bookingId, quoteId } },
-  );
+  const { data, error } = await supabase.functions.invoke("demo-confirm-payment", {
+    body: { bookingId, quoteId },
+  });
   if (error) throw error;
   if (data?.error) throw new Error(data.error);
   return data;

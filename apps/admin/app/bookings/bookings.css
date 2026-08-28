@@ -1,1 +1,85 @@
-.queue{display:grid;gap:16px}.booking-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:22px}.booking-head{display:flex;justify-content:space-between;gap:18px}.booking-head h2{margin:9px 0 5px}.booking-head p,.requirements{color:var(--muted)}.quote-chip{display:grid;align-content:center;text-align:right}.quote-chip strong{font-size:20px}.quote-chip span{font-size:11px;color:var(--muted)}.requirements{padding:12px 0;line-height:1.5}.booking-card details{margin:16px 0}.booking-card summary{cursor:pointer;color:var(--plum);font-weight:850}.inline-form{grid-template-columns:1fr auto;align-items:end}.quote-form{grid-template-columns:repeat(2,1fr)}.wide{grid-column:1/-1}.decline-form{grid-template-columns:1fr auto;align-items:end;margin-top:16px}.status.requested{background:#fff3d7;color:#68470d}.status.quote_ready{background:#e6f4ee;color:var(--green)}@media(max-width:700px){.booking-head{display:grid}.quote-chip{text-align:left}.inline-form,.quote-form,.decline-form{grid-template-columns:1fr}.wide{grid-column:auto}}
+.queue {
+  display: grid;
+  gap: 16px;
+}
+.booking-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+}
+.booking-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+.booking-head h2 {
+  margin: 9px 0 5px;
+}
+.booking-head p,
+.requirements {
+  color: var(--muted);
+}
+.quote-chip {
+  display: grid;
+  align-content: center;
+  text-align: right;
+}
+.quote-chip strong {
+  font-size: 20px;
+}
+.quote-chip span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.requirements {
+  padding: 12px 0;
+  line-height: 1.5;
+}
+.booking-card details {
+  margin: 16px 0;
+}
+.booking-card summary {
+  cursor: pointer;
+  color: var(--plum);
+  font-weight: 850;
+}
+.inline-form {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+.quote-form {
+  grid-template-columns: repeat(2, 1fr);
+}
+.wide {
+  grid-column: 1/-1;
+}
+.decline-form {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  margin-top: 16px;
+}
+.status.requested {
+  background: var(--mm-semantic-warning-surface);
+  color: var(--mm-semantic-warning);
+}
+.status.quote_ready {
+  background: var(--mm-semantic-success-surface);
+  color: var(--green);
+}
+@media (max-width: 700px) {
+  .booking-head {
+    display: grid;
+  }
+  .quote-chip {
+    text-align: left;
+  }
+  .inline-form,
+  .quote-form,
+  .decline-form {
+    grid-template-columns: 1fr;
+  }
+  .wide {
+    grid-column: auto;
+  }
+}

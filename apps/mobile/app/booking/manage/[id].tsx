@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { colors, Eyebrow, PrimaryButton } from "../../../src/components/ui";
+import { CancellationStatus, DisputeStatus, RefundStatus, presentStatus } from "@mmemme/domain";
 import { useAuth } from "../../../src/lib/auth";
 import { getBooking, type BookingDetail } from "../../../src/lib/bookings";
 import {
@@ -28,6 +29,18 @@ import {
 } from "../../../src/lib/safety";
 
 const money = (k: number) => `₦${Math.round(k / 100).toLocaleString("en-NG")}`;
+const cancellationLabel = (value: string) =>
+  CancellationStatus.safeParse(value).success
+    ? presentStatus("cancellation", CancellationStatus.parse(value)).label
+    : "Cancellation updated";
+const refundLabel = (value: string) =>
+  RefundStatus.safeParse(value).success
+    ? presentStatus("refund", RefundStatus.parse(value)).label
+    : "Refund updated";
+const disputeLabel = (value: string) =>
+  DisputeStatus.safeParse(value).success
+    ? presentStatus("dispute", DisputeStatus.parse(value)).label
+    : "Support case updated";
 export default function ManageBooking() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
@@ -65,9 +78,7 @@ export default function ManageBooking() {
       await fn();
       await load();
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Action could not be completed",
-      );
+      setError(e instanceof Error ? e.message : "Action could not be completed");
     } finally {
       setBusy(false);
     }
@@ -84,10 +95,7 @@ export default function ManageBooking() {
   const dispute = safety.disputes[0];
   return (
     <SafeAreaView style={st.safe}>
-      <ScrollView
-        contentContainerStyle={st.content}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={st.content} keyboardShouldPersistTaps="handled">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Go back"
@@ -100,21 +108,13 @@ export default function ManageBooking() {
         <Text style={st.title}>Support and safety</Text>
         <Card title="MMEMME support" icon="chatbubble-ellipses-outline">
           <Text style={st.muted}>
-            Messages stay attached to this booking and are visible only to you
-            and authorized operations staff.
+            Messages stay attached to this booking and are visible only to you and authorized
+            operations staff.
           </Text>
           {safety.messages.map((m: any) => (
-            <View
-              key={m.id}
-              style={[
-                st.bubble,
-                m.author_id === user?.id ? st.mine : st.theirs,
-              ]}
-            >
+            <View key={m.id} style={[st.bubble, m.author_id === user?.id ? st.mine : st.theirs]}>
               <Text style={st.body}>{m.body}</Text>
-              <Text style={st.date}>
-                {new Date(m.created_at).toLocaleString("en-NG")}
-              </Text>
+              <Text style={st.date}>{new Date(m.created_at).toLocaleString("en-NG")}</Text>
             </View>
           ))}
           <TextInput
@@ -157,46 +157,36 @@ export default function ManageBooking() {
           ))}
           <PrimaryButton
             disabled={busy}
-            onPress={() =>
-              run(() => saveNotificationPreferences(user!.id, prefs))
-            }
+            onPress={() => run(() => saveNotificationPreferences(user!.id, prefs))}
           >
             Save preferences
           </PrimaryButton>
         </Card>
-        {["accepted_awaiting_payment", "confirmed", "service_due"].includes(
-          booking.status,
-        ) &&
+        {["accepted_awaiting_payment", "confirmed", "service_due"].includes(booking.status) &&
           !safety.cancellation && (
             <Card title="Cancellation preview" icon="calculator-outline">
               <Text style={st.muted}>
-                Preview the policy calculation before sending a request. Nothing
-                changes until operations reviews it.
+                Preview the policy calculation before sending a request. Nothing changes until
+                operations reviews it.
               </Text>
               {preview && (
                 <View style={st.calculation}>
+                  <Text style={st.body}>Paid: {money(preview.paidAmountKobo)}</Text>
                   <Text style={st.body}>
-                    Paid: {money(preview.paidAmountKobo)}
+                    Estimated refund: {money(preview.refundableAmountKobo)} ({preview.refundPercent}
+                    %)
                   </Text>
                   <Text style={st.body}>
-                    Estimated refund: {money(preview.refundableAmountKobo)} (
-                    {preview.refundPercent}%)
-                  </Text>
-                  <Text style={st.body}>
-                    Estimated retained amount:{" "}
-                    {money(preview.retainedAmountKobo)}
+                    Estimated retained amount: {money(preview.retainedAmountKobo)}
                   </Text>
                   <Text style={st.date}>
-                    Policy {preview.policyVersion} · {preview.daysBeforeEvent}{" "}
-                    days before event
+                    Policy {preview.policyVersion} · {preview.daysBeforeEvent} days before event
                   </Text>
                 </View>
               )}
               <PrimaryButton
                 disabled={busy}
-                onPress={() =>
-                  run(async () => setPreview(await cancellationPreview(id)))
-                }
+                onPress={() => run(async () => setPreview(await cancellationPreview(id)))}
               >
                 Calculate preview
               </PrimaryButton>
@@ -218,31 +208,24 @@ export default function ManageBooking() {
           )}
         {safety.cancellation && (
           <Card title="Cancellation status" icon="document-text-outline">
-            <Text style={st.state}>{safety.cancellation.status}</Text>
+            <Text style={st.state}>{cancellationLabel(safety.cancellation.status)}</Text>
             <Text style={st.body}>
-              Estimated refund:{" "}
-              {money(safety.cancellation.refundable_amount_kobo)}
+              Estimated refund: {money(safety.cancellation.refundable_amount_kobo)}
             </Text>
             {safety.refunds[0] && (
-              <Text style={st.body}>
-                Refund: {safety.refunds[0].status.replaceAll("_", " ")}
-              </Text>
+              <Text style={st.body}>Refund: {refundLabel(safety.refunds[0].status)}</Text>
             )}
           </Card>
         )}
-        {["confirmed", "service_due", "fulfilled", "disputed"].includes(
-          booking.status,
-        ) && (
+        {["confirmed", "service_due", "fulfilled", "disputed"].includes(booking.status) && (
           <Card title="Dispute and evidence" icon="shield-outline">
             {dispute ? (
               <>
-                <Text style={st.state}>{dispute.status}</Text>
+                <Text style={st.state}>{disputeLabel(dispute.status)}</Text>
                 <Text style={st.body}>{dispute.reason}</Text>
                 <PrimaryButton
                   disabled={busy}
-                  onPress={() =>
-                    run(() => uploadDisputeEvidence(dispute.id, user!.id))
-                  }
+                  onPress={() => run(() => uploadDisputeEvidence(dispute.id, user!.id))}
                 >
                   Attach evidence
                 </PrimaryButton>
@@ -272,10 +255,7 @@ export default function ManageBooking() {
             <Text style={st.muted}>
               Confirm only after the vendor has delivered the booked service.
             </Text>
-            <PrimaryButton
-              disabled={busy}
-              onPress={() => run(() => confirmFulfillment(id))}
-            >
+            <PrimaryButton disabled={busy} onPress={() => run(() => confirmFulfillment(id))}>
               The service was delivered
             </PrimaryButton>
           </Card>
@@ -329,15 +309,7 @@ export default function ManageBooking() {
     </SafeAreaView>
   );
 }
-function Card({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: any;
-  children: React.ReactNode;
-}) {
+function Card({ title, icon, children }: { title: string; icon: any; children: React.ReactNode }) {
   return (
     <View style={st.card}>
       <View style={st.cardHead}>
@@ -385,7 +357,7 @@ const st = StyleSheet.create({
   date: { color: colors.muted, fontSize: 10, marginTop: 5 },
   bubble: { padding: 12, borderRadius: 15, maxWidth: "88%" },
   mine: { backgroundColor: colors.rose, alignSelf: "flex-end" },
-  theirs: { backgroundColor: "#F2EFEF", alignSelf: "flex-start" },
+  theirs: { backgroundColor: colors.rose, alignSelf: "flex-start" },
   input: {
     minHeight: 52,
     borderWidth: 1,
@@ -410,8 +382,8 @@ const st = StyleSheet.create({
   state: { fontWeight: "900", color: colors.plum, textTransform: "capitalize" },
   stars: { flexDirection: "row", gap: 7 },
   error: {
-    color: "#9B1C31",
-    backgroundColor: "#FDECEF",
+    color: colors.error,
+    backgroundColor: colors.errorSurface,
     padding: 12,
     borderRadius: 12,
   },

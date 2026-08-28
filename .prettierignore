@@ -9,5 +9,6 @@ docs/*.pdf
 docs/*.png
 package-lock.json
 packages/database/src/database.generated.ts
+packages/tokens/src/tokens.css
 supabase/migrations/*.sql
 supabase/seed.sql

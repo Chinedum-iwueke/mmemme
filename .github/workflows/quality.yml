@@ -38,6 +38,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run tokens:check
+      - run: npm run native-ui:check
       - run: npm run sql:lint
       - run: npm run secrets:check
       - run: npm run boundaries:check

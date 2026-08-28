@@ -33,9 +33,11 @@
     "secrets:check": "node scripts/check-secrets.mjs",
     "boundaries:check": "node scripts/check-boundaries.mjs",
     "production:safety": "node scripts/check-production-safety.mjs",
+    "tokens:check": "npm run check -w @mmemme/tokens",
+    "native-ui:check": "node scripts/check-native-ui.mjs",
     "expo:doctor": "npx expo-doctor@latest apps/mobile",
     "audit": "npm audit --audit-level=high",
-    "quality": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run sql:lint && npm run secrets:check && npm run boundaries:check && npm run production:safety && npm run build"
+    "quality": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run tokens:check && npm run native-ui:check && npm run sql:lint && npm run secrets:check && npm run boundaries:check && npm run production:safety && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

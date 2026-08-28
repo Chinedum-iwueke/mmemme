@@ -1,0 +1,213 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`customer presentation language > matches the reviewed contract 1`] = `
+{
+  "booking": {
+    "accepted_awaiting_payment": {
+      "description": "Your booking is not confirmed until payment succeeds.",
+      "label": "Waiting for payment",
+      "tone": "warning",
+    },
+    "cancelled": {
+      "description": "Review the cancellation record for any refund details.",
+      "label": "Booking cancelled",
+      "tone": "neutral",
+    },
+    "completed": {
+      "description": "You can now leave a verified review.",
+      "label": "Booking completed",
+      "tone": "success",
+    },
+    "confirmed": {
+      "description": "Your receipt and next steps are ready.",
+      "label": "Booking confirmed",
+      "tone": "success",
+    },
+    "declined": {
+      "description": "This vendor could not accept the request. No payment was taken.",
+      "label": "Request declined",
+      "tone": "error",
+    },
+    "disputed": {
+      "description": "MMEMME is reviewing the issue with you.",
+      "label": "Support case open",
+      "tone": "warning",
+    },
+    "expired": {
+      "description": "Ask MMEMME for updated availability and terms.",
+      "label": "Quote expired",
+      "tone": "warning",
+    },
+    "fulfilled": {
+      "description": "Confirm fulfillment when you are ready.",
+      "label": "Service delivered",
+      "tone": "success",
+    },
+    "operations_review": {
+      "description": "We have not confirmed availability yet.",
+      "label": "Checking with the vendor",
+      "tone": "info",
+    },
+    "quote_ready": {
+      "description": "Review the complete terms before it expires.",
+      "label": "Quote ready",
+      "tone": "success",
+    },
+    "requested": {
+      "description": "MMEMME is reviewing your details.",
+      "label": "Request sent",
+      "tone": "info",
+    },
+    "service_due": {
+      "description": "Review the confirmed details and contact support if anything has changed.",
+      "label": "Event approaching",
+      "tone": "info",
+    },
+  },
+  "cancellation": {
+    "approved": {
+      "description": "Review the confirmed refund or retained amount.",
+      "label": "Cancellation approved",
+      "tone": "success",
+    },
+    "rejected": {
+      "description": "Open the record for the reason and support options.",
+      "label": "Cancellation not approved",
+      "tone": "error",
+    },
+    "requested": {
+      "description": "MMEMME is reviewing the applicable terms.",
+      "label": "Cancellation requested",
+      "tone": "warning",
+    },
+  },
+  "dispute": {
+    "closed": {
+      "description": "This support case is complete.",
+      "label": "Case closed",
+      "tone": "neutral",
+    },
+    "investigating": {
+      "description": "We are reviewing the booking and evidence.",
+      "label": "Review in progress",
+      "tone": "info",
+    },
+    "open": {
+      "description": "MMEMME has received the issue.",
+      "label": "Support case open",
+      "tone": "warning",
+    },
+    "resolved_customer": {
+      "description": "Open the resolution to review the customer outcome.",
+      "label": "Resolved for customer",
+      "tone": "success",
+    },
+    "resolved_vendor": {
+      "description": "Open the resolution to review the vendor outcome.",
+      "label": "Resolved for vendor",
+      "tone": "neutral",
+    },
+  },
+  "payment": {
+    "charged_back": {
+      "description": "The payment provider reversed this transaction. Contact MMEMME support.",
+      "label": "Payment reversed",
+      "tone": "error",
+    },
+    "failed": {
+      "description": "No booking confirmation was created from this attempt.",
+      "label": "Payment not completed",
+      "tone": "error",
+    },
+    "initiated": {
+      "description": "Complete checkout with Paystack.",
+      "label": "Payment started",
+      "tone": "info",
+    },
+    "partially_refunded": {
+      "description": "Part of this payment has been returned.",
+      "label": "Partially refunded",
+      "tone": "info",
+    },
+    "pending": {
+      "description": "We are waiting for verified confirmation. Do not pay again.",
+      "label": "Confirming payment",
+      "tone": "warning",
+    },
+    "refunded": {
+      "description": "The approved amount has been returned through the payment provider.",
+      "label": "Refunded",
+      "tone": "success",
+    },
+    "succeeded": {
+      "description": "Your verified receipt is available.",
+      "label": "Payment received",
+      "tone": "success",
+    },
+  },
+  "payout": {
+    "eligible": {
+      "description": "Required fulfillment checks have passed.",
+      "label": "Payout eligible",
+      "tone": "info",
+    },
+    "failed": {
+      "description": "Operations must review and retry safely.",
+      "label": "Payout failed",
+      "tone": "error",
+    },
+    "held": {
+      "description": "Funds are not yet eligible for vendor payout.",
+      "label": "Payout held",
+      "tone": "neutral",
+    },
+    "paid": {
+      "description": "The payout was recorded as paid.",
+      "label": "Vendor paid",
+      "tone": "success",
+    },
+    "processing": {
+      "description": "The provider is processing this payout.",
+      "label": "Payout processing",
+      "tone": "info",
+    },
+    "reversed": {
+      "description": "The provider reversed this payout.",
+      "label": "Payout reversed",
+      "tone": "error",
+    },
+  },
+  "refund": {
+    "approved": {
+      "description": "MMEMME will submit the approved amount to the provider.",
+      "label": "Refund approved",
+      "tone": "info",
+    },
+    "awaiting_first_approval": {
+      "description": "An authorized operator must review this refund.",
+      "label": "Refund awaiting review",
+      "tone": "warning",
+    },
+    "awaiting_second_approval": {
+      "description": "A second authorized operator must independently approve it.",
+      "label": "Refund awaiting final review",
+      "tone": "warning",
+    },
+    "failed": {
+      "description": "MMEMME operations is reviewing the failed attempt.",
+      "label": "Refund needs attention",
+      "tone": "error",
+    },
+    "processing": {
+      "description": "The payment provider is processing the refund.",
+      "label": "Refund processing",
+      "tone": "info",
+    },
+    "succeeded": {
+      "description": "The provider confirmed the refund.",
+      "label": "Refund completed",
+      "tone": "success",
+    },
+  },
+}
+`;
