@@ -3,9 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@mmemme/database";
 import { AppState, Platform } from "react-native";
 import { secureStorage } from "./secure-storage";
-import {parseEnvironment,PublicMobileEnvironment} from "@mmemme/config";
+import { parseEnvironment, PublicMobileEnvironment } from "@mmemme/config";
 
-export const mobileEnvironment=parseEnvironment(PublicMobileEnvironment,process.env,"mobile public");
+export const mobileEnvironment = parseEnvironment(
+  PublicMobileEnvironment,
+  process.env,
+  "mobile public",
+);
 export const isSupabaseConfigured = true;
 
 export const supabase = createClient<Database>(

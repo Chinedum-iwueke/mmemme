@@ -1,8 +1,11 @@
 import * as Crypto from "expo-crypto";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -18,7 +21,8 @@ import { getVendor, type Vendor } from "../../src/lib/vendors";
 
 export default function RequestScreen() {
   const { vendorId } = useLocalSearchParams<{ vendorId: string }>();
-  const clientRequestId = useRef(Crypto.randomUUID());
+  const submitting = useRef(false);
+  const [clientRequestId, setClientRequestId] = useState("");
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [brief, setBrief] = useState<{
     id: string;
@@ -39,12 +43,19 @@ export default function RequestScreen() {
         setBrief(b);
         setGuests(String(b?.guest_count ?? ""));
         setPackageId(v?.packages[0]?.id ?? null);
+        const key = `mmemme.request.${vendorId}.${b?.id ?? "brief"}`;
+        AsyncStorage.getItem(key).then(async (saved) => {
+          const value = saved ?? Crypto.randomUUID();
+          if (!saved) await AsyncStorage.setItem(key, value);
+          setClientRequestId(value);
+        });
       })
       .catch(() => setError("We could not prepare this request."))
       .finally(() => setBusy(false));
   }, [vendorId]);
   const submit = async () => {
-    if (!brief || busy) return;
+    if (!brief || busy || submitting.current || !clientRequestId) return;
+    submitting.current = true;
     setBusy(true);
     setError("");
     try {
@@ -54,7 +65,7 @@ export default function RequestScreen() {
         briefId: brief.id,
         requirements,
         guestCount: Number(guests),
-        clientRequestId: clientRequestId.current,
+        clientRequestId,
       });
       router.replace({
         pathname: "/booking/[id]",
@@ -63,6 +74,7 @@ export default function RequestScreen() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "We could not submit your request.");
       setBusy(false);
+      submitting.current = false;
     }
   };
   if (busy && !vendor)
@@ -76,92 +88,104 @@ export default function RequestScreen() {
     );
   return (
     <SafeAreaView style={s.safe}>
-      <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={() => router.back()}
-          style={s.back}
-        >
-          <Ionicons name="arrow-back" size={22} color={colors.ink} />
-        </Pressable>
-        <Eyebrow>Booking request</Eyebrow>
-        <Text style={s.title}>{vendor?.name ?? "Request a vendor"}</Text>
-        {!brief ? (
-          <View style={s.notice}>
-            <Text style={s.noticeTitle}>Create your wedding brief first</Text>
-            <Text style={s.muted}>
-              Your date and guest plan are needed before operations can confirm availability.
-            </Text>
-            <PrimaryButton onPress={() => router.replace("/brief")}>
-              Create wedding brief
-            </PrimaryButton>
-          </View>
-        ) : (
-          <>
-            <View style={s.summary}>
-              <Text style={s.summaryTitle}>{brief.wedding_date}</Text>
+      <KeyboardAvoidingView style={s.safe} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            onPress={() => router.back()}
+            style={s.back}
+          >
+            <Ionicons name="arrow-back" size={22} color={colors.ink} />
+          </Pressable>
+          <Eyebrow>Booking request</Eyebrow>
+          <Text style={s.title}>{vendor?.name ?? "Request a vendor"}</Text>
+          {!brief ? (
+            <View style={s.notice}>
+              <Text style={s.noticeTitle}>Create your wedding brief first</Text>
               <Text style={s.muted}>
-                {brief.area} · {brief.guest_count} planned guests
+                Your date and guest plan are needed before operations can confirm availability.
               </Text>
+              <PrimaryButton onPress={() => router.replace("/brief")}>
+                Create wedding brief
+              </PrimaryButton>
             </View>
-            <Text style={s.label}>Package</Text>
-            {vendor?.packages.map((p) => (
+          ) : (
+            <>
+              <View style={s.summary}>
+                <Text style={s.summaryTitle}>{brief.wedding_date}</Text>
+                <Text style={s.muted}>
+                  {brief.area} · {brief.guest_count} planned guests
+                </Text>
+              </View>
+              <Text style={s.label}>Package</Text>
+              {vendor?.packages.map((p) => (
+                <Pressable
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: packageId === p.id }}
+                  onPress={() => setPackageId(p.id)}
+                  key={p.id}
+                  style={[s.option, packageId === p.id && s.selected]}
+                >
+                  <Text style={s.optionTitle}>{p.name}</Text>
+                  <Text style={s.muted}>{p.description}</Text>
+                </Pressable>
+              ))}
+              <Text style={s.label}>Expected guest count</Text>
+              <TextInput
+                accessibilityLabel="Expected guest count"
+                value={guests}
+                onChangeText={(v) => setGuests(v.replace(/\D/g, ""))}
+                keyboardType="number-pad"
+                style={s.input}
+              />
+              <Text style={s.label}>Requirements and questions</Text>
+              <TextInput
+                accessibilityLabel="Requirements and questions"
+                multiline
+                value={requirements}
+                onChangeText={setRequirements}
+                placeholder="Tell us about service style, dietary needs, access times or must-haves…"
+                placeholderTextColor={colors.placeholder}
+                style={[s.input, s.textarea]}
+              />
               <Pressable
-                accessibilityRole="radio"
-                accessibilityState={{ selected: packageId === p.id }}
-                onPress={() => setPackageId(p.id)}
-                key={p.id}
-                style={[s.option, packageId === p.id && s.selected]}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: ack }}
+                onPress={() => setAck(!ack)}
+                style={s.ack}
               >
-                <Text style={s.optionTitle}>{p.name}</Text>
-                <Text style={s.muted}>{p.description}</Text>
+                <Ionicons
+                  name={ack ? "checkbox" : "square-outline"}
+                  size={25}
+                  color={colors.plum}
+                />
+                <Text style={s.ackText}>
+                  I understand this is a request. The vendor’s availability is not confirmed until
+                  MMEMME issues a quote.
+                </Text>
               </Pressable>
-            ))}
-            <Text style={s.label}>Expected guest count</Text>
-            <TextInput
-              accessibilityLabel="Expected guest count"
-              value={guests}
-              onChangeText={(v) => setGuests(v.replace(/\D/g, ""))}
-              keyboardType="number-pad"
-              style={s.input}
-            />
-            <Text style={s.label}>Requirements and questions</Text>
-            <TextInput
-              accessibilityLabel="Requirements and questions"
-              multiline
-              value={requirements}
-              onChangeText={setRequirements}
-              placeholder="Tell us about service style, dietary needs, access times or must-haves…"
-              placeholderTextColor={colors.placeholder}
-              style={[s.input, s.textarea]}
-            />
-            <Pressable
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: ack }}
-              onPress={() => setAck(!ack)}
-              style={s.ack}
-            >
-              <Ionicons name={ack ? "checkbox" : "square-outline"} size={25} color={colors.plum} />
-              <Text style={s.ackText}>
-                I understand this is a request. The vendor’s availability is not confirmed until
-                MMEMME issues a quote.
-              </Text>
-            </Pressable>
-            {!!error && (
-              <Text accessibilityRole="alert" style={s.error}>
-                {error}
-              </Text>
-            )}
-            <PrimaryButton
-              disabled={busy || !ack || requirements.trim().length < 20 || Number(guests) < 10}
-              onPress={submit}
-            >
-              {busy ? "Submitting once…" : "Submit booking request"}
-            </PrimaryButton>
-          </>
-        )}
-      </ScrollView>
+              {!!error && (
+                <Text accessibilityRole="alert" style={s.error}>
+                  {error}
+                </Text>
+              )}
+              <PrimaryButton
+                disabled={
+                  busy ||
+                  !clientRequestId ||
+                  !ack ||
+                  requirements.trim().length < 20 ||
+                  Number(guests) < 10
+                }
+                onPress={submit}
+              >
+                {busy ? "Submitting once…" : "Submit booking request"}
+              </PrimaryButton>
+            </>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

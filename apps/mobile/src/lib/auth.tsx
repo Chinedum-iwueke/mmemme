@@ -4,8 +4,13 @@ import { isSupabaseConfigured, supabase } from "./supabase";
 import type { ProfileRow } from "./database.types";
 
 type AuthContextValue = {
-  session: Session | null; user: User | null; profile: ProfileRow | null;
-  loading: boolean; configured: boolean; refreshProfile: () => Promise<void>; signOut: () => Promise<void>;
+  session: Session | null;
+  user: User | null;
+  profile: ProfileRow | null;
+  loading: boolean;
+  configured: boolean;
+  refreshProfile: () => Promise<void>;
+  signOut: () => Promise<void>;
 };
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -16,27 +21,55 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const refreshProfile = async () => {
     const user = (await supabase.auth.getUser()).data.user;
-    if (!user) { setProfile(null); return; }
-    const { data } = await supabase.from("profiles").select("id,full_name,phone,email,is_admin").eq("id", user.id).maybeSingle();
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+    const { data } = await supabase
+      .from("profiles")
+      .select("id,full_name,phone,email,is_admin")
+      .eq("id", user.id)
+      .maybeSingle();
     setProfile(data as ProfileRow | null);
   };
 
   useEffect(() => {
-    if (!isSupabaseConfigured) { setLoading(false); return; }
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
     supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session); if (data.session) await refreshProfile(); setLoading(false);
+      setSession(data.session);
+      if (data.session) await refreshProfile();
+      setLoading(false);
     });
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next); if (next) setTimeout(refreshProfile, 0); else setProfile(null);
+      setSession(next);
+      if (next) setTimeout(refreshProfile, 0);
+      else setProfile(null);
     });
     return () => subscription.subscription.unsubscribe();
   }, []);
 
-  const value = useMemo<AuthContextValue>(() => ({
-    session, user: session?.user ?? null, profile, loading, configured: isSupabaseConfigured,
-    refreshProfile,
-    signOut: async () => { await supabase.auth.signOut(); },
-  }), [session, profile, loading]);
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      session,
+      user: session?.user ?? null,
+      profile,
+      loading,
+      configured: isSupabaseConfigured,
+      refreshProfile,
+      signOut: async () => {
+        if (session?.user)
+          await supabase
+            .from("push_tokens")
+            .update({ active: false, updated_at: new Date().toISOString() })
+            .eq("customer_id", session.user.id);
+        await supabase.auth.signOut();
+      },
+    }),
+    [session, profile, loading],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

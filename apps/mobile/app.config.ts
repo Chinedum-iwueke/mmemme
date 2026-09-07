@@ -9,19 +9,31 @@ export default {
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "light",
+  runtimeVersion: { policy: "appVersion" },
+  updates: { checkAutomatically: "ON_LOAD", fallbackToCacheTimeout: 0 },
   plugins: [
     "expo-router",
     "expo-secure-store",
     "expo-web-browser",
     "@sentry/react-native",
     "expo-notifications",
+    "expo-updates",
   ],
   ios: {
     supportsTablet: true,
     bundleIdentifier: "ng.mmemme.app",
+    associatedDomains: ["applinks:mmemme.com"],
   },
   android: {
     package: "ng.mmemme.app",
+    intentFilters: [
+      {
+        action: "VIEW",
+        autoVerify: true,
+        data: [{ scheme: "https", host: "mmemme.com", pathPrefix: "/booking" }],
+        category: ["BROWSABLE", "DEFAULT"],
+      },
+    ],
     adaptiveIcon: {
       // Mirrors tokens.neutral[25]; Expo config cannot import the JSON-backed token package.
       backgroundColor: "#fbfcf8",

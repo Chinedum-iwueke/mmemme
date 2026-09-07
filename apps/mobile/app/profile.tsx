@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { colors, Eyebrow, PrimaryButton } from "../src/components/ui";
+import { MobileShell } from "../src/components/mobile-shell";
 import { useAuth } from "../src/lib/auth";
 
 export default function ProfileScreen() {
@@ -14,57 +15,52 @@ export default function ProfileScreen() {
     return null;
   }
   return (
-    <SafeAreaView style={styles.safe}>
-      <View style={styles.content}>
-        <View style={styles.top}>
+    <MobileShell>
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.content}>
+          <View style={styles.top}>
+            <View style={{ width: 44 }} />
+            <Text style={styles.logo}>mmemme</Text>
+            <View style={{ width: 44 }} />
+          </View>
+          <Eyebrow>Your account</Eyebrow>
+          <Text style={styles.title}>{profile?.full_name ?? "MMEMME customer"}</Text>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Ionicons name="call-outline" size={21} color={colors.plum} />
+              <View>
+                <Text style={styles.label}>Mobile</Text>
+                <Text style={styles.value}>{user.phone}</Text>
+              </View>
+            </View>
+            <View style={styles.row}>
+              <Ionicons name="mail-outline" size={21} color={colors.plum} />
+              <View>
+                <Text style={styles.label}>Receipt email</Text>
+                <Text style={styles.value}>{profile?.email ?? "Not set"}</Text>
+              </View>
+            </View>
+          </View>
+          <PrimaryButton onPress={() => router.push("/bookings")}>View my bookings</PrimaryButton>
+          <PrimaryButton
+            style={{ marginTop: 10, backgroundColor: colors.coral }}
+            onPress={() => router.push("/brief")}
+          >
+            Create or edit wedding brief
+          </PrimaryButton>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Go back"
-            onPress={() => router.back()}
-            style={styles.back}
+            onPress={async () => {
+              await signOut();
+              router.replace("/");
+            }}
+            style={styles.signout}
           >
-            <Ionicons name="arrow-back" size={22} color={colors.ink} />
+            <Text style={styles.signoutText}>Sign out</Text>
           </Pressable>
-          <Text style={styles.logo}>mmemme</Text>
-          <View style={{ width: 44 }} />
         </View>
-        <Eyebrow>Your account</Eyebrow>
-        <Text style={styles.title}>{profile?.full_name ?? "MMEMME customer"}</Text>
-        <View style={styles.card}>
-          <View style={styles.row}>
-            <Ionicons name="call-outline" size={21} color={colors.plum} />
-            <View>
-              <Text style={styles.label}>Mobile</Text>
-              <Text style={styles.value}>{user.phone}</Text>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <Ionicons name="mail-outline" size={21} color={colors.plum} />
-            <View>
-              <Text style={styles.label}>Receipt email</Text>
-              <Text style={styles.value}>{profile?.email ?? "Not set"}</Text>
-            </View>
-          </View>
-        </View>
-        <PrimaryButton onPress={() => router.push("/bookings")}>View my bookings</PrimaryButton>
-        <PrimaryButton
-          style={{ marginTop: 10, backgroundColor: colors.coral }}
-          onPress={() => router.push("/brief")}
-        >
-          Create or edit wedding brief
-        </PrimaryButton>
-        <Pressable
-          accessibilityRole="button"
-          onPress={async () => {
-            await signOut();
-            router.replace("/");
-          }}
-          style={styles.signout}
-        >
-          <Text style={styles.signoutText}>Sign out</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </MobileShell>
   );
 }
 const styles = StyleSheet.create({

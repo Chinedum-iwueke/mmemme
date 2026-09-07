@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   Pressable,
   SafeAreaView,
@@ -14,6 +15,7 @@ import {
 import { colors, Eyebrow, PrimaryButton, TrustBadge } from "../../src/components/ui";
 import { useAuth } from "../../src/lib/auth";
 import { getVendor, type Vendor } from "../../src/lib/vendors";
+import { listShortlist, toggleShortlist } from "../../src/lib/shortlist";
 
 const naira = (kobo: number) => `₦${Math.round(kobo / 100).toLocaleString("en-NG")}`;
 export default function VendorDetail() {
@@ -22,6 +24,7 @@ export default function VendorDetail() {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
   useEffect(() => {
     getVendor(id)
       .then((data) => {
@@ -31,6 +34,9 @@ export default function VendorDetail() {
       .catch(() => setError("We could not load this vendor. Check your connection and try again."))
       .finally(() => setLoading(false));
   }, [id]);
+  useEffect(() => {
+    listShortlist(user?.id).then((items) => setSaved(items.includes(id)));
+  }, [id, user?.id]);
   useEffect(() => {
     if (request === "1" && user && vendor)
       router.replace({ pathname: "/request/[vendorId]", params: { vendorId: id } });
@@ -84,10 +90,22 @@ export default function VendorDetail() {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
         {vendor.heroUrl ? (
-          <Image
-            accessibilityLabel={`${vendor.name} portfolio image`}
-            source={{ uri: vendor.heroUrl }}
-            style={styles.hero}
+          <FlatList
+            data={[vendor.heroUrl]}
+            horizontal
+            pagingEnabled
+            initialNumToRender={1}
+            maxToRenderPerBatch={2}
+            windowSize={3}
+            keyExtractor={(item) => item}
+            accessibilityLabel={`${vendor.name} portfolio gallery`}
+            renderItem={({ item }) => (
+              <Image
+                accessibilityLabel={`${vendor.name} portfolio image`}
+                source={{ uri: item }}
+                style={styles.hero}
+              />
+            )}
           />
         ) : (
           <View style={[styles.hero, { backgroundColor: colors.rose }]}>
@@ -101,6 +119,16 @@ export default function VendorDetail() {
           style={styles.back}
         >
           <Ionicons name="arrow-back" size={22} color={colors.ink} />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${saved ? "Remove" : "Save"} ${vendor.name} ${saved ? "from" : "to"} shortlist`}
+          accessibilityState={{ selected: saved }}
+          hitSlop={8}
+          onPress={async () => setSaved(await toggleShortlist(vendor.id, user?.id))}
+          style={styles.save}
+        >
+          <Ionicons name={saved ? "heart" : "heart-outline"} size={22} color={colors.plum} />
         </Pressable>
         <View style={styles.body}>
           <TrustBadge />
@@ -172,6 +200,17 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     backgroundColor: "rgba(255,255,255,.9)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  save: {
+    position: "absolute",
+    right: 18,
+    top: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,.94)",
     alignItems: "center",
     justifyContent: "center",
   },

@@ -5,6 +5,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  AppState,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -33,6 +34,7 @@ export default function BookingScreen() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const load = useCallback(async () => {
     try {
       setBooking(await getBooking(id));
@@ -51,7 +53,12 @@ export default function BookingScreen() {
     const timer = setInterval(load, 4000);
     return () => clearInterval(timer);
   }, [booking?.status, load]);
+  useEffect(() => {
+    const listener = AppState.addEventListener("change", (state) => state === "active" && load());
+    return () => listener.remove();
+  }, [load]);
   const quote = booking?.quotes[0];
+  const quoteExpired = quote ? new Date(quote.expires_at) <= new Date() : false;
   const accept = async () => {
     if (!quote || busy) return;
     setBusy(true);
@@ -165,12 +172,36 @@ export default function BookingScreen() {
               timestamp.
             </Text>
             {booking.status === "quote_ready" && (
-              <PrimaryButton
-                disabled={busy || new Date(quote.expires_at) <= new Date()}
-                onPress={accept}
-              >
-                {busy ? "Recording acceptance…" : "Accept quote and terms"}
-              </PrimaryButton>
+              <>
+                {quoteExpired ? (
+                  <View accessibilityRole="alert" style={s.expired}>
+                    <Ionicons name="time-outline" size={21} color={colors.warning} />
+                    <Text style={s.expiredText}>
+                      This quote expired. MMEMME will issue a fresh quote before you can pay.
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: termsAccepted }}
+                    onPress={() => setTermsAccepted((value) => !value)}
+                    style={s.termsCheck}
+                  >
+                    <Ionicons
+                      name={termsAccepted ? "checkbox" : "square-outline"}
+                      size={25}
+                      color={colors.plum}
+                    />
+                    <Text style={s.termsCheckText}>
+                      I reviewed the price, inclusions, exclusions, payment schedule and
+                      cancellation consequences.
+                    </Text>
+                  </Pressable>
+                )}
+                <PrimaryButton disabled={busy || quoteExpired || !termsAccepted} onPress={accept}>
+                  {busy ? "Recording acceptance…" : "Accept quote and terms"}
+                </PrimaryButton>
+              </>
             )}
             {booking.status === "accepted_awaiting_payment" && (
               <>
@@ -335,6 +366,23 @@ const s = StyleSheet.create({
   total: { fontSize: 20, fontWeight: "900", color: colors.plum },
   deposit: { fontSize: 17, fontWeight: "900", color: colors.ink },
   expiry: { color: colors.gold, fontWeight: "800" },
+  expired: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 9,
+    backgroundColor: colors.warningSurface,
+    borderRadius: 14,
+    padding: 12,
+  },
+  expiredText: { flex: 1, color: colors.warning, lineHeight: 20, fontWeight: "700" },
+  termsCheck: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    paddingVertical: 8,
+  },
+  termsCheckText: { flex: 1, color: colors.ink, lineHeight: 21 },
   sectionTitle: {
     fontSize: 13,
     fontWeight: "900",

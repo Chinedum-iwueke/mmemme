@@ -5,10 +5,7 @@ Sentry.init({
   sendDefaultPii: false,
   tracesSampleRate: 0.1,
 });
-export const captureError = (
-  error: unknown,
-  context: Record<string, unknown> = {},
-) => {
+export const captureError = (error: unknown, context: Record<string, unknown> = {}) => {
   console.error(
     JSON.stringify({
       level: "error",

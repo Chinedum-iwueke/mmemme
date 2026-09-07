@@ -473,42 +473,42 @@ not a secondary or reduced booking experience.
 
 Goal: replace prototype presentation with a polished, store-ready native app.
 
-- [ ] **M12-01 — Native navigation and app shell**
+- [x] **M12-01 — Native navigation and app shell**
       Dependencies: M9-04, M9-05.
       Implement Discover, Brief/Shortlist, Bookings and Profile navigation, deep links,
       safe-area handling, auth return intent and notification routing.
       Acceptance: Android back, iOS gestures, cold-start deep links and restored
       sessions behave predictably.
 
-- [ ] **M12-02 — Discovery and vendor-profile redesign**
+- [x] **M12-02 — Discovery and vendor-profile redesign**
       Dependencies: M12-01, M10-04.
       Build virtualized results, filter sheet, image gallery, package comparison and
       prominent verification disclosures using shared tokens and content contracts.
       Acceptance: smooth on representative low-end Android, no unbounded image memory
       usage and complete screen-reader order.
 
-- [ ] **M12-03 — Brief, shortlist and request redesign**
+- [x] **M12-03 — Brief, shortlist and request redesign**
       Dependencies: M12-02.
       Add focused steps, progress, inline validation, draft recovery, package/date
       review and idempotent request submission.
       Acceptance: keyboard never covers the active input; app termination preserves
       drafts; repeat taps create one request.
 
-- [ ] **M12-04 — Quote, checkout and confirmation redesign**
+- [x] **M12-04 — Quote, checkout and confirmation redesign**
       Dependencies: M12-03, M15-02.
       Present exact money, inclusions, exclusions, expiry and cancellation impact;
       implement hosted checkout, confirming state, recovery and receipt.
       Acceptance: money is consistently formatted in NGN; customer cannot confuse
       payment return with booking confirmation.
 
-- [ ] **M12-05 — Booking management and safety redesign**
+- [x] **M12-05 — Booking management and safety redesign**
       Dependencies: M12-04, M15-03.
       Polish timeline, support, reminders, cancellation, refund, dispute evidence,
       fulfillment and verified reviews.
       Acceptance: all exception states remain usable with large text, screen reader
       and intermittent connectivity.
 
-- [ ] **M12-06 — Native lifecycle and notifications**
+- [x] **M12-06 — Native lifecycle and notifications**
       Dependencies: M12-01, M15-04.
       Handle push permissions contextually, token rotation, foreground/background
       behavior, email fallback, app updates and expired sessions.
