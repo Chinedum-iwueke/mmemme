@@ -619,14 +619,14 @@ operator-approved published profile without founders entering application data.
 
 Goal: enable founders to operate the MVP safely without database access.
 
-- [ ] **M14-01 — Admin identity and authorization**
+- [x] **M14-01 — Admin identity and authorization**
       Dependencies: M8-05.
       Enforce MFA, server-side role checks, session timeout, revocation and least
       privilege. Replace local bypasses with environment-bound test helpers.
       Acceptance: non-admin and AAL1 sessions cannot access or mutate admin data;
       authorization tests cover every server action.
 
-- [ ] **M14-02 — Supply and verification workspace**
+- [x] **M14-02 — Supply and verification workspace**
       Dependencies: M9-03, M13-01, M14-01.
       Complete application queues, credential/evidence review, change requests,
       provider result review, inspection recording, approval/rejection/suspension,
@@ -635,28 +635,28 @@ Goal: enable founders to operate the MVP safely without database access.
       SQL; dual-role conflicts are visible; incomplete, expired or suspended
       verification blocks or unpublishes according to approved policy.
 
-- [ ] **M14-03 — Booking operations workspace**
+- [x] **M14-03 — Booking operations workspace**
       Dependencies: M14-01.
       Implement queues, SLA/overdue state, ownership, vendor-contact log, decline,
       quote issue/revision/expiry and customer notification preview.
       Acceptance: request to accepted quote requires no database edit and every
       action records actor, reason and correlation ID.
 
-- [ ] **M14-04 — Support, dispute and cancellation workspace**
+- [x] **M14-04 — Support, dispute and cancellation workspace**
       Dependencies: M14-03, M15-03.
       Build unified booking context, evidence timeline, policy calculation, response
       templates, assignment and resolution.
       Acceptance: operations can rescue every defined state while customers see the
       matching outcome on both clients.
 
-- [ ] **M14-05 — Money and reconciliation workspace**
+- [x] **M14-05 — Money and reconciliation workspace**
       Dependencies: M14-01, M15-02, M15-03.
       Complete ledger, refunds, dual approvals, payout eligibility, provider state,
       chargebacks, reversals, daily reconciliation and exception ownership.
       Acceptance: money-moving actions require two distinct authorized people where
       specified; no successful payment lacks a matched ledger and held payout.
 
-- [ ] **M14-06 — Operational usability**
+- [x] **M14-06 — Operational usability**
       Dependencies: M14-02 through M14-05.
       Add global correlation/reference search, saved queues, pagination, loading and
       error recovery, safe confirmations, activity history and export with redaction.

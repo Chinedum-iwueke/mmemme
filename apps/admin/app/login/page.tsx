@@ -6,7 +6,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
-  const [factor, setFactor] = useState<{ id: string; challenge: string } | null>(null);
+  const [factor, setFactor] = useState<{ id: string; challenge: string; qr?: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -38,7 +38,24 @@ export default function LoginPage() {
       setFactor({ id: verified.id, challenge: data.id });
       return;
     }
-    window.location.assign("/vendors");
+    const { data: enrollment, error: enrollError } = await client.auth.mfa.enroll({
+      factorType: "totp",
+      friendlyName: "MMEMME Operations",
+    });
+    if (enrollError) {
+      setBusy(false);
+      setError("Could not enrol an authenticator.");
+      return;
+    }
+    const { data: challenge, error: challengeError } = await client.auth.mfa.challenge({
+      factorId: enrollment.id,
+    });
+    setBusy(false);
+    if (challengeError) {
+      setError("Could not start MFA enrolment.");
+      return;
+    }
+    setFactor({ id: enrollment.id, challenge: challenge.id, qr: enrollment.totp.qr_code });
   };
   const verify = async (event: FormEvent) => {
     event.preventDefault();
@@ -76,6 +93,15 @@ export default function LoginPage() {
         )}
         {factor ? (
           <form onSubmit={verify} className="form">
+            {factor.qr && (
+              <div className="mfa-enrol">
+                <p>
+                  Scan this one-time QR code with your authenticator app, then enter its six-digit
+                  code.
+                </p>
+                <img src={factor.qr} alt="Authenticator setup QR code" width={192} height={192} />
+              </div>
+            )}
             <label>
               Authenticator code
               <input

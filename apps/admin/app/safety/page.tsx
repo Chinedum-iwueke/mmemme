@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createAdminClient, requireAdmin } from "../../lib/supabase/server";
+import { AssignmentForm } from "../operations/assignment-form";
 import {
   approvePayoutEligibility,
   approveRefund,
@@ -13,7 +14,7 @@ import {
 import "./safety.css";
 const money = (k: number) => `₦${Math.round(k / 100).toLocaleString("en-NG")}`;
 export default async function SafetyPage() {
-  await requireAdmin();
+  await requireAdmin("support");
   const c = createAdminClient();
   const [
     { data: messages },
@@ -23,6 +24,9 @@ export default async function SafetyPage() {
     { data: bookings },
     { data: payouts },
     { data: runs },
+    { data: assignments },
+    { data: admins },
+    { data: evidence },
   ] = await Promise.all([
     c
       .from("support_messages")
@@ -37,7 +41,20 @@ export default async function SafetyPage() {
       .select("id,booking_id,amount_kobo,status")
       .order("created_at", { ascending: false }),
     c.from("reconciliation_runs").select("*").order("run_date", { ascending: false }).limit(7),
+    c.from("operations_assignments").select("entity_type,entity_id,assigned_to,priority,due_at"),
+    c
+      .from("admin_access")
+      .select("user_id,profiles!admin_access_user_id_fkey(full_name)")
+      .eq("active", true)
+      .is("revoked_at", null),
+    c.from("dispute_evidence").select("id,dispute_id,description,media_type,created_at"),
   ]);
+  const context = (bookingId: string) => {
+    const booking = bookings?.find((item) => item.id === bookingId);
+    return booking
+      ? `Booking ${booking.id.slice(0, 8)} · event ${booking.event_date} · ${booking.status} · correlation ${booking.correlation_id}`
+      : "Booking context unavailable";
+  };
   return (
     <div className="ops-page">
       <header className="ops-top">
@@ -55,11 +72,25 @@ export default async function SafetyPage() {
               <small>
                 Booking {m.booking_id.slice(0, 8)} · {new Date(m.created_at).toLocaleString()}
               </small>
+              <p className="case-context">{context(m.booking_id)}</p>
               <form action={replySupport} className="form inline-form">
                 <input type="hidden" name="bookingId" value={m.booking_id} />
                 <label>
                   Reply
-                  <input name="body" required minLength={2} />
+                  <select name="body" required defaultValue="">
+                    <option value="" disabled>
+                      Choose a reviewed response
+                    </option>
+                    <option value="We received your message and are confirming the details with the vendor. We will update this booking timeline when verification is complete.">
+                      Confirming with vendor
+                    </option>
+                    <option value="Your request is with MMEMME operations. No action or additional payment is required from you while we review it.">
+                      Review in progress
+                    </option>
+                    <option value="We have completed our review. Please open your booking timeline for the recorded outcome and next step.">
+                      Outcome recorded
+                    </option>
+                  </select>
                 </label>
                 <button className="secondary">Send</button>
               </form>
@@ -75,12 +106,26 @@ export default async function SafetyPage() {
                 Refund preview {money(x.refundable_amount_kobo)} · retained{" "}
                 {money(x.retained_amount_kobo)}
               </small>
+              <p className="case-context">{context(x.booking_id)}</p>
+              <AssignmentForm
+                entityType="cancellation"
+                entityId={x.id}
+                correlationId={bookings?.find((b) => b.id === x.booking_id)?.correlation_id ?? x.id}
+                admins={(admins ?? []) as never}
+                current={assignments?.find(
+                  (a) => a.entity_type === "cancellation" && a.entity_id === x.id,
+                )}
+              />
               {x.status === "requested" && (
                 <form action={decideCancellation} className="form">
                   <input type="hidden" name="cancellationId" value={x.id} />
                   <label>
                     Decision reason
                     <input name="reason" required minLength={5} />
+                  </label>
+                  <label className="attest">
+                    <input type="checkbox" name="confirmed" value="yes" required /> I verified the
+                    booking, approved policy calculation and customer-visible outcome.
                   </label>
                   <div className="buttons">
                     <button className="primary" name="decision" value="approve">
@@ -102,6 +147,10 @@ export default async function SafetyPage() {
                       <>
                         <input type="hidden" name="refundId" value={r.id} />
                         <input name="reason" required minLength={5} placeholder="Approval reason" />
+                        <label className="attest">
+                          <input type="checkbox" name="confirmed" value="yes" required /> I reviewed
+                          the amount and prior approvals.
+                        </label>
                         <button className="secondary">
                           {r.status === "awaiting_first_approval"
                             ? "First approval"
@@ -112,6 +161,10 @@ export default async function SafetyPage() {
                     {r.status === "approved" && (
                       <>
                         <input type="hidden" name="refundId" value={r.id} />
+                        <label className="attest">
+                          <input type="checkbox" name="confirmed" value="yes" required /> Send this
+                          exact approved amount to the provider.
+                        </label>
                         <button className="primary" formAction={executeRefund}>
                           Send approved refund
                         </button>
@@ -127,6 +180,29 @@ export default async function SafetyPage() {
             <article className="case" key={d.id}>
               <span className="status">{d.status}</span>
               <strong>{d.reason}</strong>
+              <p className="case-context">{context(d.booking_id)}</p>
+              <AssignmentForm
+                entityType="dispute"
+                entityId={d.id}
+                correlationId={bookings?.find((b) => b.id === d.booking_id)?.correlation_id ?? d.id}
+                admins={(admins ?? []) as never}
+                current={assignments?.find(
+                  (a) => a.entity_type === "dispute" && a.entity_id === d.id,
+                )}
+              />
+              {(evidence?.filter((item) => item.dispute_id === d.id).length ?? 0) > 0 && (
+                <details>
+                  <summary>Evidence timeline</summary>
+                  {evidence
+                    ?.filter((item) => item.dispute_id === d.id)
+                    .map((item) => (
+                      <p className="case-context" key={item.id}>
+                        {new Date(item.created_at).toLocaleString("en-NG")} · {item.media_type} ·{" "}
+                        {item.description || "No description"}
+                      </p>
+                    ))}
+                </details>
+              )}
               {["open", "investigating"].includes(d.status) && (
                 <form action={resolveDispute} className="form">
                   <input type="hidden" name="disputeId" value={d.id} />
@@ -141,6 +217,10 @@ export default async function SafetyPage() {
                   <label>
                     Resolution note
                     <input name="reason" minLength={5} required />
+                  </label>
+                  <label className="attest">
+                    <input type="checkbox" name="confirmed" value="yes" required /> This outcome
+                    matches the reviewed evidence and response.
                   </label>
                   <button className="secondary">Record resolution</button>
                 </form>
@@ -191,6 +271,10 @@ export default async function SafetyPage() {
                 <label>
                   Approval reason
                   <input name="reason" minLength={5} required />
+                </label>
+                <label className="attest">
+                  <input type="checkbox" name="confirmed" value="yes" required /> Payment,
+                  fulfillment and vendor details match.
                 </label>
                 <button className="secondary">Approve eligibility</button>
               </form>

@@ -7,8 +7,14 @@ import {
   scheduleInspection,
 } from "./actions";
 import "./applications.css";
-export default async function VendorApplicationsPage() {
-  await requireAdmin();
+import { AssignmentForm } from "../../operations/assignment-form";
+export default async function VendorApplicationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  await requireAdmin("vendors");
+  const { status } = await searchParams;
   const client = createAdminClient();
   const [
     { data: applications },
@@ -17,8 +23,24 @@ export default async function VendorApplicationsPage() {
     { data: checks },
     { data: inspections },
     { data: changes },
+    { data: memberships },
+    { data: profiles },
+    { data: events },
+    { data: assignments },
+    { data: admins },
   ] = await Promise.all([
-    client.from("vendor_applications").select("*").order("updated_at", { ascending: false }),
+    status
+      ? client
+          .from("vendor_applications")
+          .select("*")
+          .eq("status", status as never)
+          .order("updated_at", { ascending: false })
+          .limit(50)
+      : client
+          .from("vendor_applications")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .limit(50),
     client.from("vendor_accounts").select("id,legal_name,category,phone"),
     client
       .from("vendor_evidence")
@@ -30,6 +52,21 @@ export default async function VendorApplicationsPage() {
     client
       .from("vendor_change_requests")
       .select("application_id,fields,request_message,vendor_response,responded_at,resolved_at"),
+    client.from("vendor_memberships").select("account_id,user_id,role"),
+    client.from("profiles").select("id,is_admin,full_name"),
+    client
+      .from("vendor_application_events")
+      .select("application_id,previous_state,new_state,reason,created_at")
+      .order("created_at", { ascending: false }),
+    client
+      .from("operations_assignments")
+      .select("entity_id,assigned_to,priority,due_at")
+      .eq("entity_type", "vendor_application"),
+    client
+      .from("admin_access")
+      .select("user_id,profiles!admin_access_user_id_fkey(full_name)")
+      .eq("active", true)
+      .is("revoked_at", null),
   ]);
   return (
     <div className="ops-page application-page">
@@ -40,6 +77,21 @@ export default async function VendorApplicationsPage() {
         </div>
         <Link href="/vendors">Published supply</Link>
       </header>
+      <form method="get" className="application-filter panel">
+        <label>
+          Status{" "}
+          <select name="status" defaultValue={status ?? ""}>
+            <option value="">All applications</option>
+            <option value="submitted">Submitted</option>
+            <option value="in_review">In review</option>
+            <option value="inspection_pending">Inspection pending</option>
+            <option value="changes_requested">Changes requested</option>
+            <option value="approved">Approved</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </label>
+        <button className="secondary">Apply queue</button>
+      </form>
       <section className="application-summary">
         <div>
           <strong>
@@ -68,6 +120,12 @@ export default async function VendorApplicationsPage() {
           const providerChecks = checks?.filter((item) => item.application_id === app.id) ?? [];
           const inspection = inspections?.find((item) => item.application_id === app.id);
           const requests = changes?.filter((item) => item.application_id === app.id) ?? [];
+          const history = events?.filter((item) => item.application_id === app.id) ?? [];
+          const conflict = memberships?.some(
+            (member) =>
+              member.account_id === app.account_id &&
+              profiles?.some((profile) => profile.id === member.user_id && profile.is_admin),
+          );
           return (
             <article className="application-card" key={app.id}>
               <header>
@@ -79,6 +137,19 @@ export default async function VendorApplicationsPage() {
                 </div>
                 <span className={`status ${app.status}`}>{app.status.replaceAll("_", " ")}</span>
               </header>
+              {conflict && (
+                <p className="conflict-alert" role="alert">
+                  Dual-role conflict: a member of this vendor account also has administrator status.
+                  A different operator must review and approve this application.
+                </p>
+              )}
+              <AssignmentForm
+                entityType="vendor_application"
+                entityId={app.id}
+                correlationId={app.id}
+                admins={(admins ?? []) as never}
+                current={assignments?.find((item) => item.entity_id === app.id)}
+              />
               <div className="application-columns">
                 <section>
                   <h3>Private evidence</h3>
@@ -211,6 +282,15 @@ export default async function VendorApplicationsPage() {
                   </label>
                   <button className="primary">Record authorized decision</button>
                 </form>
+              </details>
+              <details>
+                <summary>Application history ({history.length})</summary>
+                {history.map((event) => (
+                  <p className="application-history" key={`${event.created_at}:${event.new_state}`}>
+                    {new Date(event.created_at).toLocaleString("en-NG")} ·{" "}
+                    {event.previous_state ?? "created"} → {event.new_state} · {event.reason}
+                  </p>
+                ))}
               </details>
             </article>
           );

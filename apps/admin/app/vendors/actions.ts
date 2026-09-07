@@ -29,7 +29,7 @@ const PackageInput = z
     message: "Maximum guests must be at least minimum guests",
   });
 export async function createVendor(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const input = VendorInput.parse(Object.fromEntries(formData));
   const client = createAdminClient();
   const { data, error } = await client
@@ -59,7 +59,7 @@ export async function createVendor(formData: FormData) {
   revalidatePath("/vendors");
 }
 export async function updateVendor(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const vendorId = z.string().uuid().parse(formData.get("vendorId"));
   const input = VendorInput.parse(Object.fromEntries(formData));
   const client = createAdminClient();
@@ -88,7 +88,7 @@ export async function updateVendor(formData: FormData) {
   revalidatePath("/vendors");
 }
 export async function createPackage(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const input = PackageInput.parse(Object.fromEntries(formData));
   const client = createAdminClient();
   const { data, error } = await client
@@ -116,7 +116,7 @@ export async function createPackage(formData: FormData) {
   revalidatePath("/vendors");
 }
 export async function updatePackage(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const packageId = z.string().uuid().parse(formData.get("packageId"));
   const input = PackageInput.parse(Object.fromEntries(formData));
   const client = createAdminClient();
@@ -144,7 +144,7 @@ export async function updatePackage(formData: FormData) {
   revalidatePath("/vendors");
 }
 export async function approveVerification(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const vendorId = z.string().uuid().parse(formData.get("vendorId"));
   if (formData.get("attested") !== "yes") throw new Error("Verification attestation is required");
   const client = createAdminClient();
@@ -171,10 +171,18 @@ export async function approveVerification(formData: FormData) {
     .from("vendors")
     .update({ verification_status: "approved", verification_expires_at: expires.toISOString() })
     .eq("id", vendorId);
+  await client.from("admin_audit_events").insert({
+    admin_id: admin.id,
+    action: "vendor.verification_approved",
+    entity_type: "vendor",
+    entity_id: vendorId,
+    reason: "All seven verification checks attested",
+    correlation_id: crypto.randomUUID(),
+  });
   revalidatePath("/vendors");
 }
 export async function setPublished(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const vendorId = z.string().uuid().parse(formData.get("vendorId"));
   const published = formData.get("published") === "true";
   const { data, error } = await createAdminClient()
@@ -185,5 +193,15 @@ export async function setPublished(formData: FormData) {
     .select("id")
     .maybeSingle();
   if (error || !data) throw new Error("Only approved vendors can be published");
+  await createAdminClient()
+    .from("admin_audit_events")
+    .insert({
+      admin_id: admin.id,
+      action: published ? "vendor.published" : "vendor.unpublished",
+      entity_type: "vendor",
+      entity_id: vendorId,
+      reason: "Publication state changed through operations console",
+      correlation_id: crypto.randomUUID(),
+    });
   revalidatePath("/vendors");
 }

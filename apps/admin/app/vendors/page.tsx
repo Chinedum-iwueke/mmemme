@@ -12,7 +12,7 @@ import "./vendors.css";
 
 const money = (kobo: number | null) => (kobo ? Math.round(kobo / 100) : 0);
 export default async function VendorsPage() {
-  await requireAdmin();
+  await requireAdmin("vendors");
   const client = createAdminClient();
   const [{ data: vendors }, { data: packages }] = await Promise.all([
     client

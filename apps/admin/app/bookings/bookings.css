@@ -2,6 +2,41 @@
   display: grid;
   gap: 16px;
 }
+.queue-controls,
+.filter-form {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.queue-controls {
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.compact-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 12px 0;
+}
+.assignment {
+  margin: 10px 0;
+}
+.history-row,
+.notification-preview {
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 10px;
+  border-left: 3px solid var(--mm-semantic-border-accent);
+}
+.notification-preview {
+  background: var(--mm-semantic-canvas-subtle);
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  padding: 24px;
+}
 .booking-card {
   background: #fff;
   border: 1px solid var(--border);
@@ -77,6 +112,9 @@
   .inline-form,
   .quote-form,
   .decline-form {
+    grid-template-columns: 1fr;
+  }
+  .compact-form {
     grid-template-columns: 1fr;
   }
   .wide {

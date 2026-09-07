@@ -5,7 +5,7 @@ import { createClient, createAdminClient, requireAdmin } from "../../../lib/supa
 
 const uuid = z.string().uuid();
 export async function reviewApplication(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin("vendors");
   const applicationId = uuid.parse(formData.get("applicationId"));
   const status = z
     .enum([
@@ -57,7 +57,7 @@ export async function reviewApplication(formData: FormData) {
   revalidatePath("/vendors/applications");
 }
 export async function scheduleInspection(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const applicationId = uuid.parse(formData.get("applicationId"));
   const scheduledFor = z.coerce.date().parse(formData.get("scheduledFor"));
   const address = z.string().trim().min(5).max(300).parse(formData.get("address"));
@@ -105,7 +105,7 @@ export async function scheduleInspection(formData: FormData) {
   revalidatePath("/vendors/applications");
 }
 export async function completeInspection(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const inspectionId = uuid.parse(formData.get("inspectionId"));
   const applicationId = uuid.parse(formData.get("applicationId"));
   const outcome = z.enum(["passed", "failed", "follow_up"]).parse(formData.get("outcome"));
@@ -129,7 +129,7 @@ export async function completeInspection(formData: FormData) {
   revalidatePath("/vendors/applications");
 }
 export async function reviewProviderCheck(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const checkId = uuid.parse(formData.get("checkId"));
   const applicationId = uuid.parse(formData.get("applicationId"));
   const decision = z.enum(["accept", "reject", "manual_review"]).parse(formData.get("decision"));
@@ -144,5 +144,14 @@ export async function reviewProviderCheck(formData: FormData) {
     .eq("id", checkId)
     .eq("application_id", applicationId);
   if (error) throw new Error("Could not record provider review");
+  await client.from("admin_audit_events").insert({
+    admin_id: admin.id,
+    action: "vendor_provider_check.reviewed",
+    entity_type: "vendor_application",
+    entity_id: applicationId,
+    reason: `Provider result marked ${decision}`,
+    correlation_id: crypto.randomUUID(),
+    metadata: { checkId, decision },
+  });
   revalidatePath("/vendors/applications");
 }

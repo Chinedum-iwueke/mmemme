@@ -4,6 +4,9 @@ import { z } from "zod";
 import { createAdminClient, createClient, requireAdmin } from "../../lib/supabase/server";
 const uuid = z.string().uuid();
 const reason = (v: FormDataEntryValue | null) => z.string().trim().min(5).max(2000).parse(v);
+const requireConfirmation = (form: FormData) => {
+  if (form.get("confirmed") !== "yes") throw new Error("Explicit confirmation is required");
+};
 const audit = async (
   adminId: string,
   action: string,
@@ -21,17 +24,33 @@ const audit = async (
     correlation_id: correlationId,
   });
 export async function replySupport(form: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("support");
   const bookingId = uuid.parse(form.get("bookingId"));
   const body = reason(form.get("body"));
-  const { error } = await createAdminClient()
+  const client = createAdminClient();
+  const { error } = await client
     .from("support_messages")
     .insert({ booking_id: bookingId, author_id: admin.id, body });
   if (error) throw new Error("Could not send reply");
+  const { data: booking } = await client
+    .from("bookings")
+    .select("correlation_id")
+    .eq("id", bookingId)
+    .single();
+  if (booking)
+    await audit(
+      admin.id,
+      "support.replied",
+      "booking",
+      bookingId,
+      "Sent reviewed support response",
+      booking.correlation_id,
+    );
   revalidatePath("/safety");
 }
 export async function decideCancellation(form: FormData) {
-  const admin = await requireAdmin();
+  requireConfirmation(form);
+  const admin = await requireAdmin("support");
   const cancellationId = uuid.parse(form.get("cancellationId"));
   const approve = form.get("decision") === "approve";
   const why = reason(form.get("reason"));
@@ -103,7 +122,8 @@ export async function decideCancellation(form: FormData) {
   revalidatePath("/safety");
 }
 export async function approveRefund(form: FormData) {
-  const admin = await requireAdmin();
+  requireConfirmation(form);
+  const admin = await requireAdmin("money");
   const refundId = uuid.parse(form.get("refundId"));
   const why = reason(form.get("reason"));
   const client = createAdminClient();
@@ -141,7 +161,8 @@ export async function approveRefund(form: FormData) {
 }
 
 export async function executeRefund(form: FormData) {
-  await requireAdmin();
+  requireConfirmation(form);
+  await requireAdmin("money");
   const refundId = uuid.parse(form.get("refundId"));
   const client = await createClient();
   const { data, error } = await client.functions.invoke("process-refund", {
@@ -152,7 +173,8 @@ export async function executeRefund(form: FormData) {
   revalidatePath("/money");
 }
 export async function resolveDispute(form: FormData) {
-  const admin = await requireAdmin();
+  requireConfirmation(form);
+  const admin = await requireAdmin("support");
   const disputeId = uuid.parse(form.get("disputeId"));
   const outcome = z
     .enum(["resolved_customer", "resolved_vendor", "closed"])
@@ -183,7 +205,7 @@ export async function resolveDispute(form: FormData) {
   revalidatePath("/safety");
 }
 export async function transitionFulfillment(form: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("bookings");
   const bookingId = uuid.parse(form.get("bookingId"));
   const next = z.enum(["service_due", "completed"]).parse(form.get("next"));
   const why = reason(form.get("reason"));
@@ -201,7 +223,8 @@ export async function transitionFulfillment(form: FormData) {
   revalidatePath("/safety");
 }
 export async function approvePayoutEligibility(form: FormData) {
-  const admin = await requireAdmin();
+  requireConfirmation(form);
+  const admin = await requireAdmin("money");
   const payoutId = uuid.parse(form.get("payoutId"));
   const why = reason(form.get("reason"));
   const client = createAdminClient();
@@ -254,7 +277,7 @@ export async function approvePayoutEligibility(form: FormData) {
   revalidatePath("/money");
 }
 export async function runReconciliation() {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("money");
   const client = createAdminClient();
   const [{ data: payments }, { data: entries }] = await Promise.all([
     client.from("payments").select("id,amount_kobo,status"),
@@ -271,17 +294,62 @@ export async function runReconciliation() {
         .reduce((n, e) => n + e.amount_kobo, 0)
     );
   });
-  await client.from("reconciliation_runs").upsert(
-    {
-      run_date: new Date().toISOString().slice(0, 10),
-      status: exceptions.length ? "exceptions" : "balanced",
-      payment_count: succeeded.length,
-      gross_kobo: succeeded.reduce((n, p) => n + p.amount_kobo, 0),
-      exception_count: exceptions.length,
-      details: { paymentIds: exceptions.map((e) => e.id) },
-      run_by: admin.id,
-    },
-    { onConflict: "run_date" },
+  const { data: run, error } = await client
+    .from("reconciliation_runs")
+    .upsert(
+      {
+        run_date: new Date().toISOString().slice(0, 10),
+        status: exceptions.length ? "exceptions" : "balanced",
+        payment_count: succeeded.length,
+        gross_kobo: succeeded.reduce((n, p) => n + p.amount_kobo, 0),
+        exception_count: exceptions.length,
+        details: { paymentIds: exceptions.map((e) => e.id) },
+        run_by: admin.id,
+      },
+      { onConflict: "run_date" },
+    )
+    .select("id")
+    .single();
+  if (error || !run) throw new Error("Could not record reconciliation run");
+  if (exceptions.length)
+    await client.from("reconciliation_exceptions").upsert(
+      exceptions.map((payment) => ({
+        run_id: run.id,
+        payment_id: payment.id,
+        kind: "ledger_mismatch",
+        expected_kobo: payment.amount_kobo,
+        actual_kobo: (entries ?? [])
+          .filter(
+            (entry) =>
+              entry.payment_id === payment.id &&
+              ["platform_fee", "vendor_net"].includes(entry.entry_type),
+          )
+          .reduce((sum, entry) => sum + entry.amount_kobo, 0),
+      })),
+      { onConflict: "run_id,payment_id,kind" },
+    );
+  await audit(
+    admin.id,
+    "reconciliation.completed",
+    "reconciliation",
+    run.id,
+    exceptions.length
+      ? `${exceptions.length} exception(s) detected`
+      : "All successful payments balanced",
+    crypto.randomUUID(),
   );
   revalidatePath("/safety");
+  revalidatePath("/money");
+}
+
+export async function resolveReconciliationException(form: FormData) {
+  requireConfirmation(form);
+  await requireAdmin("money");
+  const client = await createClient();
+  const { error } = await client.rpc("resolve_reconciliation_exception", {
+    p_exception_id: uuid.parse(form.get("exceptionId")),
+    p_reason: reason(form.get("reason")),
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/money");
 }

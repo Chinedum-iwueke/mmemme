@@ -5,7 +5,7 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
-  await requireAdmin();
+  await requireAdmin("audit");
   const q = (await searchParams).q?.trim() ?? "";
   const client = createAdminClient();
   let audit = client
@@ -30,6 +30,7 @@ export default async function AuditPage({
           <h1>Audit and correlation search</h1>
         </div>
         <Link href="/">Dashboard</Link>
+        <Link href="/search">Global search</Link>
       </header>
       <form className="panel form" method="get">
         <label>

@@ -4,7 +4,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ applicationId: string; evidenceId: string }> },
 ) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin("vendors");
   const { applicationId, evidenceId } = await params;
   const client = createAdminClient();
   const { data: evidence } = await client

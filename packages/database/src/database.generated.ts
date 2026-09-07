@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_access: {
+        Row: {
+          active: boolean
+          created_at: string
+          last_seen_at: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          role: Database["public"]["Enums"]["admin_role"]
+          session_timeout_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          last_seen_at?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role: Database["public"]["Enums"]["admin_role"]
+          session_timeout_minutes?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          last_seen_at?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          role?: Database["public"]["Enums"]["admin_role"]
+          session_timeout_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_access_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_audit_events: {
         Row: {
           action: string
@@ -562,6 +613,98 @@ export type Database = {
           },
         ]
       }
+      operations_assignments: {
+        Row: {
+          assigned_by: string
+          assigned_to: string
+          due_at: string | null
+          entity_id: string
+          entity_type: string
+          priority: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          assigned_to: string
+          due_at?: string | null
+          entity_id: string
+          entity_type: string
+          priority?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          assigned_to?: string
+          due_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          priority?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operations_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_assignments_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      operations_case_events: {
+        Row: {
+          actor_id: string
+          correlation_id: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json
+          summary: string
+          visibility: string
+        }
+        Insert: {
+          actor_id: string
+          correlation_id: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          summary: string
+          visibility?: string
+        }
+        Update: {
+          actor_id?: string
+          correlation_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          summary?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operations_case_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_kobo: number
@@ -973,6 +1116,80 @@ export type Database = {
           },
         ]
       }
+      reconciliation_exceptions: {
+        Row: {
+          actual_kobo: number | null
+          assigned_to: string | null
+          created_at: string
+          expected_kobo: number | null
+          id: string
+          kind: string
+          payment_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          run_id: string | null
+          status: string
+        }
+        Insert: {
+          actual_kobo?: number | null
+          assigned_to?: string | null
+          created_at?: string
+          expected_kobo?: number | null
+          id?: string
+          kind: string
+          payment_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          run_id?: string | null
+          status?: string
+        }
+        Update: {
+          actual_kobo?: number | null
+          assigned_to?: string | null
+          created_at?: string
+          expected_kobo?: number | null
+          id?: string
+          kind?: string
+          payment_id?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          run_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reconciliation_exceptions_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconciliation_exceptions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconciliation_exceptions_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconciliation_exceptions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "reconciliation_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reconciliation_runs: {
         Row: {
           created_at: string
@@ -1162,6 +1379,41 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_operation_queues: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          name: string
+          owner_id: string
+          scope: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name: string
+          owner_id: string
+          scope: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name?: string
+          owner_id?: string
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_operation_queues_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2366,9 +2618,36 @@ export type Database = {
         }
       }
       accept_vendor_invitation: { Args: { p_token: string }; Returns: string }
+      admin_has_capability: { Args: { p_capability: string }; Returns: boolean }
       application_account: {
         Args: { p_application_id: string }
         Returns: string
+      }
+      assign_operations_case: {
+        Args: {
+          p_assigned_to: string
+          p_correlation_id: string
+          p_due_at: string
+          p_entity_id: string
+          p_entity_type: string
+          p_priority: string
+          p_reason: string
+        }
+        Returns: {
+          assigned_by: string
+          assigned_to: string
+          due_at: string | null
+          entity_id: string
+          entity_type: string
+          priority: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "operations_assignments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       cancellation_preview: { Args: { p_booking_id: string }; Returns: Json }
       confirm_fulfillment: {
@@ -2526,6 +2805,29 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "cancellations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      resolve_reconciliation_exception: {
+        Args: { p_exception_id: string; p_reason: string }
+        Returns: {
+          actual_kobo: number | null
+          assigned_to: string | null
+          created_at: string
+          expected_kobo: number | null
+          id: string
+          kind: string
+          payment_id: string | null
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          run_id: string | null
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reconciliation_exceptions"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -2695,6 +2997,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      touch_admin_session: {
+        Args: never
+        Returns: {
+          active: boolean
+          created_at: string
+          last_seen_at: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          role: Database["public"]["Enums"]["admin_role"]
+          session_timeout_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "admin_access"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       valid_booking_transition: {
         Args: {
           new_state: Database["public"]["Enums"]["booking_status"]
@@ -2718,6 +3040,13 @@ export type Database = {
       }
     }
     Enums: {
+      admin_role:
+        | "owner"
+        | "operations"
+        | "verification"
+        | "support"
+        | "finance"
+        | "auditor"
       booking_status:
         | "requested"
         | "operations_review"
@@ -2905,6 +3234,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: [
+        "owner",
+        "operations",
+        "verification",
+        "support",
+        "finance",
+        "auditor",
+      ],
       booking_status: [
         "requested",
         "operations_review",
