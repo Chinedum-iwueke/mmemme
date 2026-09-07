@@ -925,7 +925,197 @@ Milestone exit: MMEMME is a live, monitored and recoverable product serving at
 least 100 invited pilot participants across public web, customer web, vendor web,
 iOS and Android with safely operated verification and payments.
 
-## 7. Parallel external and founder-owned backlog
+## 7. External production configuration register
+
+This is the authoritative register for configuration outside the repository. An
+item is complete only when the named owner, recovery owner, environment, secret
+location, renewal/rotation date and linked verification evidence are recorded in
+the private launch record. Never paste credentials into this document, an issue,
+chat, source control or a client-visible environment variable.
+
+### 7.1 Company ownership, access and secrets
+
+- [ ] Create company-controlled billing identities and distribution lists for all
+      providers; remove reliance on a founder's personal email or payment card.
+- [ ] Record primary and backup owners, least-privilege roles, MFA method, recovery
+      codes, emergency access and offboarding procedure for every provider.
+- [ ] Select a production secret manager; store server secrets there and configure
+      audited CI/EAS/Vercel/Supabase delivery without copying production secrets to
+      local `.env` files.
+- [ ] Create separate preview, staging and production projects/credentials. Confirm
+      production data and keys cannot be read by preview or local deployments.
+- [ ] Set billing budgets, quota warnings, renewal dates and service-status contacts;
+      test account recovery with both founders.
+- [ ] Create an environment-variable inventory with classification, consumer,
+      rotation owner and last-verified date. At minimum reconcile:
+      `MMEMME_ENV`, `PUBLIC_WEB_URL`, `NEXT_PUBLIC_SITE_URL`,
+      `NEXT_PUBLIC_MMEMME_ENV`, `NEXT_PUBLIC_SUPABASE_URL`,
+      `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_REQUESTS_ENABLED`,
+      `NEXT_PUBLIC_LEGAL_CONTENT_STATUS`, `NEXT_PUBLIC_SENTRY_DSN`,
+      `EXPO_PUBLIC_MMEMME_ENV`, `EXPO_PUBLIC_SUPABASE_URL`,
+      `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_REQUESTS_ENABLED`,
+      `EXPO_PUBLIC_PAYMENTS_SANDBOX_ENABLED`,
+      `EXPO_PUBLIC_PAYMENTS_LIVE_ENABLED`, `EXPO_PUBLIC_DEMO_MODE`,
+      `EXPO_PUBLIC_EAS_PROJECT_ID`, `EXPO_PUBLIC_SENTRY_DSN`, `SUPABASE_URL`,
+      `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `REQUESTS_ENABLED`,
+      `PAYMENTS_SANDBOX_ENABLED`, `PAYMENTS_LIVE_ENABLED`,
+      `PAYMENTS_DEMO_MODE`, `PAYSTACK_SECRET_KEY`, `CRON_SECRET`,
+      `RESEND_API_KEY`, `NOTIFICATION_FROM_EMAIL`, `EXPO_ACCESS_TOKEN`,
+      `SENTRY_DSN`, `ADMIN_REQUIRE_AAL2`, `MMEMME_ADMIN_EMAILS`,
+      `MALWARE_SCANNER_URL`, `MALWARE_SCANNER_KEY`,
+      `VERIFICATION_PROVIDER_URL` and `VERIFICATION_PROVIDER_KEY`.
+
+### 7.2 Domain, DNS and business email
+
+- [ ] Register/confirm the company-owned production domain with auto-renewal,
+      registrar lock, MFA, backup owner and protected recovery contact.
+- [ ] Define public web, vendor, operations/admin and API hostnames; point DNS only
+      after staging smoke tests and document TTL/rollback records.
+- [ ] Configure TLS, canonical HTTPS redirects, apex/`www` behavior, HSTS decision,
+      universal/app-link association files and domain verification for hosting,
+      Apple, Google, email and analytics providers.
+- [ ] Create `support@`, `privacy@`, `legal@`, `security@` and transactional sender
+      addresses with monitored owners and escalation rules.
+- [ ] Configure and validate SPF, DKIM and DMARC; test inbox placement, reply routing,
+      bounce/complaint handling and transactional-domain separation.
+
+### 7.3 Supabase production data plane
+
+- [ ] Create company-owned staging and production projects in the approved region;
+      document plan, quotas, data residency and support route.
+- [ ] Configure Auth site URL, exact redirect allowlist for web/mobile, email templates,
+      OTP/magic-link expiry, password/session policy, CAPTCHA/rate limits, MFA for
+      admins and the approved Nigerian SMS provider if phone OTP remains enabled.
+- [ ] Configure custom SMTP and, where used, SMS credentials including
+      `SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN` or the selected provider equivalent;
+      test delivery, abuse limits and provider failure behavior.
+- [ ] Apply extensions, migrations, RLS, database functions, scheduled jobs and Edge
+      Functions through protected deployment automation; set all required function
+      secrets and confirm `demo-confirm-payment` is absent/disabled in production.
+- [ ] Create and verify public/private buckets, file limits, MIME restrictions,
+      signed-URL expiry, lifecycle/retention rules and CORS origins.
+- [ ] Configure connection pooling/limits, network restrictions where available,
+      daily backups/PITR, retention, restore access and database/storage quota alerts.
+- [ ] Bootstrap named MFA admin accounts through an audited process; rotate bootstrap
+      access and prove RLS/storage isolation plus backup restoration.
+
+### 7.4 Paystack and money operations
+
+- [ ] Complete Paystack business verification and obtain written approval for the
+      managed marketplace settlement/payout arrangement; do not describe split
+      settlement as escrow.
+- [ ] Create distinct test/live credentials and authorized subaccounts/recipients;
+      store the live secret server-side only and document key rotation/revocation.
+- [ ] Register the production webhook URL, validate signatures, restrict the callback
+      URL to informational recovery and confirm transaction status, reference,
+      currency and amount server-side before value is provided.
+- [ ] Configure settlement bank account, split/commission behavior, gateway-fee
+      handling, refund permissions, transfer/payout controls and two-person approvals.
+- [ ] Configure webhook/reconciliation/chargeback/failed-transfer alerts and provider
+      dashboard access for finance owners; test downloadable settlement evidence.
+- [ ] Keep `PAYMENTS_LIVE_ENABLED=false`, `PAYMENTS_DEMO_MODE=false` and production
+      sandbox disabled until legal gates and the controlled live-money rehearsal pass.
+
+### 7.5 Vendor identity, bank-name and evidence providers
+
+- [ ] Select providers covering the approved Nigerian identity and bank-name checks;
+      execute commercial and data-processing agreements and document availability,
+      retention, sub-processors, data residency, manual review and breach contacts.
+- [ ] Obtain sandbox and production approval/credentials; configure
+      `VERIFICATION_PROVIDER_URL`/`VERIFICATION_PROVIDER_KEY`, callback/IP rules if
+      required, consent wording and provider outage escalation.
+- [ ] Confirm the integration exchanges provider tokens/references rather than raw
+      NIN/BVN values and that provider payloads are redacted from logs and analytics.
+- [ ] Select a malware/document scanner, approve its privacy/data-location terms,
+      configure `MALWARE_SCANNER_URL`/`MALWARE_SCANNER_KEY`, file/time limits and
+      fail-closed behavior; test clean, infected, timeout and unavailable outcomes.
+- [ ] Record credential expiry/renewal rules, evidence retention/deletion, operator
+      access policy and incident contacts approved by counsel.
+
+### 7.6 Email, push, SMS and scheduled delivery
+
+- [ ] Create the company Resend account, verify the transactional domain, configure
+      `RESEND_API_KEY` and `NOTIFICATION_FROM_EMAIL`, suppressions, webhook events,
+      retention, quotas, bounce/complaint alerts and API-key rotation.
+- [ ] Create/configure the Expo/EAS project and `EXPO_ACCESS_TOKEN`; register APNs and
+      FCM credentials, test token rotation, receipts, disabled permissions, deep links
+      and critical email fallback on physical devices.
+- [ ] If SMS is enabled, select and approve the Nigerian-capable provider, sender ID,
+      consent/opt-out rules, fraud/spend caps, geographic restrictions, delivery
+      receipts and fallback. Remove unused provider credentials.
+- [ ] Configure an authenticated scheduler for notification dispatch and reconciliation
+      with a rotated `CRON_SECRET`, overlap protection, retry policy and missed-job alert.
+- [ ] Test received, changes-requested, inspection, approval, rejection, quote,
+      payment, cancellation, refund and security messages without exposing credentials.
+
+### 7.7 Hosting, CI/CD and source control
+
+- [ ] Create separate public web and private operations projects in Vercel or the
+      selected host, plus isolated preview/staging/production environments and domains.
+- [ ] Configure GitHub organization ownership, two maintainer accounts, branch
+      protection, required quality/security checks, environment approvals, protected
+      deploy credentials, Dependabot and backup recovery.
+- [ ] Pin runtime/package-manager versions, install commands, build variables and
+      deployment regions; confirm preview is no-index and has no production access.
+- [ ] Configure CSP/security headers, allowed origins, image/storage hosts, health
+      checks, source-map upload, release/version identifiers, cache invalidation and
+      rollback. Rehearse application rollback without reversing financial migrations.
+- [ ] Enable deployment, domain, certificate, function, bandwidth and billing alerts;
+      record provider status pages and escalation contacts.
+
+### 7.8 Apple, Google and native signing
+
+- [ ] Enrol company-controlled Apple Developer and Google Play Console accounts;
+      complete legal entity, tax/banking/contact verification, MFA, backup admins and
+      role separation.
+- [ ] Reserve final iOS bundle ID and Android application ID; configure EAS project,
+      signing certificates/profiles, App Store Connect API key and Play service account
+      in EAS-managed or approved secure storage.
+- [ ] Configure APNs/FCM, associated domains, universal/app links, Android App Links,
+      production URL schemes and verified redirect URLs.
+- [ ] Complete privacy nutrition labels/Data Safety, age/content ratings, encryption
+      declarations, privacy manifests, account-deletion URL, support/privacy/terms URLs,
+      reviewer account/instructions, screenshots and store listing metadata.
+- [ ] Configure TestFlight groups and Play internal/closed tracks, staged rollout,
+      crash/ANR alerts and emergency release/credential-rotation procedures.
+
+### 7.9 Observability, analytics, privacy and support tooling
+
+- [ ] Create separate Sentry projects for public web, admin and mobile; configure DSNs,
+      server auth token/source maps, releases, environments, sampling, PII scrubbing,
+      retention and alerts with tested owner routing.
+- [ ] Select and privacy-review PostHog or equivalent; configure separate environments,
+      approved host/region, consent, IP/field masking, retention and a denylist that
+      excludes credentials, raw identity data, payment secrets and support evidence.
+- [ ] Configure uptime/synthetic checks for web, auth, vendor upload, Edge Functions,
+      webhook reception and notification/reconciliation workers; connect escalation
+      channels and status communication templates.
+- [ ] Select an approved support/ticketing channel, restrict access, define retention
+      and escalation, and ensure sensitive vendor evidence is linked through audited
+      access rather than copied into tickets or chat.
+- [ ] Document log destinations, correlation IDs, retention, redaction and access;
+      verify secrets and personal/vendor credential contents never reach telemetry.
+
+### 7.10 Legal, finance and go-live evidence
+
+- [ ] Publish counsel-approved customer terms, privacy notice, cookie/analytics consent,
+      vendor terms, credential consent, cancellation/refund/dispute/chargeback policy,
+      data retention/deletion and account-deletion instructions; set
+      `NEXT_PUBLIC_LEGAL_CONTENT_STATUS=approved` only after written approval.
+- [ ] Obtain accounting approval for commission, gateway fees, VAT/tax, invoices,
+      settlement, refunds, chargebacks, payout records and reconciliation ownership.
+- [ ] Record controller/processor roles and DPAs for Supabase, hosting, Paystack,
+      verification, scanner, email/SMS, Sentry, analytics and support vendors.
+- [ ] Complete provider security/privacy review, breach-notification contacts and any
+      required Nigerian registrations or filings identified by counsel.
+- [ ] Attach evidence for production recovery, DNS/email authentication, provider
+      approvals, RLS/storage suite, restore rehearsal, mobile installs, notification
+      delivery, monitoring alerts and live-money reconciliation to the launch record.
+- [ ] Run an external-configuration sign-off: technical founder, operations founder,
+      counsel/accounting owner and backup operator each confirm their sections; any
+      missing evidence remains a release blocker and must not be auto-completed.
+
+## 8. Parallel external and founder-owned backlog
 
 These items block launch but cannot be completed by code alone:
 
@@ -943,7 +1133,7 @@ These items block launch but cannot be completed by code alone:
 - [ ] App Store, Play Console, domain, support email and company identities ready.
 - [ ] Permissioned testimonials/references supplied; no fabricated social proof.
 
-## 8. Release blocker policy
+## 9. Release blocker policy
 
 The following always block live launch:
 
@@ -960,7 +1150,7 @@ The following always block live launch:
 - Demo accounts, demo payment flags or uninspected published vendors in production.
 - A core customer, vendor or operations task requiring a database edit.
 
-## 9. Shipped MVP definition of done
+## 10. Shipped MVP definition of done
 
 All of the following must be true:
 
