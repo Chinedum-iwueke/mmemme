@@ -531,7 +531,7 @@ draft → submitted → in_review → inspection_pending → approved
 exceptions: rejected | withdrawn | expired | suspended
 ```
 
-- [ ] **M13-01 — Vendor identity and membership model**
+- [x] **M13-01 — Vendor identity and membership model**
       Dependencies: M8-03, M8-05.
       Add `vendor_accounts`, `vendor_memberships`, `vendor_applications`, versioned
       credential requirements, reviewer assignments and state events. Support one
@@ -541,7 +541,7 @@ exceptions: rejected | withdrawn | expired | suspended
       cross-vendor reads and unauthorized application transitions fail under RLS and
       server tests.
 
-- [ ] **M13-02 — Vendor sign-up and account recovery**
+- [x] **M13-02 — Vendor sign-up and account recovery**
       Dependencies: M13-01, M9-03.
       Add the public “List your business” entry point, verified email and Nigerian
       phone, consent, business category, secure session recovery, team invitation and
@@ -549,7 +549,7 @@ exceptions: rejected | withdrawn | expired | suspended
       Acceptance: a new venue or caterer creates and recovers an account, resumes the
       exact onboarding step and cannot enter the customer or admin role accidentally.
 
-- [ ] **M13-03 — Autosaved onboarding workflow**
+- [x] **M13-03 — Autosaved onboarding workflow**
       Dependencies: M13-02.
       Build responsive steps for legal/business name, trading name, contacts, category,
       Lagos address/service area, capacity, business or operating-authority evidence,
@@ -559,7 +559,7 @@ exceptions: rejected | withdrawn | expired | suspended
       Acceptance: progress survives refresh, intermittent connectivity and re-login;
       missing or invalid requirements are explained before submission.
 
-- [ ] **M13-04 — Private credential and media uploads**
+- [x] **M13-04 — Private credential and media uploads**
       Dependencies: M13-03, M8-03.
       Add direct-to-private-storage uploads with signed access, progress, retry,
       virus/malware scanning, type/size/page limits, EXIF stripping where appropriate,
@@ -569,7 +569,7 @@ exceptions: rejected | withdrawn | expired | suspended
       oversized files are quarantined/rejected; operators receive time-limited access
       with audit events.
 
-- [ ] **M13-05 — Bank and identity verification integration boundary**
+- [x] **M13-05 — Bank and identity verification integration boundary**
       Dependencies: adviser/provider choice, M13-04.
       Implement a provider adapter that stores request IDs, result summaries, consent,
       timestamps and reviewer decisions. Do not persist raw NIN/BVN values in MMEMME
@@ -577,7 +577,7 @@ exceptions: rejected | withdrawn | expired | suspended
       Acceptance: sandbox success/failure/manual-review states are testable; provider
       downtime does not lose the application or imply approval.
 
-- [ ] **M13-06 — Draft listing and package builder**
+- [x] **M13-06 — Draft listing and package builder**
       Dependencies: M13-03, M9-03.
       Let vendors create a draft public profile, upload owned media, enter normalized
       capacity/area/price guidance and create venue or catering packages with
@@ -585,7 +585,7 @@ exceptions: rejected | withdrawn | expired | suspended
       Acceptance: drafts are never publicly indexable; invalid category/package data
       is rejected server-side; vendor edits cannot rewrite historical quotes.
 
-- [ ] **M13-07 — Submission, changes and verification status**
+- [x] **M13-07 — Submission, changes and verification status**
       Dependencies: M13-04 through M13-06, M14-02.
       Add application review summary, attestation, immutable submission snapshot,
       status timeline, operator change requests, structured vendor responses,
@@ -594,7 +594,7 @@ exceptions: rejected | withdrawn | expired | suspended
       Acceptance: submission is idempotent; vendors see clear next steps; only an
       authorized operator can approve, reject, suspend or publish.
 
-- [ ] **M13-08 — Verified vendor maintenance**
+- [x] **M13-08 — Verified vendor maintenance**
       Dependencies: M13-07.
       Allow approved vendors to propose profile/package changes and renew expiring
       credentials. Material verification fields create a review request rather than
@@ -602,7 +602,7 @@ exceptions: rejected | withdrawn | expired | suspended
       Acceptance: approved live data remains stable until reviewed, every change is
       attributable and expiry/suspension affects publication according to policy.
 
-- [ ] **M13-09 — Vendor communications and onboarding analytics**
+- [x] **M13-09 — Vendor communications and onboarding analytics**
       Dependencies: M13-07, M15-04.
       Send received, changes-requested, inspection, approved, rejected and expiry
       emails; instrument consented funnel steps without sending credential contents

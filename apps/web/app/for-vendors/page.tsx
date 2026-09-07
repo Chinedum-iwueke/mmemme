@@ -10,7 +10,7 @@ export default function Page() {
       eyebrow="For Lagos venues and caterers"
       title="Better-fit enquiries. Clearer terms. Founder-supported bookings."
       intro="Vendor onboarding is managed during the MVP so every listing and package can be accurate."
-      action={{ href: "/contact?subject=vendor", label: "Start a vendor enquiry" }}
+      action={{ href: "/vendor/apply", label: "Start your application" }}
     >
       <h2>Who can apply</h2>
       <p>
@@ -19,7 +19,7 @@ export default function Page() {
       </p>
       <h2>The onboarding path</h2>
       <ol>
-        <li>Introductory fit call and package review</li>
+        <li>Create secure vendor access and complete your private application</li>
         <li>Identity, contact, authority, portfolio and reference checks</li>
         <li>Physical operating-site inspection</li>
         <li>Listing and package normalization</li>
@@ -30,7 +30,7 @@ export default function Page() {
         The closed-beta default is a 7.5% vendor commission on MMEMME-processed payments. This is a
         testable beta policy, not a permanent rate.
       </p>
-      <h2>No self-publishing</h2>
+      <h2>You control the application. MMEMME controls publication.</h2>
       <p>
         Submitting an enquiry does not publish a profile. MMEMME controls approval and may decline
         supply that does not fit the initial Lagos wedding marketplace.

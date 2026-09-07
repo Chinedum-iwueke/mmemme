@@ -123,8 +123,8 @@ export default async function OperationsDashboard() {
               ))}
             </div>
             <div className="gate">
-              <strong>Live payment gate is closed</strong>Paystack, legal,
-              cancellation policy and reconciliation rehearsal must all pass.
+              <strong>Live payment gate is closed</strong>Paystack, legal, cancellation policy and
+              reconciliation rehearsal must all pass.
             </div>
           </section>
         </div>

@@ -3,6 +3,7 @@ Deno.serve(async (request) => {
   if (request.headers.get("x-cron-secret") !== Deno.env.get("CRON_SECRET"))
     return new Response("Unauthorized", { status: 401 });
   const admin = adminClient();
+  await admin.rpc("expire_vendor_applications");
   const { data: due } = await admin
     .from("booking_reminders")
     .select("id,booking_id,customer_id,kind")
@@ -87,5 +88,70 @@ Deno.serve(async (request) => {
       .update({ push_status: pushStatus, email_status: emailStatus })
       .eq("id", row.id);
   }
-  return Response.json({ processed: rows?.length ?? 0 });
+  const { data: expiring } = await admin
+    .from("vendor_applications")
+    .select("id,account_id,expires_at")
+    .eq("status", "approved")
+    .lte("expires_at", new Date(Date.now() + 30 * 86400000).toISOString());
+  for (const application of expiring ?? []) {
+    const { data: owner } = await admin
+      .from("vendor_memberships")
+      .select("user_id")
+      .eq("account_id", application.account_id)
+      .eq("role", "owner")
+      .single();
+    if (owner)
+      await admin.from("vendor_notifications").upsert(
+        {
+          application_id: application.id,
+          recipient_id: owner.user_id,
+          kind: "expiry",
+          title: "Your MMEMME verification needs renewal",
+          body: `Verification expires ${application.expires_at}. Open your workspace to renew credentials.`,
+          deduplication_key: `expiry-30:${application.id}:${application.expires_at}`,
+        },
+        { onConflict: "deduplication_key" },
+      );
+  }
+  const { data: vendorRows } = await admin
+    .from("vendor_notifications")
+    .select("id,recipient_id,title,body,deduplication_key")
+    .in("email_status", ["pending", "failed"])
+    .limit(100);
+  for (const row of vendorRows ?? []) {
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("email")
+      .eq("id", row.recipient_id)
+      .single();
+    let emailStatus = "suppressed";
+    if (profile?.email && Deno.env.get("RESEND_API_KEY")) {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+          "Content-Type": "application/json",
+          "Idempotency-Key": `vendor-${row.deduplication_key}`,
+        },
+        body: JSON.stringify({
+          from: Deno.env.get("NOTIFICATION_FROM_EMAIL"),
+          to: [profile.email],
+          subject: row.title,
+          text: `${row.body}\n\nOpen your vendor workspace: ${Deno.env.get("PUBLIC_WEB_URL")}/vendor/workspace`,
+        }),
+      });
+      emailStatus = response.ok ? "sent" : "failed";
+    }
+    await admin
+      .from("vendor_notifications")
+      .update({
+        email_status: emailStatus,
+        sent_at: emailStatus === "sent" ? new Date().toISOString() : null,
+      })
+      .eq("id", row.id);
+  }
+  return Response.json({
+    processed: rows?.length ?? 0,
+    vendorProcessed: vendorRows?.length ?? 0,
+  });
 });

@@ -28,10 +28,7 @@ export default async function SafetyPage() {
       .from("support_messages")
       .select("id,booking_id,author_id,body,created_at")
       .order("created_at", { ascending: false }),
-    c
-      .from("cancellations")
-      .select("*")
-      .order("requested_at", { ascending: false }),
+    c.from("cancellations").select("*").order("requested_at", { ascending: false }),
     c.from("refunds").select("*").order("created_at", { ascending: false }),
     c.from("disputes").select("*").order("created_at", { ascending: false }),
     c.from("bookings").select("id,status,correlation_id,event_date"),
@@ -39,11 +36,7 @@ export default async function SafetyPage() {
       .from("payouts")
       .select("id,booking_id,amount_kobo,status")
       .order("created_at", { ascending: false }),
-    c
-      .from("reconciliation_runs")
-      .select("*")
-      .order("run_date", { ascending: false })
-      .limit(7),
+    c.from("reconciliation_runs").select("*").order("run_date", { ascending: false }).limit(7),
   ]);
   return (
     <div className="ops-page">
@@ -60,8 +53,7 @@ export default async function SafetyPage() {
             <article className="case" key={m.id}>
               <strong>{m.body}</strong>
               <small>
-                Booking {m.booking_id.slice(0, 8)} ·{" "}
-                {new Date(m.created_at).toLocaleString()}
+                Booking {m.booking_id.slice(0, 8)} · {new Date(m.created_at).toLocaleString()}
               </small>
               <form action={replySupport} className="form inline-form">
                 <input type="hidden" name="bookingId" value={m.booking_id} />
@@ -94,11 +86,7 @@ export default async function SafetyPage() {
                     <button className="primary" name="decision" value="approve">
                       Approve cancellation
                     </button>
-                    <button
-                      className="secondary"
-                      name="decision"
-                      value="reject"
-                    >
+                    <button className="secondary" name="decision" value="reject">
                       Reject
                     </button>
                   </div>
@@ -108,19 +96,12 @@ export default async function SafetyPage() {
                 ?.filter((r) => r.cancellation_id === x.id)
                 .map((r) => (
                   <form action={approveRefund} className="refund" key={r.id}>
-                    <span className="status">
-                      {r.status.replaceAll("_", " ")}
-                    </span>
+                    <span className="status">{r.status.replaceAll("_", " ")}</span>
                     <strong>{money(r.amount_kobo)}</strong>
                     {r.status.startsWith("awaiting_") && (
                       <>
                         <input type="hidden" name="refundId" value={r.id} />
-                        <input
-                          name="reason"
-                          required
-                          minLength={5}
-                          placeholder="Approval reason"
-                        />
+                        <input name="reason" required minLength={5} placeholder="Approval reason" />
                         <button className="secondary">
                           {r.status === "awaiting_first_approval"
                             ? "First approval"
@@ -152,12 +133,8 @@ export default async function SafetyPage() {
                   <label>
                     Resolution
                     <select name="outcome">
-                      <option value="resolved_customer">
-                        Resolve for customer
-                      </option>
-                      <option value="resolved_vendor">
-                        Resolve for vendor
-                      </option>
+                      <option value="resolved_customer">Resolve for customer</option>
+                      <option value="resolved_vendor">Resolve for vendor</option>
                       <option value="closed">Close</option>
                     </select>
                   </label>
@@ -180,17 +157,12 @@ export default async function SafetyPage() {
                   {b.status.replaceAll("_", " ")} · {b.event_date}
                 </strong>
                 <small>Correlation {b.correlation_id}</small>
-                <form
-                  action={transitionFulfillment}
-                  className="form inline-form"
-                >
+                <form action={transitionFulfillment} className="form inline-form">
                   <input type="hidden" name="bookingId" value={b.id} />
                   <input
                     type="hidden"
                     name="next"
-                    value={
-                      b.status === "confirmed" ? "service_due" : "completed"
-                    }
+                    value={b.status === "confirmed" ? "service_due" : "completed"}
                   />
                   <label>
                     Reason
@@ -199,15 +171,12 @@ export default async function SafetyPage() {
                       required
                       minLength={5}
                       defaultValue={
-                        b.status === "confirmed"
-                          ? "Event date reached"
-                          : "Fulfillment verified"
+                        b.status === "confirmed" ? "Event date reached" : "Fulfillment verified"
                       }
                     />
                   </label>
                   <button className="secondary">
-                    Mark{" "}
-                    {b.status === "confirmed" ? "service due" : "completed"}
+                    Mark {b.status === "confirmed" ? "service due" : "completed"}
                   </button>
                 </form>
               </article>
@@ -215,11 +184,7 @@ export default async function SafetyPage() {
           {payouts
             ?.filter((p) => p.status === "held")
             .map((p) => (
-              <form
-                action={approvePayoutEligibility}
-                className="case form"
-                key={p.id}
-              >
+              <form action={approvePayoutEligibility} className="case form" key={p.id}>
                 <span className="status">held payout</span>
                 <strong>{money(p.amount_kobo)}</strong>
                 <input type="hidden" name="payoutId" value={p.id} />
@@ -240,8 +205,7 @@ export default async function SafetyPage() {
               <span className={`status ${r.status}`}>{r.status}</span>
               <strong>{r.run_date}</strong>
               <small>
-                {r.payment_count} payments · {r.exception_count} unresolved fund
-                exceptions
+                {r.payment_count} payments · {r.exception_count} unresolved fund exceptions
               </small>
             </article>
           ))}
@@ -250,13 +214,7 @@ export default async function SafetyPage() {
     </div>
   );
 }
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="panel safety-section">
       <h2>{title}</h2>

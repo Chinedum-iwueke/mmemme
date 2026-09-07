@@ -10,9 +10,7 @@ export default async function AuditPage({
   const client = createAdminClient();
   let audit = client
     .from("admin_audit_events")
-    .select(
-      "id,admin_id,action,entity_type,entity_id,reason,metadata,correlation_id,created_at",
-    )
+    .select("id,admin_id,action,entity_type,entity_id,reason,metadata,correlation_id,created_at")
     .order("created_at", { ascending: false })
     .limit(100);
   if (q) audit = audit.or(`correlation_id.eq.${q},entity_id.eq.${q}`);
@@ -51,9 +49,7 @@ export default async function AuditPage({
               </p>
               <p>Correlation {e.correlation_id}</p>
             </div>
-            <span className="pill">
-              {new Date(e.created_at).toLocaleString()}
-            </span>
+            <span className="pill">{new Date(e.created_at).toLocaleString()}</span>
           </article>
         ))}
       </section>
@@ -64,16 +60,13 @@ export default async function AuditPage({
             <article className="request" key={t.id}>
               <div>
                 <strong>
-                  {t.entity_type}: {t.previous_state ?? "created"} →{" "}
-                  {t.new_state}
+                  {t.entity_type}: {t.previous_state ?? "created"} → {t.new_state}
                 </strong>
                 <p>
                   {t.reason} · correlation {t.correlation_id}
                 </p>
               </div>
-              <span className="pill">
-                {new Date(t.created_at).toLocaleString()}
-              </span>
+              <span className="pill">{new Date(t.created_at).toLocaleString()}</span>
             </article>
           ))}
         </section>

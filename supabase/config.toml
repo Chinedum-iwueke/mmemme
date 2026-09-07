@@ -46,3 +46,9 @@ verify_jwt = true
 
 [functions.dispatch-notifications]
 verify_jwt = false
+
+[functions.scan-vendor-evidence]
+verify_jwt = true
+
+[functions.vendor-provider-check]
+verify_jwt = true

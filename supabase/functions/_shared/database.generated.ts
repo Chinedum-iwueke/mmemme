@@ -1332,6 +1332,813 @@ export type Database = {
           },
         ]
       }
+      vendor_accounts: {
+        Row: {
+          category: Database["public"]["Enums"]["vendor_category"]
+          consent_version: string
+          consented_at: string
+          created_at: string
+          created_by: string
+          id: string
+          legal_name: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["vendor_category"]
+          consent_version: string
+          consented_at?: string
+          created_at?: string
+          created_by: string
+          id?: string
+          legal_name: string
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["vendor_category"]
+          consent_version?: string
+          consented_at?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          legal_name?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_accounts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_application_events: {
+        Row: {
+          actor_id: string | null
+          application_id: string
+          correlation_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          new_state: Database["public"]["Enums"]["vendor_application_status"]
+          previous_state:
+            | Database["public"]["Enums"]["vendor_application_status"]
+            | null
+          reason: string
+        }
+        Insert: {
+          actor_id?: string | null
+          application_id: string
+          correlation_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_state: Database["public"]["Enums"]["vendor_application_status"]
+          previous_state?:
+            | Database["public"]["Enums"]["vendor_application_status"]
+            | null
+          reason: string
+        }
+        Update: {
+          actor_id?: string | null
+          application_id?: string
+          correlation_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_state?: Database["public"]["Enums"]["vendor_application_status"]
+          previous_state?:
+            | Database["public"]["Enums"]["vendor_application_status"]
+            | null
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_application_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_application_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_applications: {
+        Row: {
+          account_id: string
+          assigned_reviewer: string | null
+          created_at: string
+          current_step: number
+          decision_reason: string | null
+          draft_data: Json
+          expires_at: string | null
+          id: string
+          requirements_version: string
+          revision: number
+          status: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot: Json | null
+          submitted_at: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          account_id: string
+          assigned_reviewer?: string | null
+          created_at?: string
+          current_step?: number
+          decision_reason?: string | null
+          draft_data?: Json
+          expires_at?: string | null
+          id?: string
+          requirements_version?: string
+          revision?: number
+          status?: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot?: Json | null
+          submitted_at?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          account_id?: string
+          assigned_reviewer?: string | null
+          created_at?: string
+          current_step?: number
+          decision_reason?: string | null
+          draft_data?: Json
+          expires_at?: string | null
+          id?: string
+          requirements_version?: string
+          revision?: number
+          status?: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot?: Json | null
+          submitted_at?: string | null
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_applications_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "vendor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_applications_assigned_reviewer_fkey"
+            columns: ["assigned_reviewer"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_applications_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_change_requests: {
+        Row: {
+          application_id: string
+          created_at: string
+          fields: string[]
+          id: string
+          request_message: string
+          requested_by: string
+          resolved_at: string | null
+          responded_at: string | null
+          responded_by: string | null
+          vendor_response: string | null
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          fields: string[]
+          id?: string
+          request_message: string
+          requested_by: string
+          resolved_at?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          vendor_response?: string | null
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          fields?: string[]
+          id?: string
+          request_message?: string
+          requested_by?: string
+          resolved_at?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          vendor_response?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_change_requests_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_change_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_change_requests_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_credential_requirements: {
+        Row: {
+          accepted_mime_types: string[]
+          active: boolean
+          category: Database["public"]["Enums"]["vendor_category"]
+          code: string
+          created_at: string
+          description: string
+          evidence_kind: string
+          expires: boolean
+          id: string
+          label: string
+          max_bytes: number
+          max_pages: number | null
+          required: boolean
+          version: string
+        }
+        Insert: {
+          accepted_mime_types: string[]
+          active?: boolean
+          category: Database["public"]["Enums"]["vendor_category"]
+          code: string
+          created_at?: string
+          description: string
+          evidence_kind: string
+          expires?: boolean
+          id?: string
+          label: string
+          max_bytes: number
+          max_pages?: number | null
+          required?: boolean
+          version: string
+        }
+        Update: {
+          accepted_mime_types?: string[]
+          active?: boolean
+          category?: Database["public"]["Enums"]["vendor_category"]
+          code?: string
+          created_at?: string
+          description?: string
+          evidence_kind?: string
+          expires?: boolean
+          id?: string
+          label?: string
+          max_bytes?: number
+          max_pages?: number | null
+          required?: boolean
+          version?: string
+        }
+        Relationships: []
+      }
+      vendor_evidence: {
+        Row: {
+          application_id: string
+          byte_size: number
+          created_at: string
+          expires_at: string | null
+          id: string
+          mime_type: string
+          original_name: string
+          ownership_attested: boolean
+          page_count: number | null
+          rejection_reason: string | null
+          requirement_code: string
+          scan_provider: string | null
+          scan_reference: string | null
+          scanned_at: string | null
+          status: Database["public"]["Enums"]["vendor_evidence_status"]
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          application_id: string
+          byte_size: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          mime_type: string
+          original_name: string
+          ownership_attested: boolean
+          page_count?: number | null
+          rejection_reason?: string | null
+          requirement_code: string
+          scan_provider?: string | null
+          scan_reference?: string | null
+          scanned_at?: string | null
+          status?: Database["public"]["Enums"]["vendor_evidence_status"]
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          application_id?: string
+          byte_size?: number
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          mime_type?: string
+          original_name?: string
+          ownership_attested?: boolean
+          page_count?: number | null
+          rejection_reason?: string | null
+          requirement_code?: string
+          scan_provider?: string | null
+          scan_reference?: string | null
+          scanned_at?: string | null
+          status?: Database["public"]["Enums"]["vendor_evidence_status"]
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_evidence_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_evidence_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_funnel_events: {
+        Row: {
+          account_id: string
+          actor_id: string | null
+          application_id: string
+          created_at: string
+          event_name: string
+          id: string
+          properties: Json
+          step: number | null
+        }
+        Insert: {
+          account_id: string
+          actor_id?: string | null
+          application_id: string
+          created_at?: string
+          event_name: string
+          id?: string
+          properties?: Json
+          step?: number | null
+        }
+        Update: {
+          account_id?: string
+          actor_id?: string | null
+          application_id?: string
+          created_at?: string
+          event_name?: string
+          id?: string
+          properties?: Json
+          step?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_funnel_events_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_funnel_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_funnel_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_inspections: {
+        Row: {
+          acknowledged_at: string | null
+          address: string
+          application_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          outcome: string | null
+          scheduled_for: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          address: string
+          application_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          scheduled_for: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          address?: string
+          application_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          scheduled_for?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_inspections_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_inspections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_invitations: {
+        Row: {
+          accepted_at: string | null
+          account_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["vendor_member_role"]
+          token_hash: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          account_id: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          invited_by: string
+          role: Database["public"]["Enums"]["vendor_member_role"]
+          token_hash: string
+        }
+        Update: {
+          accepted_at?: string | null
+          account_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["vendor_member_role"]
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_invitations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_listing_drafts: {
+        Row: {
+          application_id: string
+          area: string
+          capacity_max: number | null
+          capacity_min: number | null
+          description: string
+          portfolio_paths: string[]
+          price_from_kobo: number | null
+          revision: number
+          trading_name: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          application_id: string
+          area?: string
+          capacity_max?: number | null
+          capacity_min?: number | null
+          description?: string
+          portfolio_paths?: string[]
+          price_from_kobo?: number | null
+          revision?: number
+          trading_name?: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          application_id?: string
+          area?: string
+          capacity_max?: number | null
+          capacity_min?: number | null
+          description?: string
+          portfolio_paths?: string[]
+          price_from_kobo?: number | null
+          revision?: number
+          trading_name?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_listing_drafts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_listing_drafts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_memberships: {
+        Row: {
+          account_id: string
+          created_at: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["vendor_member_role"]
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          invited_by?: string | null
+          role: Database["public"]["Enums"]["vendor_member_role"]
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["vendor_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_memberships_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_memberships_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_notifications: {
+        Row: {
+          application_id: string
+          body: string
+          created_at: string
+          deduplication_key: string
+          email_status: string
+          id: string
+          kind: string
+          recipient_id: string
+          sent_at: string | null
+          title: string
+        }
+        Insert: {
+          application_id: string
+          body: string
+          created_at?: string
+          deduplication_key: string
+          email_status?: string
+          id?: string
+          kind: string
+          recipient_id: string
+          sent_at?: string | null
+          title: string
+        }
+        Update: {
+          application_id?: string
+          body?: string
+          created_at?: string
+          deduplication_key?: string
+          email_status?: string
+          id?: string
+          kind?: string
+          recipient_id?: string
+          sent_at?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_notifications_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_package_drafts: {
+        Row: {
+          active: boolean
+          application_id: string
+          created_at: string
+          description: string
+          exclusions: string[]
+          guest_max: number
+          guest_min: number
+          id: string
+          inclusions: string[]
+          name: string
+          price_from_kobo: number
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          active?: boolean
+          application_id: string
+          created_at?: string
+          description: string
+          exclusions?: string[]
+          guest_max: number
+          guest_min: number
+          id?: string
+          inclusions?: string[]
+          name: string
+          price_from_kobo: number
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          active?: boolean
+          application_id?: string
+          created_at?: string
+          description?: string
+          exclusions?: string[]
+          guest_max?: number
+          guest_min?: number
+          id?: string
+          inclusions?: string[]
+          name?: string
+          price_from_kobo?: number
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_package_drafts_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_package_drafts_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_provider_checks: {
+        Row: {
+          application_id: string
+          consent_version: string
+          consented_at: string
+          created_at: string
+          id: string
+          kind: string
+          provider: string
+          provider_request_id: string
+          result_summary: Json
+          reviewed_by: string | null
+          reviewer_decision: string | null
+          status: Database["public"]["Enums"]["provider_check_status"]
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          consent_version: string
+          consented_at: string
+          created_at?: string
+          id?: string
+          kind: string
+          provider: string
+          provider_request_id: string
+          result_summary?: Json
+          reviewed_by?: string | null
+          reviewer_decision?: string | null
+          status?: Database["public"]["Enums"]["provider_check_status"]
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          consent_version?: string
+          consented_at?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          provider?: string
+          provider_request_id?: string
+          result_summary?: Json
+          reviewed_by?: string | null
+          reviewer_decision?: string | null
+          status?: Database["public"]["Enums"]["provider_check_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_provider_checks_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_provider_checks_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           area: string
@@ -1558,6 +2365,11 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      accept_vendor_invitation: { Args: { p_token: string }; Returns: string }
+      application_account: {
+        Args: { p_application_id: string }
+        Returns: string
+      }
       cancellation_preview: { Args: { p_booking_id: string }; Returns: Json }
       confirm_fulfillment: {
         Args: { p_booking_id: string }
@@ -1584,7 +2396,54 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_vendor_account: {
+        Args: {
+          p_category: Database["public"]["Enums"]["vendor_category"]
+          p_consent_version: string
+          p_legal_name: string
+          p_phone: string
+        }
+        Returns: {
+          account_id: string
+          assigned_reviewer: string | null
+          created_at: string
+          current_step: number
+          decision_reason: string | null
+          draft_data: Json
+          expires_at: string | null
+          id: string
+          requirements_version: string
+          revision: number
+          status: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot: Json | null
+          submitted_at: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendor_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      expire_vendor_applications: { Args: never; Returns: number }
+      invite_vendor_member: {
+        Args: {
+          p_account_id: string
+          p_email: string
+          p_role: Database["public"]["Enums"]["vendor_member_role"]
+        }
+        Returns: string
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_vendor_member: {
+        Args: {
+          p_account_id: string
+          p_roles?: Database["public"]["Enums"]["vendor_member_role"][]
+        }
+        Returns: boolean
+      }
       open_booking_dispute: {
         Args: { p_booking_id: string; p_reason: string }
         Returns: {
@@ -1625,6 +2484,27 @@ export type Database = {
         }
         Returns: string
       }
+      propose_vendor_maintenance: {
+        Args: { p_application_id: string; p_fields: string[]; p_reason: string }
+        Returns: {
+          application_id: string
+          created_at: string
+          fields: string[]
+          id: string
+          request_message: string
+          requested_by: string
+          resolved_at: string | null
+          responded_at: string | null
+          responded_by: string | null
+          vendor_response: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendor_change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       request_cancellation: {
         Args: { p_booking_id: string; p_reason: string }
         Returns: {
@@ -1650,6 +2530,58 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      respond_vendor_change_request: {
+        Args: { p_request_id: string; p_response: string }
+        Returns: {
+          application_id: string
+          created_at: string
+          fields: string[]
+          id: string
+          request_message: string
+          requested_by: string
+          resolved_at: string | null
+          responded_at: string | null
+          responded_by: string | null
+          vendor_response: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendor_change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      review_vendor_application: {
+        Args: {
+          p_application_id: string
+          p_fields?: string[]
+          p_new_status: Database["public"]["Enums"]["vendor_application_status"]
+          p_reason: string
+        }
+        Returns: {
+          account_id: string
+          assigned_reviewer: string | null
+          created_at: string
+          current_step: number
+          decision_reason: string | null
+          draft_data: Json
+          expires_at: string | null
+          id: string
+          requirements_version: string
+          revision: number
+          status: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot: Json | null
+          submitted_at: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendor_applications"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       save_customer_draft: {
         Args: {
           p_brief: Json
@@ -1666,6 +2598,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "customer_drafts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_vendor_application: {
+        Args: {
+          p_application_id: string
+          p_data: Json
+          p_expected_revision: number
+          p_step: number
+        }
+        Returns: {
+          account_id: string
+          assigned_reviewer: string | null
+          created_at: string
+          current_step: number
+          decision_reason: string | null
+          draft_data: Json
+          expires_at: string | null
+          id: string
+          requirements_version: string
+          revision: number
+          status: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot: Json | null
+          submitted_at: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendor_applications"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1698,6 +2661,36 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_vendor_application: {
+        Args: {
+          p_application_id: string
+          p_attested: boolean
+          p_idempotency_key: string
+        }
+        Returns: {
+          account_id: string
+          assigned_reviewer: string | null
+          created_at: string
+          current_step: number
+          decision_reason: string | null
+          draft_data: Json
+          expires_at: string | null
+          id: string
+          requirements_version: string
+          revision: number
+          status: Database["public"]["Enums"]["vendor_application_status"]
+          submission_snapshot: Json | null
+          submitted_at: string | null
+          updated_at: string
+          vendor_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vendor_applications"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1753,7 +2746,32 @@ export type Database = {
         | "paid"
         | "failed"
         | "reversed"
+      provider_check_status:
+        | "pending"
+        | "processing"
+        | "passed"
+        | "failed"
+        | "manual_review"
+        | "unavailable"
+      vendor_application_status:
+        | "draft"
+        | "submitted"
+        | "in_review"
+        | "inspection_pending"
+        | "changes_requested"
+        | "approved"
+        | "rejected"
+        | "withdrawn"
+        | "expired"
+        | "suspended"
       vendor_category: "venue" | "caterer"
+      vendor_evidence_status:
+        | "quarantined"
+        | "scanning"
+        | "clean"
+        | "rejected"
+        | "expired"
+      vendor_member_role: "owner" | "manager" | "editor" | "viewer"
       verification_status:
         | "draft"
         | "in_review"
@@ -1918,7 +2936,35 @@ export const Constants = {
         "failed",
         "reversed",
       ],
+      provider_check_status: [
+        "pending",
+        "processing",
+        "passed",
+        "failed",
+        "manual_review",
+        "unavailable",
+      ],
+      vendor_application_status: [
+        "draft",
+        "submitted",
+        "in_review",
+        "inspection_pending",
+        "changes_requested",
+        "approved",
+        "rejected",
+        "withdrawn",
+        "expired",
+        "suspended",
+      ],
       vendor_category: ["venue", "caterer"],
+      vendor_evidence_status: [
+        "quarantined",
+        "scanning",
+        "clean",
+        "rejected",
+        "expired",
+      ],
+      vendor_member_role: ["owner", "manager", "editor", "viewer"],
       verification_status: [
         "draft",
         "in_review",

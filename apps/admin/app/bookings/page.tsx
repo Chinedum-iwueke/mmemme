@@ -3,5 +3,137 @@ import { addContactNote, claimRequest, declineRequest, issueQuote } from "./acti
 import { createAdminClient, requireAdmin } from "../../lib/supabase/server";
 import "./bookings.css";
 
-const money=(k:number)=>`₦${Math.round(k/100).toLocaleString("en-NG")}`;
-export default async function BookingQueue(){await requireAdmin();const client=createAdminClient();const [{data:bookings},{data:vendors},{data:profiles},{data:quotes}]=await Promise.all([client.from("bookings").select("id,customer_id,vendor_id,event_date,guest_count,requirements,status,created_at").order("created_at",{ascending:false}),client.from("vendors").select("id,name"),client.from("profiles").select("id,full_name,phone,email"),client.from("quotes").select("id,booking_id,revision,deposit_amount_kobo,expires_at").order("revision",{ascending:false})]);return <div className="ops-page"><header className="ops-top"><div><p className="eyebrow">Transaction operations</p><h1>Booking requests</h1></div><Link href="/">Dashboard</Link></header><div className="queue">{bookings?.map(b=>{const customer=profiles?.find(p=>p.id===b.customer_id);const vendor=vendors?.find(v=>v.id===b.vendor_id);const latest=quotes?.find(q=>q.booking_id===b.id);return <article className="booking-card" key={b.id}><div className="booking-head"><div><span className={`status ${b.status}`}>{b.status.replaceAll("_"," ")}</span><h2>{customer?.full_name??"Customer"} → {vendor?.name??"Vendor"}</h2><p>{b.event_date} · {b.guest_count} guests · {customer?.phone??customer?.email}</p></div>{latest&&<div className="quote-chip"><strong>{money(latest.deposit_amount_kobo)}</strong><span>deposit · rev {latest.revision}</span></div>}</div><p className="requirements">{b.requirements}</p>{b.status==="requested"&&<form action={claimRequest}><input type="hidden" name="bookingId" value={b.id}/><button className="primary">Claim and review</button></form>}{["operations_review","quote_ready"].includes(b.status)&&<details><summary>Vendor contact and quote</summary><form action={addContactNote} className="form inline-form"><input type="hidden" name="bookingId" value={b.id}/><label>Contact attempt<input name="body" required placeholder="Called vendor; date held until 4pm"/></label><button className="secondary">Record contact</button></form><form action={issueQuote} className="form quote-form"><input type="hidden" name="bookingId" value={b.id}/><label>Total (₦)<input name="totalNaira" type="number" min="1" required/></label><label>Deposit (₦)<input name="depositNaira" type="number" min="1" required/></label><label>Expires<input name="expiresAt" type="datetime-local" required/></label><label>Payment schedule<input name="paymentSchedule" required placeholder="50% now; balance 30 days before"/></label><label>Inclusions<textarea name="inclusions" rows={4} placeholder="One item per line"/></label><label>Exclusions<textarea name="exclusions" rows={4} placeholder="One item per line"/></label><label className="wide">Cancellation consequences<textarea name="cancellationSummary" minLength={20} rows={4} required/></label><label className="attest wide"><input type="checkbox" name="availabilityConfirmed" value="yes" required/> I confirmed this date, package and price directly with the vendor.</label><button className="primary wide">{b.status==="quote_ready"?"Issue revised quote":"Issue quote"}</button></form></details>}{["requested","operations_review"].includes(b.status)&&<form action={declineRequest} className="form decline-form"><input type="hidden" name="bookingId" value={b.id}/><label>Decline reason<input name="reason" minLength={5} required/></label><button className="secondary">Decline request</button></form>}</article>})}{!bookings?.length&&<div className="panel empty">No booking requests yet.</div>}</div></div>}
+const money = (k: number) => `₦${Math.round(k / 100).toLocaleString("en-NG")}`;
+export default async function BookingQueue() {
+  await requireAdmin();
+  const client = createAdminClient();
+  const [{ data: bookings }, { data: vendors }, { data: profiles }, { data: quotes }] =
+    await Promise.all([
+      client
+        .from("bookings")
+        .select("id,customer_id,vendor_id,event_date,guest_count,requirements,status,created_at")
+        .order("created_at", { ascending: false }),
+      client.from("vendors").select("id,name"),
+      client.from("profiles").select("id,full_name,phone,email"),
+      client
+        .from("quotes")
+        .select("id,booking_id,revision,deposit_amount_kobo,expires_at")
+        .order("revision", { ascending: false }),
+    ]);
+  return (
+    <div className="ops-page">
+      <header className="ops-top">
+        <div>
+          <p className="eyebrow">Transaction operations</p>
+          <h1>Booking requests</h1>
+        </div>
+        <Link href="/">Dashboard</Link>
+      </header>
+      <div className="queue">
+        {bookings?.map((b) => {
+          const customer = profiles?.find((p) => p.id === b.customer_id);
+          const vendor = vendors?.find((v) => v.id === b.vendor_id);
+          const latest = quotes?.find((q) => q.booking_id === b.id);
+          return (
+            <article className="booking-card" key={b.id}>
+              <div className="booking-head">
+                <div>
+                  <span className={`status ${b.status}`}>{b.status.replaceAll("_", " ")}</span>
+                  <h2>
+                    {customer?.full_name ?? "Customer"} → {vendor?.name ?? "Vendor"}
+                  </h2>
+                  <p>
+                    {b.event_date} · {b.guest_count} guests · {customer?.phone ?? customer?.email}
+                  </p>
+                </div>
+                {latest && (
+                  <div className="quote-chip">
+                    <strong>{money(latest.deposit_amount_kobo)}</strong>
+                    <span>deposit · rev {latest.revision}</span>
+                  </div>
+                )}
+              </div>
+              <p className="requirements">{b.requirements}</p>
+              {b.status === "requested" && (
+                <form action={claimRequest}>
+                  <input type="hidden" name="bookingId" value={b.id} />
+                  <button className="primary">Claim and review</button>
+                </form>
+              )}
+              {["operations_review", "quote_ready"].includes(b.status) && (
+                <details>
+                  <summary>Vendor contact and quote</summary>
+                  <form action={addContactNote} className="form inline-form">
+                    <input type="hidden" name="bookingId" value={b.id} />
+                    <label>
+                      Contact attempt
+                      <input
+                        name="body"
+                        required
+                        placeholder="Called vendor; date held until 4pm"
+                      />
+                    </label>
+                    <button className="secondary">Record contact</button>
+                  </form>
+                  <form action={issueQuote} className="form quote-form">
+                    <input type="hidden" name="bookingId" value={b.id} />
+                    <label>
+                      Total (₦)
+                      <input name="totalNaira" type="number" min="1" required />
+                    </label>
+                    <label>
+                      Deposit (₦)
+                      <input name="depositNaira" type="number" min="1" required />
+                    </label>
+                    <label>
+                      Expires
+                      <input name="expiresAt" type="datetime-local" required />
+                    </label>
+                    <label>
+                      Payment schedule
+                      <input
+                        name="paymentSchedule"
+                        required
+                        placeholder="50% now; balance 30 days before"
+                      />
+                    </label>
+                    <label>
+                      Inclusions
+                      <textarea name="inclusions" rows={4} placeholder="One item per line" />
+                    </label>
+                    <label>
+                      Exclusions
+                      <textarea name="exclusions" rows={4} placeholder="One item per line" />
+                    </label>
+                    <label className="wide">
+                      Cancellation consequences
+                      <textarea name="cancellationSummary" minLength={20} rows={4} required />
+                    </label>
+                    <label className="attest wide">
+                      <input type="checkbox" name="availabilityConfirmed" value="yes" required /> I
+                      confirmed this date, package and price directly with the vendor.
+                    </label>
+                    <button className="primary wide">
+                      {b.status === "quote_ready" ? "Issue revised quote" : "Issue quote"}
+                    </button>
+                  </form>
+                </details>
+              )}
+              {["requested", "operations_review"].includes(b.status) && (
+                <form action={declineRequest} className="form decline-form">
+                  <input type="hidden" name="bookingId" value={b.id} />
+                  <label>
+                    Decline reason
+                    <input name="reason" minLength={5} required />
+                  </label>
+                  <button className="secondary">Decline request</button>
+                </form>
+              )}
+            </article>
+          );
+        })}
+        {!bookings?.length && <div className="panel empty">No booking requests yet.</div>}
+      </div>
+    </div>
+  );
+}

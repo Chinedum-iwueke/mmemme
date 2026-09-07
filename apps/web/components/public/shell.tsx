@@ -16,6 +16,7 @@ export function Header() {
           <Link href="/caterers">Caterers</Link>
           <Link href="/how-it-works">How it works</Link>
           <Link href="/verification">Verification</Link>
+          <Link href="/for-vendors">For vendors</Link>
         </nav>
         <AccountNav />
         <MobileNav />

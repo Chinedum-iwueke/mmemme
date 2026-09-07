@@ -1,14 +1,9 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import {
-  createAdminClient,
-  createClient,
-  requireAdmin,
-} from "../../lib/supabase/server";
+import { createAdminClient, createClient, requireAdmin } from "../../lib/supabase/server";
 const uuid = z.string().uuid();
-const reason = (v: FormDataEntryValue | null) =>
-  z.string().trim().min(5).max(2000).parse(v);
+const reason = (v: FormDataEntryValue | null) => z.string().trim().min(5).max(2000).parse(v);
 const audit = async (
   adminId: string,
   action: string,
@@ -78,10 +73,7 @@ export async function decideCancellation(form: FormData) {
       decision_reason: why,
     })
     .eq("id", c.id);
-  await client
-    .from("bookings")
-    .update({ status: "cancelled" })
-    .eq("id", c.booking_id);
+  await client.from("bookings").update({ status: "cancelled" }).eq("id", c.booking_id);
   if (c.refundable_amount_kobo > 0) {
     const { data: payment } = await client
       .from("payments")
@@ -133,9 +125,7 @@ export async function approveRefund(form: FormData) {
       .eq("id", r.id);
   } else if (r.status === "awaiting_second_approval") {
     if (r.first_approved_by === admin.id)
-      throw new Error(
-        "A different administrator must provide the second approval",
-      );
+      throw new Error("A different administrator must provide the second approval");
     await client
       .from("refunds")
       .update({
@@ -145,14 +135,7 @@ export async function approveRefund(form: FormData) {
       })
       .eq("id", r.id);
   } else throw new Error("Refund is not awaiting approval");
-  await audit(
-    admin.id,
-    "refund.approval",
-    "refund",
-    r.id,
-    why,
-    r.bookings.correlation_id,
-  );
+  await audit(admin.id, "refund.approval", "refund", r.id, why, r.bookings.correlation_id);
   revalidatePath("/safety");
   revalidatePath("/money");
 }
@@ -164,8 +147,7 @@ export async function executeRefund(form: FormData) {
   const { data, error } = await client.functions.invoke("process-refund", {
     body: { refundId },
   });
-  if (error || data?.error)
-    throw new Error(data?.error ?? "Refund processing could not start");
+  if (error || data?.error) throw new Error(data?.error ?? "Refund processing could not start");
   revalidatePath("/safety");
   revalidatePath("/money");
 }
@@ -215,14 +197,7 @@ export async function transitionFulfillment(form: FormData) {
     .select("correlation_id")
     .single();
   if (!b) throw new Error("Booking is not in the required state");
-  await audit(
-    admin.id,
-    `booking.${next}`,
-    "booking",
-    bookingId,
-    why,
-    b.correlation_id,
-  );
+  await audit(admin.id, `booking.${next}`, "booking", bookingId, why, b.correlation_id);
   revalidatePath("/safety");
 }
 export async function approvePayoutEligibility(form: FormData) {
@@ -235,11 +210,7 @@ export async function approvePayoutEligibility(form: FormData) {
     .select("*,bookings(correlation_id,status)")
     .eq("id", payoutId)
     .single();
-  if (
-    !p ||
-    p.status !== "held" ||
-    !["fulfilled", "completed"].includes(p.bookings.status)
-  )
+  if (!p || p.status !== "held" || !["fulfilled", "completed"].includes(p.bookings.status))
     throw new Error("Payout is not eligible for approval");
   const { data: a } = await client
     .from("payout_approvals")
@@ -254,9 +225,7 @@ export async function approvePayoutEligibility(form: FormData) {
     });
   else {
     if (a.first_approved_by === admin.id)
-      throw new Error(
-        "A different administrator must confirm payout eligibility",
-      );
+      throw new Error("A different administrator must confirm payout eligibility");
     await client
       .from("payout_approvals")
       .update({
