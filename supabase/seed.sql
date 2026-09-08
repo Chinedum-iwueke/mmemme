@@ -11,13 +11,13 @@ update public.profiles set full_name='Demo Finance Reviewer',email='reviewer@mme
 insert into public.admin_access(user_id,role,session_timeout_minutes) values('90000000-0000-4000-8000-000000000002','finance',120) on conflict(user_id) do update set role='finance',active=true,revoked_at=null;
 update public.policy_versions set status='approved',approved_by='90000000-0000-4000-8000-000000000001',approved_at=now() where version in('venue-beta-2026-09','caterer-beta-2026-09');
 
-insert into public.vendors(id,name,category,area,description,capacity_min,capacity_max,price_from_kobo,verification_status,verification_expires_at,published)
+insert into public.vendors(id,name,category,area,description,capacity_min,capacity_max,price_from_kobo,verification_status,verification_expires_at,published,hero_image_path)
 values
-  ('10000000-0000-4000-8000-000000000001','Lagoon House','venue','Victoria Island','A waterfront celebration venue with indoor and outdoor ceremony options.',100,350,280000000,'approved','2027-07-12T00:00:00Z',false),
-  ('10000000-0000-4000-8000-000000000002','The Assembly','venue','Ikeja GRA','A calm garden and hall setting for intimate and mid-size Lagos weddings.',80,280,190000000,'approved','2027-06-30T00:00:00Z',false),
-  ('10000000-0000-4000-8000-000000000003','Adùnní Table','caterer','Lekki','Nigerian celebration menus presented with modern service and generous portions.',100,500,950000,'approved','2027-07-08T00:00:00Z',false),
-  ('10000000-0000-4000-8000-000000000004','Ìfẹ́ Kitchen','caterer','Surulere','Classic Lagos party food with structured guest-count packages.',80,400,780000,'approved','2027-07-10T00:00:00Z',false)
-on conflict (id) do update set name=excluded.name, description=excluded.description;
+  ('10000000-0000-4000-8000-000000000001','Lagoon House','venue','Victoria Island','A waterfront celebration venue with indoor and outdoor ceremony options.',100,350,280000000,'approved','2027-07-12T00:00:00Z',false,'/images/editorial/lagoon-house.webp'),
+  ('10000000-0000-4000-8000-000000000002','The Assembly','venue','Ikeja GRA','A calm garden and hall setting for intimate and mid-size Lagos weddings.',80,280,190000000,'approved','2027-06-30T00:00:00Z',false,'/images/editorial/the-assembly.webp'),
+  ('10000000-0000-4000-8000-000000000003','Adùnní Table','caterer','Lekki','Nigerian celebration menus presented with modern service and generous portions.',100,500,950000,'approved','2027-07-08T00:00:00Z',false,'/images/editorial/adunni-table.webp'),
+  ('10000000-0000-4000-8000-000000000004','Ìfẹ́ Kitchen','caterer','Surulere','Classic Lagos party food with structured guest-count packages.',80,400,780000,'approved','2027-07-10T00:00:00Z',false,'/images/editorial/ife-kitchen.webp')
+on conflict (id) do update set name=excluded.name, description=excluded.description, hero_image_path=excluded.hero_image_path;
 
 insert into public.service_packages(id,vendor_id,name,description,price_from_kobo,inclusions)
 values

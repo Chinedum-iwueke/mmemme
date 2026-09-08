@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Icon } from "../components/public/icons";
 import { SearchForm, VendorGrid } from "../components/public/marketplace";
 import { listPublicVendors } from "../lib/marketplace";
@@ -11,6 +12,15 @@ export default async function Home() {
   return (
     <main id="main">
       <section className="home-hero">
+        <Image
+          alt="A contemporary Lagos wedding celebration overlooking the lagoon at golden hour"
+          className="hero-image"
+          fill
+          priority
+          sizes="100vw"
+          src="/images/editorial/lagos-wedding-hero.webp"
+        />
+        <div className="hero-shade" aria-hidden="true" />
         <div className="shell hero-copy">
           <p className="eyebrow">Lagos weddings, brought together</p>
           <h1>

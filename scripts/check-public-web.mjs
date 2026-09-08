@@ -7,6 +7,11 @@ const required = [
   "apps/web/app/venues/page.tsx",
   "apps/web/app/caterers/page.tsx",
   "apps/web/app/vendors/[id]/page.tsx",
+  "apps/web/public/images/editorial/lagos-wedding-hero.webp",
+  "apps/web/public/images/editorial/lagoon-house.webp",
+  "apps/web/public/images/editorial/the-assembly.webp",
+  "apps/web/public/images/editorial/adunni-table.webp",
+  "apps/web/public/images/editorial/ife-kitchen.webp",
 ];
 for (const file of required)
   if (!fs.existsSync(file)) throw new Error(`Missing public-web contract: ${file}`);
@@ -15,6 +20,11 @@ if (!legal.includes("draft-2026-08-28")) throw new Error("Legal version must be 
 const cssBytes = fs.statSync("apps/web/app/styles.css").size;
 if (cssBytes > 35_000)
   throw new Error(`Public CSS exceeds 35 KB source budget (${cssBytes} bytes)`);
+const editorialBytes = required
+  .filter((file) => file.includes("/images/editorial/"))
+  .reduce((total, file) => total + fs.statSync(file).size, 0);
+if (editorialBytes > 1_250_000)
+  throw new Error(`Editorial imagery exceeds 1.25 MB source budget (${editorialBytes} bytes)`);
 const clientFiles = [
   "apps/web/components/public/mobile-nav.tsx",
   "apps/web/components/customer/account-nav.tsx",
@@ -32,5 +42,5 @@ if (process.env.MMEMME_ENV === "production") {
     throw new Error("Production public site URL must use HTTPS");
 }
 console.log(
-  `Public marketplace contracts passed (CSS ${cssBytes} B; shell client ${clientBytes} B).`,
+  `Public marketplace contracts passed (CSS ${cssBytes} B; images ${editorialBytes} B; shell client ${clientBytes} B).`,
 );

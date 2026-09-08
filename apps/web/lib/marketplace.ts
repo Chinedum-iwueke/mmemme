@@ -34,7 +34,9 @@ function publicClient() {
 }
 
 function publicImage(path: string | null) {
-  if (!path || !configured()) return null;
+  if (!path) return null;
+  if (path.startsWith("/")) return path;
+  if (!configured()) return null;
   return publicClient()
     .storage.from("vendor-media")
     .getPublicUrl(path, { transform: { width: 1200, quality: 76 } }).data.publicUrl;

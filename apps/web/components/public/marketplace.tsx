@@ -71,7 +71,11 @@ export function VendorCard({ vendor, returnTo }: { vendor: PublicVendor; returnT
             <span>{vendor.name.charAt(0)}</span>
           </div>
         )}
-        <span className="category-label">{vendor.category}</span>
+        <span className="image-scrim" aria-hidden="true" />
+        <span className="category-label">Curated {vendor.category}</span>
+        <span className="image-location">
+          <Icon name="location" /> {vendor.area}, Lagos
+        </span>
       </Link>
       <div className="vendor-card-body">
         <p className="trust-line">
@@ -90,7 +94,7 @@ export function VendorCard({ vendor, returnTo }: { vendor: PublicVendor; returnT
           ) : null}
         </p>
         <div className="card-price">
-          <span>Guidance from</span>
+          <span>Package guidance from</span>
           <strong>{money(vendor.price_from_kobo)}</strong>
         </div>
       </div>
