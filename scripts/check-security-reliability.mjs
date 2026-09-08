@@ -21,4 +21,19 @@ const contracts = [
 const missing = contracts.filter(([source, token]) => !source.includes(token));
 if (missing.length)
   throw new Error(`Missing M16 controls: ${missing.map(([, , name]) => name).join(", ")}`);
+for (const [name, config] of [
+  ["public web", webConfig],
+  ["operations console", adminConfig],
+]) {
+  if (!config.includes('...(isProduction ? ["upgrade-insecure-requests"] : [])'))
+    throw new Error(`${name} must enforce HTTPS upgrades only in production`);
+  if (!config.includes("...(isProduction ? [hstsHeader] : [])"))
+    throw new Error(`${name} must send HSTS only in production`);
+  if (!config.includes("${storage.origin}"))
+    throw new Error(`${name} must allow its configured Supabase origin`);
+  if (!config.includes("allowedDevOrigins: isProduction ? [] : localDevOrigins"))
+    throw new Error(`${name} must explicitly allow configured local preview origins`);
+  if (!config.includes('isProduction ? "" : " \'unsafe-eval\'"'))
+    throw new Error(`${name} must permit development tooling without weakening production CSP`);
+}
 console.log(`${contracts.length} Milestone 16 security, privacy and reliability contracts passed.`);

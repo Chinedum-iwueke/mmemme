@@ -1,8 +1,33 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs/config";
 const storage = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://example.supabase.co");
+const isProduction =
+  process.env.MMEMME_ENV === "production" || process.env.NEXT_PUBLIC_MMEMME_ENV === "production";
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "img-src 'self' data: https:",
+  "font-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
+  `connect-src 'self' ${storage.origin} https://*.supabase.co https://*.sentry.io`,
+  ...(isProduction ? ["upgrade-insecure-requests"] : []),
+].join("; ");
+const hstsHeader = {
+  key: "Strict-Transport-Security",
+  value: "max-age=63072000; includeSubDomains; preload",
+};
+const localDevOrigins = process.env.MMEMME_DEV_ORIGINS?.split(",") ?? [
+  "localhost",
+  "127.0.0.1",
+  "192.168.*.*",
+];
 const config: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: isProduction ? [] : localDevOrigins,
   transpilePackages: ["@mmemme/config", "@mmemme/domain", "@mmemme/tokens"],
   images: {
     formats: ["image/avif", "image/webp"],
@@ -15,17 +40,13 @@ const config: NextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://*.sentry.io; upgrade-insecure-requests",
+            value: contentSecurityPolicy,
           },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
+          ...(isProduction ? [hstsHeader] : []),
         ],
       },
       {
