@@ -11,12 +11,8 @@ Deno.serve(async (request) => {
   } = await userApi.auth.getUser();
   if (!user) return failure("UNAUTHORIZED", 401);
   const admin = adminClient();
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-  if (!profile?.is_admin) return failure("FORBIDDEN", 403);
+  const { data: allowed } = await userApi.rpc("admin_has_capability", { p_capability: "money" });
+  if (!allowed) return failure("FORBIDDEN", 403);
   const parsed = RefundRequest.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return failure("INVALID_REQUEST", 400);
   const { refundId } = parsed.data;
@@ -25,11 +21,15 @@ Deno.serve(async (request) => {
     .select("id,amount_kobo,status,payments(provider_reference)")
     .eq("id", refundId)
     .single();
-  if (!r || r.status !== "approved") return failure("CONFLICT", 409);
-  await admin
+  if (!r || !["approved", "failed"].includes(r.status)) return failure("CONFLICT", 409);
+  const { data: claimed } = await admin
     .from("refunds")
-    .update({ status: "processing", updated_at: new Date().toISOString() })
-    .eq("id", r.id);
+    .update({ status: "processing", failure_reason: null, updated_at: new Date().toISOString() })
+    .eq("id", r.id)
+    .in("status", ["approved", "failed"])
+    .select("id")
+    .maybeSingle();
+  if (!claimed) return failure("CONFLICT", 409);
   if (Deno.env.get("PAYMENTS_DEMO_MODE") === "true") {
     const { error } = await admin.rpc("process_refund_event", {
       p_transaction_reference: r.payments.provider_reference,
@@ -43,19 +43,22 @@ Deno.serve(async (request) => {
       ? json({ error: error.message }, 500)
       : success({ status: "succeeded", demo: true });
   }
-  const response = await fetch("https://api.paystack.co/refund", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${Deno.env.get("PAYSTACK_API_URL") ?? "https://api.paystack.co"}/refund`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        transaction: r.payments.provider_reference,
+        amount: r.amount_kobo,
+        customer_note: "MMEMME approved cancellation refund",
+        merchant_note: `MMEMME refund ${r.id}`,
+      }),
     },
-    body: JSON.stringify({
-      transaction: r.payments.provider_reference,
-      amount: r.amount_kobo,
-      customer_note: "MMEMME approved cancellation refund",
-      merchant_note: `MMEMME refund ${r.id}`,
-    }),
-  });
+  );
   const result = await response.json();
   if (!response.ok || !result.status) {
     await admin

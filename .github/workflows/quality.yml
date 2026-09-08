@@ -40,6 +40,9 @@ jobs:
       - run: npm test
       - run: npm run tokens:check
       - run: npm run native-ui:check
+      - run: npm run vendor:onboarding:check
+      - run: npm run operations:check
+      - run: npm run transactions:check
       - run: npm run sql:lint
       - run: npm run secrets:check
       - run: npm run boundaries:check
@@ -56,4 +59,6 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run db:start
+      - run: npm run db:reset
+      - run: npm run db:test
       - run: npm run db:types:check

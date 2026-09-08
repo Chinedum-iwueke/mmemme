@@ -1,8 +1,87 @@
 import { adminClient } from "../_shared/supabase.ts";
+
+type Delivery = {
+  id: string;
+  source_type: string;
+  source_id: string;
+  recipient_id: string | null;
+  channel: "push" | "email";
+  payload: { kind?: string; title?: string; body?: string; bookingId?: string; url?: string };
+  attempts: number;
+};
+const retryable = (status: number) => status === 429 || status >= 500;
+
+async function reconcileExpoReceipts(admin: ReturnType<typeof adminClient>) {
+  const { data: rows } = await admin
+    .from("notification_outbox")
+    .select("id,provider_message_id")
+    .eq("channel", "push")
+    .eq("status", "sent")
+    .eq("provider_receipt_status", "ticketed")
+    .not("provider_message_id", "is", null)
+    .limit(100);
+  const mappings = (rows ?? []).flatMap((row) =>
+    String(row.provider_message_id)
+      .split(",")
+      .filter(Boolean)
+      .map((mapping) => {
+        const separator = mapping.indexOf(":");
+        return {
+          outboxId: row.id,
+          ticketId: mapping.slice(0, separator),
+          tokenId: mapping.slice(separator + 1),
+        };
+      })
+      .filter((mapping) => mapping.ticketId && mapping.tokenId),
+  );
+  if (!mappings.length) return 0;
+  const response = await fetch("https://exp.host/--/api/v2/push/getReceipts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(Deno.env.get("EXPO_ACCESS_TOKEN")
+        ? { Authorization: `Bearer ${Deno.env.get("EXPO_ACCESS_TOKEN")}` }
+        : {}),
+    },
+    body: JSON.stringify({ ids: mappings.map(({ ticketId }) => ticketId) }),
+  });
+  if (!response.ok) return 0;
+  const result = await response.json().catch(() => ({ data: {} }));
+  const receipts = result.data ?? {};
+  for (const row of rows ?? []) {
+    const rowMappings = mappings.filter((mapping) => mapping.outboxId === row.id);
+    if (!rowMappings.every(({ ticketId }) => receipts[ticketId])) continue;
+    const rowReceipts = rowMappings.map(({ ticketId }) => receipts[ticketId]);
+    for (const mapping of rowMappings) {
+      if (receipts[mapping.ticketId]?.details?.error === "DeviceNotRegistered")
+        await admin
+          .from("push_tokens")
+          .update({ active: false, updated_at: new Date().toISOString() })
+          .eq("id", mapping.tokenId);
+    }
+    const failed = rowReceipts.find((receipt) => receipt?.status === "error");
+    await admin
+      .from("notification_outbox")
+      .update({
+        provider_receipt_status: failed ? "error" : "delivered",
+        last_error: failed?.message ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", row.id)
+      .eq("provider_receipt_status", "ticketed");
+  }
+  return mappings.length;
+}
+
 Deno.serve(async (request) => {
-  if (request.headers.get("x-cron-secret") !== Deno.env.get("CRON_SECRET"))
+  if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
+  if (
+    !Deno.env.get("CRON_SECRET") ||
+    request.headers.get("x-cron-secret") !== Deno.env.get("CRON_SECRET")
+  )
     return new Response("Unauthorized", { status: 401 });
   const admin = adminClient();
+  const receiptsChecked = await reconcileExpoReceipts(admin);
   await admin.rpc("expire_vendor_applications");
   const { data: due } = await admin
     .from("booking_reminders")
@@ -11,82 +90,25 @@ Deno.serve(async (request) => {
     .is("delivered_at", null)
     .limit(100);
   for (const reminder of due ?? []) {
-    await admin.from("customer_notifications").insert({
-      customer_id: reminder.customer_id,
-      booking_id: reminder.booking_id,
-      kind: reminder.kind,
-      title: "Your MMEMME event is approaching",
-      body: "Open your booking for the latest confirmed details.",
-      deep_link: `mmemme://booking/${reminder.booking_id}`,
-    });
-    await admin
-      .from("booking_reminders")
-      .update({ delivered_at: new Date().toISOString() })
-      .eq("id", reminder.id);
-  }
-  const { data: rows } = await admin
-    .from("customer_notifications")
-    .select("id,customer_id,booking_id,title,body,deep_link,push_status,email_status")
-    .or("push_status.eq.pending,email_status.eq.pending")
-    .limit(100);
-  for (const row of rows ?? []) {
-    const [{ data: prefs }, { data: tokens }, { data: profile }] = await Promise.all([
-      admin
-        .from("notification_preferences")
-        .select("*")
-        .eq("customer_id", row.customer_id)
-        .maybeSingle(),
-      admin
-        .from("push_tokens")
-        .select("token")
-        .eq("customer_id", row.customer_id)
-        .eq("active", true),
-      admin.from("profiles").select("email").eq("id", row.customer_id).single(),
-    ]);
-    let pushStatus = "disabled",
-      emailStatus = "disabled";
-    if (prefs?.push_enabled && tokens?.length) {
-      const response = await fetch("https://exp.host/--/api/v2/push/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(Deno.env.get("EXPO_ACCESS_TOKEN")
-            ? { Authorization: `Bearer ${Deno.env.get("EXPO_ACCESS_TOKEN")}` }
-            : {}),
-        },
-        body: JSON.stringify(
-          tokens.map((t) => ({
-            to: t.token,
-            title: row.title,
-            body: row.body,
-            data: { bookingId: row.booking_id, url: row.deep_link },
-            sound: "default",
-          })),
-        ),
-      });
-      pushStatus = response.ok ? "sent" : "failed";
-    }
-    if (prefs?.email_enabled && profile?.email && Deno.env.get("RESEND_API_KEY")) {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-          "Content-Type": "application/json",
-          "Idempotency-Key": `notification-${row.id}`,
-        },
-        body: JSON.stringify({
-          from: Deno.env.get("NOTIFICATION_FROM_EMAIL"),
-          to: [profile.email],
-          subject: row.title,
-          text: `${row.body}\n\nOpen MMEMME: ${row.deep_link ?? ""}`,
-        }),
-      });
-      emailStatus = response.ok ? "sent" : "failed";
-    }
-    await admin
-      .from("customer_notifications")
-      .update({ push_status: pushStatus, email_status: emailStatus })
-      .eq("id", row.id);
+    const { error } = await admin.from("customer_notifications").upsert(
+      {
+        customer_id: reminder.customer_id,
+        booking_id: reminder.booking_id,
+        kind: reminder.kind,
+        title: "Your MMEMME event is approaching",
+        body: "Open your booking for the latest confirmed details.",
+        deep_link: `mmemme://booking/${reminder.booking_id}`,
+        web_path: `/bookings/${reminder.booking_id}`,
+        deduplication_key: `reminder:${reminder.id}`,
+      },
+      { onConflict: "deduplication_key" },
+    );
+    if (!error)
+      await admin
+        .from("booking_reminders")
+        .update({ delivered_at: new Date().toISOString() })
+        .eq("id", reminder.id)
+        .is("delivered_at", null);
   }
   const { data: expiring } = await admin
     .from("vendor_applications")
@@ -99,7 +121,7 @@ Deno.serve(async (request) => {
       .select("user_id")
       .eq("account_id", application.account_id)
       .eq("role", "owner")
-      .single();
+      .maybeSingle();
     if (owner)
       await admin.from("vendor_notifications").upsert(
         {
@@ -107,51 +129,134 @@ Deno.serve(async (request) => {
           recipient_id: owner.user_id,
           kind: "expiry",
           title: "Your MMEMME verification needs renewal",
-          body: `Verification expires ${application.expires_at}. Open your workspace to renew credentials.`,
+          body: `Verification expires ${application.expires_at}. Renew the required credentials in your workspace.`,
           deduplication_key: `expiry-30:${application.id}:${application.expires_at}`,
         },
         { onConflict: "deduplication_key" },
       );
   }
-  const { data: vendorRows } = await admin
-    .from("vendor_notifications")
-    .select("id,recipient_id,title,body,deduplication_key")
-    .in("email_status", ["pending", "failed"])
-    .limit(100);
-  for (const row of vendorRows ?? []) {
-    const { data: profile } = await admin
-      .from("profiles")
-      .select("email")
-      .eq("id", row.recipient_id)
-      .single();
-    let emailStatus = "suppressed";
-    if (profile?.email && Deno.env.get("RESEND_API_KEY")) {
-      const response = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
-          "Content-Type": "application/json",
-          "Idempotency-Key": `vendor-${row.deduplication_key}`,
-        },
-        body: JSON.stringify({
-          from: Deno.env.get("NOTIFICATION_FROM_EMAIL"),
-          to: [profile.email],
-          subject: row.title,
-          text: `${row.body}\n\nOpen your vendor workspace: ${Deno.env.get("PUBLIC_WEB_URL")}/vendor/workspace`,
-        }),
-      });
-      emailStatus = response.ok ? "sent" : "failed";
-    }
-    await admin
-      .from("vendor_notifications")
-      .update({
-        email_status: emailStatus,
-        sent_at: emailStatus === "sent" ? new Date().toISOString() : null,
-      })
-      .eq("id", row.id);
-  }
-  return Response.json({
-    processed: rows?.length ?? 0,
-    vendorProcessed: vendorRows?.length ?? 0,
+  const leaseToken = crypto.randomUUID();
+  const { data, error: claimError } = await admin.rpc("claim_notification_deliveries", {
+    p_limit: 100,
+    p_lease_token: leaseToken,
   });
+  if (claimError) return Response.json({ error: "delivery claim failed" }, { status: 500 });
+  const deliveries = (data ?? []) as Delivery[];
+  for (const row of deliveries) {
+    let status: "sent" | "retry" | "suppressed" | "failed" = "suppressed";
+    let providerId = "",
+      receiptStatus = "",
+      lastError = "";
+    try {
+      if (!row.recipient_id) throw new Error("recipient unavailable");
+      const [{ data: preferences }, { data: profile }] = await Promise.all([
+        admin
+          .from("notification_preferences")
+          .select("push_enabled,email_enabled")
+          .eq("customer_id", row.recipient_id)
+          .maybeSingle(),
+        admin.from("profiles").select("email").eq("id", row.recipient_id).maybeSingle(),
+      ]);
+      if (row.channel === "push") {
+        if (preferences && !preferences.push_enabled) status = "suppressed";
+        else {
+          const { data: tokens } = await admin
+            .from("push_tokens")
+            .select("id,token")
+            .eq("customer_id", row.recipient_id)
+            .eq("active", true);
+          if (!tokens?.length) status = "suppressed";
+          else {
+            const response = await fetch("https://exp.host/--/api/v2/push/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(Deno.env.get("EXPO_ACCESS_TOKEN")
+                  ? { Authorization: `Bearer ${Deno.env.get("EXPO_ACCESS_TOKEN")}` }
+                  : {}),
+              },
+              body: JSON.stringify(
+                tokens.map((token) => ({
+                  to: token.token,
+                  title: row.payload.title,
+                  body: row.payload.body,
+                  data: { bookingId: row.payload.bookingId, url: row.payload.url },
+                  sound: "default",
+                })),
+              ),
+            });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) {
+              status = retryable(response.status) && row.attempts < 8 ? "retry" : "failed";
+              lastError = `Expo HTTP ${response.status}`;
+            } else {
+              const tickets = Array.isArray(result.data) ? result.data : [result.data];
+              const mappings: string[] = [];
+              for (let index = 0; index < tickets.length; index++) {
+                const ticket = tickets[index];
+                const token = tokens[index];
+                if (ticket?.details?.error === "DeviceNotRegistered" && token)
+                  await admin
+                    .from("push_tokens")
+                    .update({ active: false, updated_at: new Date().toISOString() })
+                    .eq("id", token.id);
+                if (ticket?.id && token) mappings.push(`${ticket.id}:${token.id}`);
+              }
+              providerId = mappings.join(",");
+              receiptStatus = "ticketed";
+              status = tickets.some((ticket) => ticket?.status === "error")
+                ? row.attempts < 8
+                  ? "retry"
+                  : "failed"
+                : "sent";
+              lastError = tickets.find((ticket) => ticket?.message)?.message ?? "";
+            }
+          }
+        }
+      } else {
+        const critical = ["booking_status", "support", "security"].includes(row.payload.kind ?? "");
+        if (preferences && !preferences.email_enabled && !critical) status = "suppressed";
+        else if (!profile?.email || !Deno.env.get("RESEND_API_KEY")) {
+          status = row.attempts < 8 ? "retry" : "failed";
+          lastError = "Email configuration or recipient unavailable";
+        } else {
+          const response = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+              "Content-Type": "application/json",
+              "Idempotency-Key": `${row.source_type}-${row.source_id}-${row.channel}`,
+            },
+            body: JSON.stringify({
+              from: Deno.env.get("NOTIFICATION_FROM_EMAIL"),
+              to: [profile.email],
+              subject: row.payload.title,
+              text: `${row.payload.body}\n\nOpen MMEMME: ${Deno.env.get("PUBLIC_WEB_URL")}${row.payload.url ?? ""}`,
+            }),
+          });
+          const result = await response.json().catch(() => ({}));
+          if (response.ok) {
+            status = "sent";
+            providerId = String(result.id ?? "");
+            receiptStatus = "accepted";
+          } else {
+            status = retryable(response.status) && row.attempts < 8 ? "retry" : "failed";
+            lastError = `Resend HTTP ${response.status}`;
+          }
+        }
+      }
+    } catch (error) {
+      status = row.attempts < 8 ? "retry" : "failed";
+      lastError = error instanceof Error ? error.message : "delivery failed";
+    }
+    await admin.rpc("complete_notification_delivery", {
+      p_id: row.id,
+      p_lease_token: leaseToken,
+      p_status: status,
+      p_provider_id: providerId,
+      p_receipt_status: receiptStatus,
+      p_error: lastError,
+    });
+  }
+  return Response.json({ claimed: deliveries.length, receiptsChecked, leaseToken });
 });

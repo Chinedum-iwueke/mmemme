@@ -50,112 +50,32 @@ export async function replySupport(form: FormData) {
 }
 export async function decideCancellation(form: FormData) {
   requireConfirmation(form);
-  const admin = await requireAdmin("support");
+  await requireAdmin("support");
   const cancellationId = uuid.parse(form.get("cancellationId"));
   const approve = form.get("decision") === "approve";
   const why = reason(form.get("reason"));
-  const client = createAdminClient();
-  const { data: c } = await client
-    .from("cancellations")
-    .select("*,bookings(correlation_id,status)")
-    .eq("id", cancellationId)
-    .eq("status", "requested")
-    .single();
-  if (!c) throw new Error("Cancellation is no longer pending");
-  if (!approve) {
-    await client
-      .from("cancellations")
-      .update({
-        status: "rejected",
-        decided_by: admin.id,
-        decided_at: new Date().toISOString(),
-        decision_reason: why,
-      })
-      .eq("id", c.id);
-    await audit(
-      admin.id,
-      "cancellation.rejected",
-      "cancellation",
-      c.id,
-      why,
-      c.bookings.correlation_id,
-    );
-    revalidatePath("/safety");
-    return;
-  }
-  await client
-    .from("cancellations")
-    .update({
-      status: "approved",
-      decided_by: admin.id,
-      decided_at: new Date().toISOString(),
-      decision_reason: why,
-    })
-    .eq("id", c.id);
-  await client.from("bookings").update({ status: "cancelled" }).eq("id", c.booking_id);
-  if (c.refundable_amount_kobo > 0) {
-    const { data: payment } = await client
-      .from("payments")
-      .select("id")
-      .eq("booking_id", c.booking_id)
-      .in("status", ["succeeded", "partially_refunded"])
-      .order("paid_at", { ascending: false })
-      .limit(1)
-      .single();
-    if (payment)
-      await client.from("refunds").insert({
-        cancellation_id: c.id,
-        booking_id: c.booking_id,
-        payment_id: payment.id,
-        amount_kobo: c.refundable_amount_kobo,
-        requested_by: admin.id,
-      });
-  }
-  await audit(
-    admin.id,
-    "cancellation.approved",
-    "cancellation",
-    c.id,
-    why,
-    c.bookings.correlation_id,
-  );
+  const { error } = await (
+    await createClient()
+  ).rpc("admin_decide_cancellation", {
+    p_cancellation_id: cancellationId,
+    p_approve: approve,
+    p_reason: why,
+  });
+  if (error) throw new Error(error.message);
   revalidatePath("/safety");
 }
 export async function approveRefund(form: FormData) {
   requireConfirmation(form);
-  const admin = await requireAdmin("money");
+  await requireAdmin("money");
   const refundId = uuid.parse(form.get("refundId"));
   const why = reason(form.get("reason"));
-  const client = createAdminClient();
-  const { data: r } = await client
-    .from("refunds")
-    .select("*,bookings(correlation_id)")
-    .eq("id", refundId)
-    .single();
-  if (!r) throw new Error("Refund not found");
-  if (r.status === "awaiting_first_approval") {
-    await client
-      .from("refunds")
-      .update({
-        status: "awaiting_second_approval",
-        first_approved_by: admin.id,
-        approval_reason: why,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", r.id);
-  } else if (r.status === "awaiting_second_approval") {
-    if (r.first_approved_by === admin.id)
-      throw new Error("A different administrator must provide the second approval");
-    await client
-      .from("refunds")
-      .update({
-        status: "approved",
-        second_approved_by: admin.id,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", r.id);
-  } else throw new Error("Refund is not awaiting approval");
-  await audit(admin.id, "refund.approval", "refund", r.id, why, r.bookings.correlation_id);
+  const { error } = await (
+    await createClient()
+  ).rpc("admin_approve_refund", {
+    p_refund_id: refundId,
+    p_reason: why,
+  });
+  if (error) throw new Error(error.message);
   revalidatePath("/safety");
   revalidatePath("/money");
 }
@@ -224,120 +144,24 @@ export async function transitionFulfillment(form: FormData) {
 }
 export async function approvePayoutEligibility(form: FormData) {
   requireConfirmation(form);
-  const admin = await requireAdmin("money");
+  await requireAdmin("money");
   const payoutId = uuid.parse(form.get("payoutId"));
   const why = reason(form.get("reason"));
-  const client = createAdminClient();
-  const { data: p } = await client
-    .from("payouts")
-    .select("*,bookings(correlation_id,status)")
-    .eq("id", payoutId)
-    .single();
-  if (!p || p.status !== "held" || !["fulfilled", "completed"].includes(p.bookings.status))
-    throw new Error("Payout is not eligible for approval");
-  const { data: a } = await client
-    .from("payout_approvals")
-    .select("*")
-    .eq("payout_id", payoutId)
-    .maybeSingle();
-  if (!a)
-    await client.from("payout_approvals").insert({
-      payout_id: payoutId,
-      first_approved_by: admin.id,
-      reason: why,
-    });
-  else {
-    if (a.first_approved_by === admin.id)
-      throw new Error("A different administrator must confirm payout eligibility");
-    await client
-      .from("payout_approvals")
-      .update({
-        second_approved_by: admin.id,
-        second_approved_at: new Date().toISOString(),
-      })
-      .eq("payout_id", payoutId);
-    await client
-      .from("payouts")
-      .update({
-        status: "eligible",
-        approved_by: admin.id,
-        approved_at: new Date().toISOString(),
-      })
-      .eq("id", payoutId);
-  }
-  await audit(
-    admin.id,
-    "payout.eligibility_approval",
-    "payout",
-    payoutId,
-    why,
-    p.bookings.correlation_id,
-  );
+  const { error } = await (
+    await createClient()
+  ).rpc("admin_approve_payout", { p_payout_id: payoutId, p_reason: why });
+  if (error) throw new Error(error.message);
   revalidatePath("/safety");
   revalidatePath("/money");
 }
 export async function runReconciliation() {
-  const admin = await requireAdmin("money");
-  const client = createAdminClient();
-  const [{ data: payments }, { data: entries }] = await Promise.all([
-    client.from("payments").select("id,amount_kobo,status"),
-    client.from("ledger_entries").select("payment_id,entry_type,amount_kobo"),
-  ]);
-  const succeeded = payments?.filter((p) => p.status === "succeeded") ?? [];
-  const exceptions = succeeded.filter((p) => {
-    const rows = entries?.filter((e) => e.payment_id === p.id) ?? [];
-    const gross = rows.find((e) => e.entry_type === "gross")?.amount_kobo ?? 0;
-    return (
-      gross !==
-      rows
-        .filter((e) => ["platform_fee", "vendor_net"].includes(e.entry_type))
-        .reduce((n, e) => n + e.amount_kobo, 0)
-    );
+  await requireAdmin("money");
+  const { error } = await (
+    await createClient()
+  ).rpc("run_financial_reconciliation", {
+    p_run_date: new Date().toISOString().slice(0, 10),
   });
-  const { data: run, error } = await client
-    .from("reconciliation_runs")
-    .upsert(
-      {
-        run_date: new Date().toISOString().slice(0, 10),
-        status: exceptions.length ? "exceptions" : "balanced",
-        payment_count: succeeded.length,
-        gross_kobo: succeeded.reduce((n, p) => n + p.amount_kobo, 0),
-        exception_count: exceptions.length,
-        details: { paymentIds: exceptions.map((e) => e.id) },
-        run_by: admin.id,
-      },
-      { onConflict: "run_date" },
-    )
-    .select("id")
-    .single();
-  if (error || !run) throw new Error("Could not record reconciliation run");
-  if (exceptions.length)
-    await client.from("reconciliation_exceptions").upsert(
-      exceptions.map((payment) => ({
-        run_id: run.id,
-        payment_id: payment.id,
-        kind: "ledger_mismatch",
-        expected_kobo: payment.amount_kobo,
-        actual_kobo: (entries ?? [])
-          .filter(
-            (entry) =>
-              entry.payment_id === payment.id &&
-              ["platform_fee", "vendor_net"].includes(entry.entry_type),
-          )
-          .reduce((sum, entry) => sum + entry.amount_kobo, 0),
-      })),
-      { onConflict: "run_id,payment_id,kind" },
-    );
-  await audit(
-    admin.id,
-    "reconciliation.completed",
-    "reconciliation",
-    run.id,
-    exceptions.length
-      ? `${exceptions.length} exception(s) detected`
-      : "All successful payments balanced",
-    crypto.randomUUID(),
-  );
+  if (error) throw new Error(error.message);
   revalidatePath("/safety");
   revalidatePath("/money");
 }

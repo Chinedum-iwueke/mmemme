@@ -19,7 +19,7 @@ export default async function BookingQueue({
   let bookingQuery = client
     .from("bookings")
     .select(
-      "id,customer_id,vendor_id,event_date,guest_count,requirements,status,created_at,correlation_id",
+      "id,customer_id,vendor_id,event_date,guest_count,requirements,status,created_at,correlation_id,revision",
     )
     .order("created_at", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
@@ -142,6 +142,7 @@ export default async function BookingQueue({
                   <summary>Vendor contact and quote</summary>
                   <form action={addContactNote} className="form inline-form">
                     <input type="hidden" name="bookingId" value={b.id} />
+                    <input type="hidden" name="expectedRevision" value={b.revision} />
                     <label>
                       Contact attempt
                       <input

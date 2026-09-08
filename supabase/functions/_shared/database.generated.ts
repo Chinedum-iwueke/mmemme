@@ -200,6 +200,7 @@ export type Database = {
           id: string
           package_id: string | null
           requirements: string
+          revision: number
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
           vendor_id: string
@@ -216,6 +217,7 @@ export type Database = {
           id?: string
           package_id?: string | null
           requirements: string
+          revision?: number
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
           vendor_id: string
@@ -232,6 +234,7 @@ export type Database = {
           id?: string
           package_id?: string | null
           requirements?: string
+          revision?: number
           status?: Database["public"]["Enums"]["booking_status"]
           updated_at?: string
           vendor_id?: string
@@ -272,6 +275,32 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "wedding_briefs"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      cancellation_policy_tiers: {
+        Row: {
+          minimum_days: number
+          policy_version: string
+          refund_bps: number
+        }
+        Insert: {
+          minimum_days: number
+          policy_version: string
+          refund_bps: number
+        }
+        Update: {
+          minimum_days?: number
+          policy_version?: string
+          refund_bps?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancellation_policy_tiers_policy_version_fkey"
+            columns: ["policy_version"]
+            isOneToOne: false
+            referencedRelation: "policy_versions"
+            referencedColumns: ["version"]
           },
         ]
       }
@@ -386,6 +415,7 @@ export type Database = {
           booking_id: string | null
           created_at: string
           customer_id: string
+          deduplication_key: string | null
           deep_link: string | null
           email_status: string
           id: string
@@ -400,6 +430,7 @@ export type Database = {
           booking_id?: string | null
           created_at?: string
           customer_id: string
+          deduplication_key?: string | null
           deep_link?: string | null
           email_status?: string
           id?: string
@@ -414,6 +445,7 @@ export type Database = {
           booking_id?: string | null
           created_at?: string
           customer_id?: string
+          deduplication_key?: string | null
           deep_link?: string | null
           email_status?: string
           id?: string
@@ -543,6 +575,56 @@ export type Database = {
           },
         ]
       }
+      financial_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          assigned_to: string | null
+          created_at: string
+          deduplication_key: string
+          entity_id: string | null
+          id: string
+          kind: string
+          resolved_at: string | null
+          severity: string
+          status: string
+          summary: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          deduplication_key: string
+          entity_id?: string | null
+          id?: string
+          kind: string
+          resolved_at?: string | null
+          severity: string
+          status?: string
+          summary: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          assigned_to?: string | null
+          created_at?: string
+          deduplication_key?: string
+          entity_id?: string | null
+          id?: string
+          kind?: string
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_alerts_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ledger_entries: {
         Row: {
           amount_kobo: number
@@ -577,6 +659,74 @@ export type Database = {
             columns: ["payment_id"]
             isOneToOne: false
             referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_outbox: {
+        Row: {
+          attempts: number
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          last_error: string | null
+          lease_token: string | null
+          leased_until: string | null
+          next_attempt_at: string
+          payload: Json
+          provider_message_id: string | null
+          provider_receipt_status: string | null
+          recipient_id: string | null
+          source_id: string
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          last_error?: string | null
+          lease_token?: string | null
+          leased_until?: string | null
+          next_attempt_at?: string
+          payload: Json
+          provider_message_id?: string | null
+          provider_receipt_status?: string | null
+          recipient_id?: string | null
+          source_id: string
+          source_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          id?: string
+          last_error?: string | null
+          lease_token?: string | null
+          leased_until?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          provider_message_id?: string | null
+          provider_receipt_status?: string | null
+          recipient_id?: string | null
+          source_id?: string
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_outbox_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -721,6 +871,9 @@ export type Database = {
           raw_provider_status: string | null
           status: Database["public"]["Enums"]["payment_status"]
           updated_at: string
+          verified_amount_kobo: number | null
+          verified_at: string | null
+          verified_currency: string | null
         }
         Insert: {
           amount_kobo: number
@@ -737,6 +890,9 @@ export type Database = {
           raw_provider_status?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
+          verified_amount_kobo?: number | null
+          verified_at?: string | null
+          verified_currency?: string | null
         }
         Update: {
           amount_kobo?: number
@@ -753,6 +909,9 @@ export type Database = {
           raw_provider_status?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
           updated_at?: string
+          verified_amount_kobo?: number | null
+          verified_at?: string | null
+          verified_currency?: string | null
         }
         Relationships: [
           {
@@ -894,6 +1053,50 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      policy_versions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          effective_at: string
+          id: string
+          policy_type: string
+          status: string
+          terms: Json
+          version: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          effective_at: string
+          id?: string
+          policy_type: string
+          status: string
+          terms: Json
+          version: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          effective_at?: string
+          id?: string
+          policy_type?: string
+          status?: string
+          terms?: Json
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "policy_versions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2605,6 +2808,7 @@ export type Database = {
           id: string
           package_id: string | null
           requirements: string
+          revision: number
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
           vendor_id: string
@@ -2618,7 +2822,122 @@ export type Database = {
         }
       }
       accept_vendor_invitation: { Args: { p_token: string }; Returns: string }
+      admin_approve_payout: {
+        Args: { p_payout_id: string; p_reason: string }
+        Returns: {
+          amount_kobo: number
+          approved_at: string | null
+          approved_by: string | null
+          booking_id: string
+          created_at: string
+          id: string
+          payment_id: string
+          provider_reference: string | null
+          status: Database["public"]["Enums"]["payout_status"]
+          updated_at: string
+          vendor_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payouts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_approve_refund: {
+        Args: { p_reason: string; p_refund_id: string }
+        Returns: {
+          amount_kobo: number
+          approval_reason: string | null
+          booking_id: string
+          cancellation_id: string
+          created_at: string
+          failure_reason: string | null
+          first_approved_by: string | null
+          id: string
+          payment_id: string
+          provider_reference: string | null
+          requested_by: string
+          second_approved_by: string | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "refunds"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_decide_cancellation: {
+        Args: {
+          p_approve: boolean
+          p_cancellation_id: string
+          p_reason: string
+        }
+        Returns: {
+          booking_id: string
+          calculation: Json
+          customer_id: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_reason: string | null
+          id: string
+          paid_amount_kobo: number
+          policy_version: string
+          reason: string
+          refundable_amount_kobo: number
+          requested_at: string
+          retained_amount_kobo: number
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "cancellations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_has_capability: { Args: { p_capability: string }; Returns: boolean }
+      admin_issue_quote: {
+        Args: {
+          p_booking_id: string
+          p_cancellation_summary: string
+          p_deposit_kobo: number
+          p_exclusions: string[]
+          p_expected_revision: number
+          p_expires_at: string
+          p_inclusions: string[]
+          p_payment_schedule: string
+          p_total_kobo: number
+        }
+        Returns: {
+          accepted_at: string | null
+          availability_confirmed_at: string | null
+          booking_id: string
+          cancellation_summary: string
+          cancellation_template_version: string
+          created_at: string
+          created_by: string
+          deposit_amount_kobo: number
+          exclusions: string[]
+          expires_at: string
+          id: string
+          inclusions: string[]
+          package_name_snapshot: string
+          payment_schedule: string
+          platform_fee_bps: number
+          revision: number
+          terms_version: string
+          total_amount_kobo: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "quotes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       application_account: {
         Args: { p_application_id: string }
         Returns: string
@@ -2650,6 +2969,45 @@ export type Database = {
         }
       }
       cancellation_preview: { Args: { p_booking_id: string }; Returns: Json }
+      claim_notification_deliveries: {
+        Args: { p_lease_token: string; p_limit: number }
+        Returns: {
+          attempts: number
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          id: string
+          last_error: string | null
+          lease_token: string | null
+          leased_until: string | null
+          next_attempt_at: string
+          payload: Json
+          provider_message_id: string | null
+          provider_receipt_status: string | null
+          recipient_id: string | null
+          source_id: string
+          source_type: string
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "notification_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      complete_notification_delivery: {
+        Args: {
+          p_error: string
+          p_id: string
+          p_lease_token: string
+          p_provider_id: string
+          p_receipt_status: string
+          p_status: string
+        }
+        Returns: undefined
+      }
       confirm_fulfillment: {
         Args: { p_booking_id: string }
         Returns: {
@@ -2663,6 +3021,7 @@ export type Database = {
           id: string
           package_id: string | null
           requirements: string
+          revision: number
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
           vendor_id: string
@@ -2742,6 +3101,26 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      process_chargeback_event: {
+        Args: {
+          p_amount_kobo: number
+          p_event_hash: string
+          p_event_key: string
+          p_event_type: string
+          p_provider_id: string
+          p_reference: string
+        }
+        Returns: string
+      }
+      process_payout_event: {
+        Args: {
+          p_event_hash: string
+          p_event_key: string
+          p_event_type: string
+          p_reference: string
+        }
+        Returns: string
       }
       process_refund_event: {
         Args: {
@@ -2884,6 +3263,26 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      run_financial_reconciliation: {
+        Args: { p_run_date?: string }
+        Returns: {
+          created_at: string
+          details: Json
+          exception_count: number
+          gross_kobo: number
+          id: string
+          payment_count: number
+          run_by: string
+          run_date: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "reconciliation_runs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       save_customer_draft: {
         Args: {
           p_brief: Json
@@ -2935,6 +3334,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      stable_error: {
+        Args: { p_code: string; p_detail?: string }
+        Returns: undefined
+      }
       submit_booking_request: {
         Args: {
           p_client_request_id: string
@@ -2955,6 +3358,7 @@ export type Database = {
           id: string
           package_id: string | null
           requirements: string
+          revision: number
           status: Database["public"]["Enums"]["booking_status"]
           updated_at: string
           vendor_id: string

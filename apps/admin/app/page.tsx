@@ -76,6 +76,9 @@ export default async function OperationsDashboard() {
               <ShieldCheck size={17} /> Operator access
             </a>
           )}
+          <a href="/delivery">
+            <MessageSquareText size={17} /> Delivery diagnostics
+          </a>
         </nav>
       </aside>
       <main className="main">

@@ -13,6 +13,7 @@ export default async function MoneyPage() {
     { data: payouts },
     { data: refunds },
     { data: exceptions },
+    { data: alerts },
   ] = await Promise.all([
     client
       .from("payments")
@@ -27,6 +28,11 @@ export default async function MoneyPage() {
       .from("reconciliation_exceptions")
       .select("id,payment_id,kind,expected_kobo,actual_kobo,status,resolution,created_at")
       .order("created_at", { ascending: false }),
+    client
+      .from("financial_alerts")
+      .select("id,severity,kind,summary,status,assigned_to,created_at")
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
   const rows =
     payments?.map((p) => {
@@ -172,6 +178,25 @@ export default async function MoneyPage() {
             </article>
           ))}
           {!exceptions?.length && <p className="empty">No recorded reconciliation exceptions.</p>}
+        </section>
+        <section className="panel">
+          <h2>Financial alerts</h2>
+          {alerts?.map((alert) => (
+            <article className="money-case" key={alert.id}>
+              <div>
+                <strong>
+                  {alert.severity} · {alert.kind}
+                </strong>
+                <p>{alert.summary}</p>
+                <p>
+                  Owner {alert.assigned_to?.slice(0, 8) ?? "unassigned"} ·{" "}
+                  {new Date(alert.created_at).toLocaleString("en-NG")}
+                </p>
+              </div>
+              <span className={`status ${alert.status}`}>{alert.status}</span>
+            </article>
+          ))}
+          {!alerts?.length && <p className="empty">No active financial alerts.</p>}
         </section>
       </div>
     </div>

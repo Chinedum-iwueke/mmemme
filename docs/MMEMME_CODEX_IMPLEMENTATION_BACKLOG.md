@@ -670,14 +670,14 @@ reconcile money with complete authorization and audit evidence.
 
 Goal: make all server-owned behavior safe enough for real transactions.
 
-- [ ] **M15-01 — Atomic state-transition API**
+- [x] **M15-01 — Atomic state-transition API**
       Dependencies: M8-03.
       Move multi-write admin flows into transactional database functions, enforce
       transition matrices and optimistic concurrency, and return stable errors.
       Acceptance: injected failures cannot leave partial cancellation, refund, quote,
       booking or payout state.
 
-- [ ] **M15-02 — Paystack staging certification**
+- [x] **M15-02 — Paystack staging certification**
       Dependencies: M15-01.
       Test initialization, signature validation, server verification, amount/currency
       mismatch, unknown references, abandonment, duplicate/delayed/reordered events,
@@ -685,21 +685,21 @@ Goal: make all server-owned behavior safe enough for real transactions.
       Acceptance: 100% payment/ledger/payout reconciliation across the automated
       matrix and no client-controlled confirmation path.
 
-- [ ] **M15-03 — Refund, cancellation, dispute and payout policy engine**
+- [x] **M15-03 — Refund, cancellation, dispute and payout policy engine**
       Dependencies: M15-01 and approved policy versions.
       Replace demo cancellation percentages with versioned venue/caterer policies;
       make approval and provider operations recoverable and auditable.
       Acceptance: boundary-date tests, partial/full refunds, failures, reversals and
       dual approvals match approved policy examples exactly.
 
-- [ ] **M15-04 — Notification delivery service**
+- [x] **M15-04 — Notification delivery service**
       Dependencies: M8-05, M9-05.
       Add an outbox/worker schedule, preference checks, Expo receipts, token cleanup,
       Resend idempotency, retry/backoff and delivery diagnostics.
       Acceptance: state changes enqueue once; duplicate workers do not duplicate
       messages; critical email fallback is observable.
 
-- [ ] **M15-05 — Scheduled reconciliation and financial alerts**
+- [x] **M15-05 — Scheduled reconciliation and financial alerts**
       Dependencies: M15-02, M15-03.
       Reconcile provider transactions, internal payments, ledger, refunds and payouts
       daily; page an owner on unexplained differences.
@@ -959,7 +959,7 @@ chat, source control or a client-visible environment variable.
       `EXPO_PUBLIC_EAS_PROJECT_ID`, `EXPO_PUBLIC_SENTRY_DSN`, `SUPABASE_URL`,
       `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `REQUESTS_ENABLED`,
       `PAYMENTS_SANDBOX_ENABLED`, `PAYMENTS_LIVE_ENABLED`,
-      `PAYMENTS_DEMO_MODE`, `PAYSTACK_SECRET_KEY`, `CRON_SECRET`,
+      `PAYMENTS_DEMO_MODE`, `PAYSTACK_SECRET_KEY`, `PAYSTACK_API_URL`, `CRON_SECRET`,
       `RESEND_API_KEY`, `NOTIFICATION_FROM_EMAIL`, `EXPO_ACCESS_TOKEN`,
       `SENTRY_DSN`, `ADMIN_REQUIRE_AAL2`, `MMEMME_ADMIN_EMAILS`,
       `MALWARE_SCANNER_URL`, `MALWARE_SCANNER_KEY`,

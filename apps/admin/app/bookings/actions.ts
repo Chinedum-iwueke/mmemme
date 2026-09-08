@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createAdminClient, requireAdmin } from "../../lib/supabase/server";
+import { createAdminClient, createClient, requireAdmin } from "../../lib/supabase/server";
 
 const uuid = z.string().uuid();
 const audit = async (
@@ -80,6 +80,7 @@ export async function declineRequest(form: FormData) {
 const Quote = z
   .object({
     bookingId: uuid,
+    expectedRevision: z.coerce.number().int().nonnegative(),
     totalNaira: z.coerce.number().int().positive(),
     depositNaira: z.coerce.number().int().positive(),
     expiresAt: z.string().min(1),
@@ -95,63 +96,26 @@ const lines = (value: string) =>
     .map((v) => v.trim())
     .filter(Boolean);
 export async function issueQuote(form: FormData) {
-  const admin = await requireAdmin("bookings");
+  await requireAdmin("bookings");
   if (form.get("availabilityConfirmed") !== "yes")
     throw new Error("Vendor availability confirmation is required");
   const input = Quote.parse(Object.fromEntries(form));
   const expires = new Date(input.expiresAt);
   if (expires <= new Date()) throw new Error("Quote expiry must be in the future");
-  const client = createAdminClient();
-  const { data: booking } = await client
-    .from("bookings")
-    .select("id,status,package_id,correlation_id")
-    .eq("id", input.bookingId)
-    .single();
-  if (!booking || !["operations_review", "quote_ready"].includes(booking.status))
-    throw new Error("Booking is not ready for a quote");
-  const { data: pkg } = booking.package_id
-    ? await client.from("service_packages").select("name").eq("id", booking.package_id).single()
-    : { data: null };
-  const { data: last } = await client
-    .from("quotes")
-    .select("revision")
-    .eq("booking_id", booking.id)
-    .order("revision", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const { error } = await client.from("quotes").insert({
-    booking_id: booking.id,
-    revision: (last?.revision ?? 0) + 1,
-    total_amount_kobo: input.totalNaira * 100,
-    deposit_amount_kobo: input.depositNaira * 100,
-    platform_fee_bps: 750,
-    cancellation_template_version: "beta-2026-07",
-    cancellation_summary: input.cancellationSummary,
-    terms_version: "beta-2026-07",
-    expires_at: expires.toISOString(),
-    created_by: admin.id,
-    package_name_snapshot: pkg?.name ?? "Custom service",
-    inclusions: lines(input.inclusions),
-    exclusions: lines(input.exclusions),
-    payment_schedule: input.paymentSchedule,
-    availability_confirmed_at: new Date().toISOString(),
+  const { error } = await (
+    await createClient()
+  ).rpc("admin_issue_quote", {
+    p_booking_id: input.bookingId,
+    p_expected_revision: input.expectedRevision,
+    p_total_kobo: input.totalNaira * 100,
+    p_deposit_kobo: input.depositNaira * 100,
+    p_expires_at: expires.toISOString(),
+    p_cancellation_summary: input.cancellationSummary,
+    p_inclusions: lines(input.inclusions),
+    p_exclusions: lines(input.exclusions),
+    p_payment_schedule: input.paymentSchedule,
   });
-  if (error) throw new Error("Could not issue quote");
-  if (booking.status === "operations_review")
-    await client.from("bookings").update({ status: "quote_ready" }).eq("id", booking.id);
-  await client.from("booking_operations_notes").insert({
-    booking_id: booking.id,
-    admin_id: admin.id,
-    note_type: "quote",
-    body: `Quote revision ${(last?.revision ?? 0) + 1} issued`,
-  });
-  await audit(
-    admin.id,
-    "quote.issued",
-    booking.id,
-    "Availability confirmed and quote issued",
-    booking.correlation_id,
-  );
+  if (error) throw new Error(error.message);
   revalidatePath("/bookings");
 }
 

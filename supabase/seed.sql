@@ -9,6 +9,7 @@ values('00000000-0000-0000-0000-000000000000','90000000-0000-4000-8000-000000000
 on conflict(id) do update set encrypted_password=excluded.encrypted_password;
 update public.profiles set full_name='Demo Finance Reviewer',email='reviewer@mmemme.local',is_admin=true where id='90000000-0000-4000-8000-000000000002';
 insert into public.admin_access(user_id,role,session_timeout_minutes) values('90000000-0000-4000-8000-000000000002','finance',120) on conflict(user_id) do update set role='finance',active=true,revoked_at=null;
+update public.policy_versions set status='approved',approved_by='90000000-0000-4000-8000-000000000001',approved_at=now() where version in('venue-beta-2026-09','caterer-beta-2026-09');
 
 insert into public.vendors(id,name,category,area,description,capacity_min,capacity_max,price_from_kobo,verification_status,verification_expires_at,published)
 values

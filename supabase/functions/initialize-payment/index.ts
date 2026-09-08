@@ -55,43 +55,52 @@ Deno.serve(async (request) => {
   const email = user.email ?? profile?.email;
   if (!email) return failure("INVALID_REQUEST", 400);
 
-  const reference = `mm_${crypto.randomUUID().replaceAll("-", "")}`;
+  const reference = existing?.provider_reference ?? `mm_${crypto.randomUUID().replaceAll("-", "")}`;
   const webOrigin = Deno.env.get("PUBLIC_WEB_URL");
   const callbackUrl =
     body.channel === "web" && webOrigin
       ? `${webOrigin}/checkout/return?booking=${booking.id}`
       : `mmemme://booking/${booking.id}`;
-  const { error: insertError } = await admin.from("payments").insert({
-    booking_id: booking.id,
-    quote_id: quote.id,
-    customer_id: user.id,
-    provider: "paystack",
-    provider_reference: reference,
-    amount_kobo: quote.deposit_amount_kobo,
-    status: "initiated",
-  });
-  if (insertError) return failure("INTERNAL_ERROR", 500);
+  if (!existing) {
+    const { error: insertError } = await admin.from("payments").insert({
+      booking_id: booking.id,
+      quote_id: quote.id,
+      customer_id: user.id,
+      provider: "paystack",
+      provider_reference: reference,
+      amount_kobo: quote.deposit_amount_kobo,
+      status: "initiated",
+    });
+    if (insertError)
+      return failure(
+        insertError.code === "23505" ? "CONFLICT" : "INTERNAL_ERROR",
+        insertError.code === "23505" ? 409 : 500,
+      );
+  }
 
-  const response = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${Deno.env.get("PAYSTACK_API_URL") ?? "https://api.paystack.co"}/transaction/initialize`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        amount: quote.deposit_amount_kobo,
+        currency: "NGN",
+        reference,
+        callback_url: callbackUrl,
+        metadata: { booking_id: booking.id, quote_id: quote.id },
+      }),
     },
-    body: JSON.stringify({
-      email,
-      amount: quote.deposit_amount_kobo,
-      currency: "NGN",
-      reference,
-      callback_url: callbackUrl,
-      metadata: { booking_id: booking.id, quote_id: quote.id },
-    }),
-  });
+  );
   const result = await response.json();
   if (!response.ok || !result.status) {
     await admin
       .from("payments")
-      .update({ status: "failed", raw_provider_status: result.message ?? "initialize_failed" })
+      .update({ raw_provider_status: result.message ?? "initialize_retryable" })
       .eq("provider_reference", reference);
     return failure("PROVIDER_UNAVAILABLE", 502);
   }
