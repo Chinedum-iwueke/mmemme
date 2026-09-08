@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { colors, Eyebrow, PrimaryButton } from "../src/components/ui";
 import { useAuth } from "../src/lib/auth";
+import { BrandLogo } from "../src/components/brand-logo";
 import { supabase } from "../src/lib/supabase";
 
 type Step = "phone" | "code" | "profile";
@@ -133,9 +134,7 @@ export default function AuthScreen() {
           >
             <Ionicons name="close" size={24} color={colors.ink} />
           </Pressable>
-          <View style={styles.mark}>
-            <Text style={styles.markText}>m</Text>
-          </View>
+          <BrandLogo style={styles.mark} />
           {intent && <Text style={styles.intent}>Sign in to {intent}</Text>}
           {step === "phone" && (
             <>
@@ -275,15 +274,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   mark: {
-    width: 54,
-    height: 54,
-    borderRadius: 18,
-    backgroundColor: colors.plum,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 120,
+    height: 58,
     marginBottom: 25,
   },
-  markText: { color: colors.white, fontSize: 30, fontWeight: "900" },
   intent: { color: colors.plum, fontWeight: "800", marginBottom: 10 },
   title: {
     color: colors.ink,

@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
 import { createClient } from "../../lib/supabase/browser";
+import { AdminBrandLogo } from "../../components/brand-logo";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -77,7 +78,7 @@ export default function LoginPage() {
     <main className="login-shell">
       <section className="login-card">
         <div className="brand admin-brand">
-          mmemme <small>OPS</small>
+          <AdminBrandLogo treatment="green" />
         </div>
         <p className="eyebrow">Internal access</p>
         <h1>{factor ? "Verify your identity" : "Operations sign in"}</h1>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AccountNav } from "../customer/account-nav";
 import { MobileNav } from "./mobile-nav";
+import { BrandLogo } from "./brand-logo";
 export function Header() {
   return (
     <header className="site-header">
@@ -9,7 +10,7 @@ export function Header() {
       </a>
       <div className="shell header-inner">
         <Link className="wordmark" href="/" aria-label="MMEMME home">
-          MMEMME
+          <BrandLogo priority />
         </Link>
         <nav aria-label="Primary" className="desktop-nav">
           <Link href="/venues">Venues</Link>
@@ -30,7 +31,7 @@ export function Footer() {
       <div className="shell footer-grid">
         <div>
           <Link className="wordmark inverse" href="/">
-            MMEMME
+            <BrandLogo treatment="lime" />
           </Link>
           <p>Curated Lagos wedding venues and caterers, with clear terms and supported booking.</p>
         </div>

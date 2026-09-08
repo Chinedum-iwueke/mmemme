@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const migration = read("supabase/migrations/202609080009_operations_console.sql");
@@ -10,6 +10,8 @@ const money = read("apps/admin/app/money/page.tsx");
 const supply = read("apps/admin/app/vendors/applications/page.tsx");
 const search = read("apps/admin/app/search/page.tsx") + read("apps/admin/app/exports/route.ts");
 const access = read("apps/admin/app/access/page.tsx") + read("apps/admin/app/access/actions.ts");
+if (!existsSync("apps/admin/public/brand/mmemme-stacked-green.png"))
+  throw new Error("Operations console is missing the approved MMEMME logo");
 const required = [
   [migration, "admin_has_capability", "database capability enforcement"],
   [migration, "operations_assignments", "case ownership"],

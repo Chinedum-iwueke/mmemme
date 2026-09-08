@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { colors, Eyebrow, PrimaryButton } from "../src/components/ui";
 import { MobileShell } from "../src/components/mobile-shell";
+import { BrandLogo } from "../src/components/brand-logo";
 import { useAuth } from "../src/lib/auth";
 
 export default function ProfileScreen() {
@@ -20,7 +21,7 @@ export default function ProfileScreen() {
         <View style={styles.content}>
           <View style={styles.top}>
             <View style={{ width: 44 }} />
-            <Text style={styles.logo}>mmemme</Text>
+            <BrandLogo style={styles.logo} />
             <View style={{ width: 44 }} />
           </View>
           <Eyebrow>Your account</Eyebrow>
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  logo: { fontSize: 20, fontWeight: "900", color: colors.plum },
+  logo: { width: 104, height: 50 },
   title: { fontSize: 34, fontWeight: "900", color: colors.ink, marginTop: 8, marginBottom: 22 },
   card: {
     backgroundColor: colors.white,

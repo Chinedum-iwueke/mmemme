@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { colors, Eyebrow, PrimaryButton, TrustBadge } from "../src/components/ui";
 import { MobileShell } from "../src/components/mobile-shell";
+import { BrandLogo } from "../src/components/brand-logo";
 import { useAuth } from "../src/lib/auth";
 import { isSupabaseConfigured } from "../src/lib/supabase";
 import { listVendors, type Vendor } from "../src/lib/vendors";
@@ -86,7 +87,7 @@ export default function HomeScreen() {
           ListHeaderComponent={
             <>
               <View style={styles.nav}>
-                <Text style={styles.wordmark}>mmemme</Text>
+                <BrandLogo style={styles.wordmark} />
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={user ? "Open account" : "Sign in"}
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.ivory },
   content: { padding: 18, paddingBottom: 48 },
   nav: { height: 62, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  wordmark: { color: colors.plum, fontSize: 26, fontWeight: "900", letterSpacing: -1 },
+  wordmark: { width: 122, height: 58 },
   account: {
     width: 44,
     height: 44,

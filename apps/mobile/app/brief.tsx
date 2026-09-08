@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { colors, Eyebrow, PrimaryButton } from "../src/components/ui";
+import { BrandLogo } from "../src/components/brand-logo";
 import { useAuth } from "../src/lib/auth";
 import {
   DraftBrief,
@@ -149,7 +150,7 @@ export default function BriefScreen() {
             >
               <Ionicons name="arrow-back" size={22} color={colors.ink} />
             </Pressable>
-            <Text style={styles.logo}>mmemme</Text>
+            <BrandLogo style={styles.logo} />
             <Text style={styles.skip}>Brief</Text>
           </View>
           <View accessibilityLabel={`Step ${step + 1} of 5`} style={styles.progress}>
@@ -294,7 +295,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  logo: { color: colors.plum, fontWeight: "900", fontSize: 20 },
+  logo: { width: 104, height: 50 },
   skip: { width: 44, color: colors.muted, fontSize: 12 },
   progress: {
     height: 5,

@@ -9,6 +9,11 @@ export default {
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "light",
+  splash: {
+    image: "./assets/brand/mmemme-stacked-green.png",
+    resizeMode: "contain",
+    backgroundColor: "#fbfcf8",
+  },
   runtimeVersion: { policy: "appVersion" },
   updates: { checkAutomatically: "ON_LOAD", fallbackToCacheTimeout: 0 },
   plugins: [

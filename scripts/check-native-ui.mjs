@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 const source = readFileSync("apps/mobile/src/components/production-ui.tsx", "utf8");
 const gallery = readFileSync("apps/mobile/app/component-gallery.tsx", "utf8");
 const shell = readFileSync("apps/mobile/src/components/mobile-shell.tsx", "utf8");
@@ -6,6 +6,16 @@ const lifecycle = readFileSync("apps/mobile/src/lib/lifecycle.tsx", "utf8");
 const discovery = readFileSync("apps/mobile/app/index.tsx", "utf8");
 const request = readFileSync("apps/mobile/app/request/[vendorId].tsx", "utf8");
 const booking = readFileSync("apps/mobile/app/booking/[id].tsx", "utf8");
+const brandLogo = readFileSync("apps/mobile/src/components/brand-logo.tsx", "utf8");
+for (const treatment of ["green", "lime", "white"])
+  if (!existsSync(`apps/mobile/assets/brand/mmemme-stacked-${treatment}.png`)) {
+    console.error(`Missing native MMEMME ${treatment} logo treatment`);
+    process.exit(1);
+  }
+if (!brandLogo.includes('accessibilityLabel="MMEMME"')) {
+  console.error("Native logo must expose the accessible product name");
+  process.exit(1);
+}
 const components = [
   "SafeScreen",
   "KeyboardForm",

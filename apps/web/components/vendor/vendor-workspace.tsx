@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrandLogo } from "../public/brand-logo";
 import { browserClient } from "../../lib/supabase/browser";
 
 type Application = {
@@ -442,7 +443,7 @@ export function VendorWorkspace({
     <div className="vendor-workspace">
       <aside className="vendor-sidebar">
         <a className="wordmark" href="/">
-          MMEMME
+          <BrandLogo treatment="lime" />
         </a>
         <p className="vendor-role">
           {account.legal_name}

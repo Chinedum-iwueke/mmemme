@@ -40,10 +40,24 @@ button {
   padding: 28px 18px;
 }
 .brand {
-  font-size: 25px;
-  font-weight: 900;
-  letter-spacing: -1px;
   margin: 0 10px 38px;
+}
+.admin-logo-lockup {
+  display: grid;
+  justify-items: start;
+  gap: 5px;
+}
+.admin-logo {
+  display: block;
+  width: 128px;
+  height: auto;
+}
+.admin-logo-lockup > span {
+  color: var(--mm-neutral-200);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 .nav {
   display: grid;
@@ -293,11 +307,10 @@ button {
   box-shadow: 0 20px 60px rgba(50, 21, 39, 0.12);
 }
 .admin-brand {
-  color: var(--plum);
   margin: 0 0 30px;
 }
-.admin-brand small {
-  font-size: 10px;
+.admin-brand .admin-logo-lockup > span {
+  color: var(--muted);
 }
 .login-card h1,
 .ops-page h1 {

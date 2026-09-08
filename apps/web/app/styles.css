@@ -72,6 +72,14 @@ select {
   letter-spacing: 0.035em;
   text-decoration: none;
 }
+.brand-logo {
+  display: block;
+  width: 132px;
+  height: auto;
+}
+.site-footer .brand-logo {
+  width: 144px;
+}
 .desktop-nav,
 .account-nav {
   display: flex;

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { createAdminClient, requireAdmin } from "../lib/supabase/server";
 import { signOutOperator } from "./operations/actions";
+import { AdminBrandLogo } from "../components/brand-logo";
 
 export default async function OperationsDashboard() {
   const admin = await requireAdmin();
@@ -44,7 +45,7 @@ export default async function OperationsDashboard() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          mmemme <small style={{ fontSize: 11, opacity: 0.65 }}>OPS</small>
+          <AdminBrandLogo />
         </div>
         <nav className="nav" aria-label="Operations navigation">
           <a className="active" href="/">
