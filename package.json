@@ -29,9 +29,11 @@
     "db:reset": "npx --yes supabase@2.116.0 db reset",
     "db:types": "node scripts/generate-database-types.mjs",
     "db:types:check": "node scripts/check-database-types.mjs",
-    "db:test": "npm run db:test:operations && npm run db:test:transactions",
+    "db:test": "npm run db:test:operations && npm run db:test:transactions && npm run db:test:security",
     "db:test:operations": "PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/operations_console.sql",
     "db:test:transactions": "PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/transaction_hardening.sql",
+    "db:test:security": "PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/tests/security_privacy.sql",
+    "db:restore:rehearse": "bash scripts/rehearse-restore.sh",
     "sql:lint": "node scripts/check-migrations.mjs",
     "secrets:check": "node scripts/check-secrets.mjs",
     "boundaries:check": "node scripts/check-boundaries.mjs",
@@ -41,9 +43,10 @@
     "vendor:onboarding:check": "node scripts/check-vendor-onboarding.mjs",
     "operations:check": "node scripts/check-operations-console.mjs",
     "transactions:check": "node scripts/check-transaction-hardening.mjs",
+    "security:check": "node scripts/check-security-reliability.mjs",
     "expo:doctor": "npx expo-doctor@latest apps/mobile",
     "audit": "npm audit --audit-level=high",
-    "quality": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run tokens:check && npm run native-ui:check && npm run vendor:onboarding:check && npm run operations:check && npm run transactions:check && npm run sql:lint && npm run secrets:check && npm run boundaries:check && npm run production:safety && npm run build"
+    "quality": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run tokens:check && npm run native-ui:check && npm run vendor:onboarding:check && npm run operations:check && npm run transactions:check && npm run security:check && npm run sql:lint && npm run secrets:check && npm run boundaries:check && npm run production:safety && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^9.34.0",

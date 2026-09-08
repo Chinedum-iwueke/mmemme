@@ -27,5 +27,14 @@ export async function requireCustomer(returnTo = "/bookings") {
     data: { user },
   } = await client.auth.getUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(returnTo)}`);
+  const { data: profile } = await client
+    .from("profiles")
+    .select("privacy_deleted_at")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.privacy_deleted_at) {
+    await client.auth.signOut({ scope: "local" });
+    redirect("/login?error=account-deleted");
+  }
   return { client, user };
 }

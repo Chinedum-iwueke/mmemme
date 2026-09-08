@@ -21,6 +21,7 @@ export function AccountNav() {
     <div className="account-nav">
       <Link href="/shortlist">Shortlist</Link>
       <Link href="/bookings">My bookings</Link>
+      {signedIn && <Link href="/account/privacy">Privacy</Link>}
       {signedIn ? (
         <button className="nav-link-button" onClick={signOut}>
           Sign out

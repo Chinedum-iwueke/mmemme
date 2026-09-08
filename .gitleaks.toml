@@ -1,0 +1,8 @@
+title = "MMEMME secret protection"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Local Supabase and documented placeholders only"
+paths = ['''supabase/.env.demo.example''', '''.env.example''']

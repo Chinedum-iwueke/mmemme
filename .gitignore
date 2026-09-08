@@ -11,3 +11,5 @@ coverage/
 npm-debug.log*
 supabase/.temp/
 supabase/.branches/
+.artifacts/
+.gstack/

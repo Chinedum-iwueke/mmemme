@@ -713,7 +713,7 @@ with exact reconciliation and observable delivery.
 
 Goal: remove critical technical risks before admitting real customers.
 
-- [ ] **M16-01 — Threat model and trust-boundary review**
+- [x] **M16-01 — Threat model and trust-boundary review**
       Dependencies: M11 through M15 substantially complete.
       Model customer, vendor, admin, Supabase, credential provider, storage, Paystack,
       notification and analytics boundaries; prioritize authorization, credentials,
@@ -721,35 +721,35 @@ Goal: remove critical technical risks before admitting real customers.
       Acceptance: every high-risk threat has a tested control or explicit launch
       blocker owned by a named founder.
 
-- [ ] **M16-02 — RLS and storage adversarial suite**
+- [x] **M16-02 — RLS and storage adversarial suite**
       Dependencies: M16-01.
       Test anonymous, customer A/B, vendor A/B, admin and service-role access to every
       table, function and bucket including guessed object paths and oversized uploads.
       Acceptance: cross-customer, cross-vendor and unauthorized admin access are
       impossible; test coverage maps to every policy.
 
-- [ ] **M16-03 — Application and infrastructure security**
+- [x] **M16-03 — Application and infrastructure security**
       Dependencies: M16-01.
       Add headers, request limits, origin rules, rate limits, secret rotation,
       dependency remediation, audit retention and secure logging/redaction.
       Acceptance: zero critical/high exploitable release defect; accepted dependency
       risk has owner, expiry and compensating control.
 
-- [ ] **M16-04 — Privacy and data lifecycle**
+- [x] **M16-04 — Privacy and data lifecycle**
       Dependencies: counsel-approved policy.
       Implement consent records, analytics minimization, retention/deletion schedule,
       account-data export/deletion workflow and evidence access restrictions.
       Acceptance: test users can request export/deletion and operations can complete
       it without exposing another customer or corrupting financial retention records.
 
-- [ ] **M16-05 — Backup, restore and disaster recovery**
+- [x] **M16-05 — Backup, restore and disaster recovery**
       Dependencies: production-like staging.
       Configure backups/PITR, document RPO/RTO and rehearse restore into an isolated
       environment including storage metadata and post-restore reconciliation.
       Acceptance: timed restore meets approved objectives and produces signed
       evidence in the release record.
 
-- [ ] **M16-06 — Observability and incident response**
+- [x] **M16-06 — Observability and incident response**
       Dependencies: M15.
       Configure Sentry releases/source maps, structured redacted logs, funnel and
       business metrics, alerts and runbooks for auth, bookings, funds and delivery.

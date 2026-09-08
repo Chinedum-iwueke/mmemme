@@ -377,6 +377,47 @@ export type Database = {
           },
         ]
       }
+      consent_records: {
+        Row: {
+          correlation_id: string
+          granted: boolean
+          id: string
+          policy_version: string
+          purpose: string
+          recorded_at: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          correlation_id?: string
+          granted: boolean
+          id?: string
+          policy_version: string
+          purpose: string
+          recorded_at?: string
+          source: string
+          user_id: string
+        }
+        Update: {
+          correlation_id?: string
+          granted?: boolean
+          id?: string
+          policy_version?: string
+          purpose?: string
+          recorded_at?: string
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_drafts: {
         Row: {
           brief: Json
@@ -471,6 +512,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      data_retention_rules: {
+        Row: {
+          action: string
+          data_class: string
+          legal_basis: string
+          next_review_at: string
+          owner_role: string
+          retention_days: number | null
+          reviewed_at: string
+        }
+        Insert: {
+          action: string
+          data_class: string
+          legal_basis: string
+          next_review_at: string
+          owner_role: string
+          retention_days?: number | null
+          reviewed_at: string
+        }
+        Update: {
+          action?: string
+          data_class?: string
+          legal_basis?: string
+          next_review_at?: string
+          owner_role?: string
+          retention_days?: number | null
+          reviewed_at?: string
+        }
+        Relationships: []
       }
       dispute_evidence: {
         Row: {
@@ -1101,6 +1172,76 @@ export type Database = {
           },
         ]
       }
+      privacy_requests: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          correlation_id: string
+          due_at: string
+          export_payload: Json | null
+          id: string
+          kind: Database["public"]["Enums"]["privacy_request_kind"]
+          reason: string
+          rejection_reason: string | null
+          requested_at: string
+          status: Database["public"]["Enums"]["privacy_request_status"]
+          user_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          correlation_id?: string
+          due_at?: string
+          export_payload?: Json | null
+          id?: string
+          kind: Database["public"]["Enums"]["privacy_request_kind"]
+          reason?: string
+          rejection_reason?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["privacy_request_status"]
+          user_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          correlation_id?: string
+          due_at?: string
+          export_payload?: Json | null
+          id?: string
+          kind?: Database["public"]["Enums"]["privacy_request_kind"]
+          reason?: string
+          rejection_reason?: string | null
+          requested_at?: string
+          status?: Database["public"]["Enums"]["privacy_request_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_requests_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "privacy_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_events: {
         Row: {
           booking_id: string | null
@@ -1154,6 +1295,7 @@ export type Database = {
           id: string
           is_admin: boolean
           phone: string | null
+          privacy_deleted_at: string | null
           updated_at: string
         }
         Insert: {
@@ -1163,6 +1305,7 @@ export type Database = {
           id: string
           is_admin?: boolean
           phone?: string | null
+          privacy_deleted_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -1172,6 +1315,7 @@ export type Database = {
           id?: string
           is_admin?: boolean
           phone?: string | null
+          privacy_deleted_at?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1318,6 +1462,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limit_counters: {
+        Row: {
+          request_count: number
+          scope: string
+          subject_hash: string
+          window_started_at: string
+        }
+        Insert: {
+          request_count?: number
+          scope: string
+          subject_hash: string
+          window_started_at: string
+        }
+        Update: {
+          request_count?: number
+          scope?: string
+          subject_hash?: string
+          window_started_at?: string
+        }
+        Relationships: []
       }
       reconciliation_exceptions: {
         Row: {
@@ -1531,6 +1696,59 @@ export type Database = {
           },
         ]
       }
+      restore_rehearsals: {
+        Row: {
+          backup_started_at: string
+          created_at: string
+          database_checksum: string
+          environment: string
+          evidence_sha256: string
+          id: string
+          reconciliation_status: string
+          recorded_by: string | null
+          restore_completed_at: string
+          rpo_minutes: number
+          rto_minutes: number
+          storage_manifest_checksum: string
+        }
+        Insert: {
+          backup_started_at: string
+          created_at?: string
+          database_checksum: string
+          environment: string
+          evidence_sha256: string
+          id?: string
+          reconciliation_status: string
+          recorded_by?: string | null
+          restore_completed_at: string
+          rpo_minutes: number
+          rto_minutes: number
+          storage_manifest_checksum: string
+        }
+        Update: {
+          backup_started_at?: string
+          created_at?: string
+          database_checksum?: string
+          environment?: string
+          evidence_sha256?: string
+          id?: string
+          reconciliation_status?: string
+          recorded_by?: string | null
+          restore_completed_at?: string
+          rpo_minutes?: number
+          rto_minutes?: number
+          storage_manifest_checksum?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restore_rehearsals_recorded_by_fkey"
+            columns: ["recorded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           body: string
@@ -1615,6 +1833,69 @@ export type Database = {
           {
             foreignKeyName: "saved_operation_queues_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_incidents: {
+        Row: {
+          acknowledged_at: string | null
+          backup_owner: string | null
+          correlation_id: string
+          detected_at: string
+          domain: string
+          id: string
+          primary_owner: string | null
+          resolution: string | null
+          resolved_at: string | null
+          severity: Database["public"]["Enums"]["incident_severity"]
+          status: string
+          timeline: Json
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          backup_owner?: string | null
+          correlation_id: string
+          detected_at?: string
+          domain: string
+          id?: string
+          primary_owner?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          severity: Database["public"]["Enums"]["incident_severity"]
+          status?: string
+          timeline?: Json
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          backup_owner?: string | null
+          correlation_id?: string
+          detected_at?: string
+          domain?: string
+          id?: string
+          primary_owner?: string | null
+          resolution?: string | null
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["incident_severity"]
+          status?: string
+          timeline?: Json
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_incidents_backup_owner_fkey"
+            columns: ["backup_owner"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_incidents_primary_owner_fkey"
+            columns: ["primary_owner"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2942,6 +3223,7 @@ export type Database = {
         Args: { p_application_id: string }
         Returns: string
       }
+      apply_retention_schedule: { Args: { p_now?: string }; Returns: Json }
       assign_operations_case: {
         Args: {
           p_assigned_to: string
@@ -2968,6 +3250,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      build_account_export: { Args: { p_user_id: string }; Returns: Json }
       cancellation_preview: { Args: { p_booking_id: string }; Returns: Json }
       claim_notification_deliveries: {
         Args: { p_lease_token: string; p_limit: number }
@@ -3008,6 +3291,30 @@ export type Database = {
         }
         Returns: undefined
       }
+      complete_privacy_request: {
+        Args: { p_approve: boolean; p_reason: string; p_request_id: string }
+        Returns: {
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          correlation_id: string
+          due_at: string
+          export_payload: Json | null
+          id: string
+          kind: Database["public"]["Enums"]["privacy_request_kind"]
+          reason: string
+          rejection_reason: string | null
+          requested_at: string
+          status: Database["public"]["Enums"]["privacy_request_status"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "privacy_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       confirm_fulfillment: {
         Args: { p_booking_id: string }
         Returns: {
@@ -3033,6 +3340,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      consume_rate_limit: {
+        Args: {
+          p_limit: number
+          p_scope: string
+          p_subject: string
+          p_window_seconds: number
+        }
+        Returns: boolean
       }
       create_vendor_account: {
         Args: {
@@ -3102,6 +3418,37 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      open_security_incident: {
+        Args: {
+          p_backup: string
+          p_correlation_id: string
+          p_domain: string
+          p_primary: string
+          p_severity: Database["public"]["Enums"]["incident_severity"]
+          p_title: string
+        }
+        Returns: {
+          acknowledged_at: string | null
+          backup_owner: string | null
+          correlation_id: string
+          detected_at: string
+          domain: string
+          id: string
+          primary_owner: string | null
+          resolution: string | null
+          resolved_at: string | null
+          severity: Database["public"]["Enums"]["incident_severity"]
+          status: string
+          timeline: Json
+          title: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "security_incidents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       process_chargeback_event: {
         Args: {
           p_amount_kobo: number
@@ -3159,6 +3506,57 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "vendor_change_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_consent: {
+        Args: {
+          p_granted: boolean
+          p_policy_version: string
+          p_purpose: string
+          p_source: string
+        }
+        Returns: {
+          correlation_id: string
+          granted: boolean
+          id: string
+          policy_version: string
+          purpose: string
+          recorded_at: string
+          source: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "consent_records"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      request_account_data: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["privacy_request_kind"]
+          p_reason?: string
+        }
+        Returns: {
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          correlation_id: string
+          due_at: string
+          export_payload: Json | null
+          id: string
+          kind: Database["public"]["Enums"]["privacy_request_kind"]
+          reason: string
+          rejection_reason: string | null
+          requested_at: string
+          status: Database["public"]["Enums"]["privacy_request_status"]
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "privacy_requests"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -3464,6 +3862,7 @@ export type Database = {
         | "expired"
         | "cancelled"
         | "disputed"
+      incident_severity: "sev1" | "sev2" | "sev3"
       payment_status:
         | "initiated"
         | "pending"
@@ -3479,6 +3878,12 @@ export type Database = {
         | "paid"
         | "failed"
         | "reversed"
+      privacy_request_kind: "export" | "deletion"
+      privacy_request_status:
+        | "requested"
+        | "in_review"
+        | "completed"
+        | "rejected"
       provider_check_status:
         | "pending"
         | "processing"
@@ -3660,6 +4065,7 @@ export const Constants = {
         "cancelled",
         "disputed",
       ],
+      incident_severity: ["sev1", "sev2", "sev3"],
       payment_status: [
         "initiated",
         "pending",
@@ -3676,6 +4082,13 @@ export const Constants = {
         "paid",
         "failed",
         "reversed",
+      ],
+      privacy_request_kind: ["export", "deletion"],
+      privacy_request_status: [
+        "requested",
+        "in_review",
+        "completed",
+        "rejected",
       ],
       provider_check_status: [
         "pending",

@@ -1,10 +1,12 @@
 import { corsHeaders } from "../_shared/cors.ts";
 import { adminClient, userClient } from "../_shared/supabase.ts";
 import { failure, InitializePaymentRequest, success } from "../_shared/api.ts";
+import { requestWithinLimit } from "../_shared/security.ts";
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return failure("INVALID_REQUEST", 405);
+  if (!requestWithinLimit(request, 16 * 1024)) return failure("PAYLOAD_TOO_LARGE", 413);
   if (
     Deno.env.get("PAYMENTS_SANDBOX_ENABLED") !== "true" &&
     Deno.env.get("PAYMENTS_LIVE_ENABLED") !== "true"
@@ -24,6 +26,13 @@ Deno.serve(async (request) => {
   const body = parsed.data;
 
   const admin = adminClient();
+  const { data: allowed } = await admin.rpc("consume_rate_limit", {
+    p_scope: "initialize_payment",
+    p_subject: user.id,
+    p_limit: 10,
+    p_window_seconds: 300,
+  });
+  if (!allowed) return failure("RATE_LIMITED", 429);
   const { data: booking } = await admin
     .from("bookings")
     .select("id,customer_id,status")
