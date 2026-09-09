@@ -8,6 +8,17 @@ export function Header() {
       <a className="skip-link" href="#main">
         Skip to main content
       </a>
+      <div className="app-download-banner">
+        <div className="shell app-download-inner">
+          <p>
+            <strong>Take your wedding plans with you.</strong>
+            <span> Search, shortlist and manage bookings in the MMEMME app.</span>
+          </p>
+          <Link className="app-download-link" href="/get-app">
+            Get the app <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </div>
       <div className="shell header-inner">
         <Link className="wordmark" href="/" aria-label="MMEMME home">
           <BrandLogo priority />
