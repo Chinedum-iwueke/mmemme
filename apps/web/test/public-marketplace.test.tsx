@@ -23,6 +23,7 @@ const vendor: PublicVendor = {
   packages: [],
   verification: null,
   imageUrl: null,
+  isPlaceholder: false,
 };
 describe("public marketplace contracts", () => {
   it("submits a useful search without JavaScript", () => {
@@ -38,6 +39,12 @@ describe("public marketplace contracts", () => {
     expect(html).toContain("MMEMME Verified");
     expect(html).toContain("Up to 350 guests");
     expect(html).not.toContain("available");
+  });
+  it("labels removable demo inventory without making a verification claim", () => {
+    const html = renderToStaticMarkup(<VendorCard vendor={{ ...vendor, isPlaceholder: true }} />);
+    expect(html).toContain("Preview listing");
+    expect(html).toContain("Demo vendor profile");
+    expect(html).not.toContain("MMEMME Verified");
   });
   it("ships responsive, focus, motion and layout-reservation contracts", () => {
     const css = readFileSync(new URL("../app/styles.css", import.meta.url), "utf8");

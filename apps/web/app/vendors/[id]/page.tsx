@@ -65,7 +65,8 @@ export default async function VendorPage({ params, searchParams }: Props) {
         </div>
         <div className="profile-summary">
           <p className="trust-line">
-            <Icon name="shield" /> MMEMME Verified
+            <Icon name="shield" />
+            {vendor.isPlaceholder ? "Demo vendor profile" : "MMEMME Verified"}
           </p>
           <p className="eyebrow">
             {vendor.category} · {vendor.area}
@@ -86,7 +87,11 @@ export default async function VendorPage({ params, searchParams }: Props) {
             </p>
             <p>
               <span>Verification</span>
-              <strong>Checked {dateLabel(vendor.verification?.checked_at ?? null)}</strong>
+              <strong>
+                {vendor.isPlaceholder
+                  ? "Preview details only"
+                  : `Checked ${dateLabel(vendor.verification?.checked_at ?? null)}`}
+              </strong>
             </p>
           </div>
           <p className="availability-note">

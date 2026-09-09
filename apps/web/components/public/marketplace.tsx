@@ -72,14 +72,16 @@ export function VendorCard({ vendor, returnTo }: { vendor: PublicVendor; returnT
           </div>
         )}
         <span className="image-scrim" aria-hidden="true" />
-        <span className="category-label">Curated {vendor.category}</span>
+        <span className="category-label">
+          {vendor.isPlaceholder ? "Preview listing" : `Curated ${vendor.category}`}
+        </span>
         <span className="image-location">
           <Icon name="location" /> {vendor.area}, Lagos
         </span>
       </Link>
       <div className="vendor-card-body">
         <p className="trust-line">
-          <Icon name="shield" /> MMEMME Verified
+          <Icon name="shield" /> {vendor.isPlaceholder ? "Demo vendor profile" : "MMEMME Verified"}
         </p>
         <h3>
           <Link href={href}>{vendor.name}</Link>
@@ -125,6 +127,22 @@ export function VendorGrid({ vendors, returnTo }: { vendors: PublicVendor[]; ret
 }
 
 export function VerificationPanel({ vendor }: { vendor: PublicVendor }) {
+  if (vendor.isPlaceholder)
+    return (
+      <section className="verification-panel">
+        <div>
+          <p className="eyebrow">Preview inventory</p>
+          <h2>Demo details, not a live vendor claim</h2>
+          <p>
+            This profile uses placeholder information and generated imagery to demonstrate the
+            MMEMME booking experience before verified vendors are onboarded.
+          </p>
+        </div>
+        <p className="disclosure">
+          Preview listings cannot represent vendor availability, verification or service quality.
+        </p>
+      </section>
+    );
   const expired = vendor.verification_expires_at
     ? new Date(vendor.verification_expires_at) < new Date()
     : true;

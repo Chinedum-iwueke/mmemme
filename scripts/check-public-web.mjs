@@ -9,6 +9,7 @@ const required = [
   "apps/web/app/vendors/[id]/page.tsx",
   "apps/web/app/get-app/route.ts",
   "apps/web/app/get-the-app/page.tsx",
+  "apps/web/lib/demo-marketplace.ts",
   "apps/web/public/brand/mmemme-stacked-green.png",
   "apps/web/public/brand/mmemme-stacked-lime.png",
   "apps/web/public/brand/mmemme-stacked-white.png",

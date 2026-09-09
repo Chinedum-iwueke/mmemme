@@ -40,9 +40,12 @@ export function ShortlistView() {
             packages: service_packages,
             verification: null,
             imageUrl: v.hero_image_path
-              ? browserClient().storage.from("vendor-media").getPublicUrl(v.hero_image_path).data
-                  .publicUrl
+              ? v.hero_image_path.startsWith("/")
+                ? v.hero_image_path
+                : browserClient().storage.from("vendor-media").getPublicUrl(v.hero_image_path).data
+                    .publicUrl
               : null,
+            isPlaceholder: v.hero_image_path?.startsWith("/images/editorial/") ?? false,
           })),
         );
       }

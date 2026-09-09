@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@mmemme/database";
+import { DEMO_VENDOR_IDS, demoInventoryEnabled, demoVendors } from "./demo-marketplace";
 
 export type VendorCategory = "venue" | "caterer";
 export type PublicVendor = Database["public"]["Tables"]["vendors"]["Row"] & {
@@ -9,6 +10,7 @@ export type PublicVendor = Database["public"]["Tables"]["vendors"]["Row"] & {
     "private_note" | "checked_by"
   > | null;
   imageUrl: string | null;
+  isPlaceholder: boolean;
 };
 
 export type MarketplaceQuery = {
@@ -42,8 +44,27 @@ function publicImage(path: string | null) {
     .getPublicUrl(path, { transform: { width: 1200, quality: 76 } }).data.publicUrl;
 }
 
+function demoResults(query: MarketplaceQuery) {
+  let vendors = demoVendors.filter(
+    (vendor) =>
+      (!query.category || vendor.category === query.category) &&
+      (!query.area || vendor.area.toLowerCase().includes(query.area.toLowerCase())) &&
+      (!query.guests || (vendor.capacity_max ?? 0) >= query.guests),
+  );
+  if (query.sort === "price-low")
+    vendors = vendors.toSorted((a, b) => (a.price_from_kobo ?? 0) - (b.price_from_kobo ?? 0));
+  if (query.sort === "capacity")
+    vendors = vendors.toSorted((a, b) => (b.capacity_max ?? 0) - (a.capacity_max ?? 0));
+  const page = Math.max(1, query.page ?? 1);
+  return {
+    count: vendors.length,
+    vendors: vendors.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+  };
+}
+
 export async function listPublicVendors(query: MarketplaceQuery = {}) {
-  if (!configured()) return { vendors: [] as PublicVendor[], count: 0 };
+  if (!configured())
+    return demoInventoryEnabled ? demoResults(query) : { vendors: [] as PublicVendor[], count: 0 };
   const page = Math.max(1, query.page ?? 1);
   let request = publicClient()
     .from("vendors")
@@ -59,7 +80,8 @@ export async function listPublicVendors(query: MarketplaceQuery = {}) {
     request = request.order("capacity_max", { ascending: false, nullsFirst: false });
   else request = request.order("updated_at", { ascending: false });
   const { data, count, error } = await request.range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-  if (error) return { vendors: [] as PublicVendor[], count: 0 };
+  if (error)
+    return demoInventoryEnabled ? demoResults(query) : { vendors: [] as PublicVendor[], count: 0 };
   return {
     count: count ?? 0,
     vendors: (data ?? []).map(({ service_packages, ...vendor }) => ({
@@ -67,12 +89,16 @@ export async function listPublicVendors(query: MarketplaceQuery = {}) {
       packages: service_packages.filter((item) => item.active),
       verification: null,
       imageUrl: publicImage(vendor.hero_image_path),
+      isPlaceholder: demoInventoryEnabled && DEMO_VENDOR_IDS.has(vendor.id),
     })),
   };
 }
 
 export async function getPublicVendor(id: string): Promise<PublicVendor | null> {
-  if (!configured()) return null;
+  const demo = demoInventoryEnabled
+    ? (demoVendors.find((vendor) => vendor.id === id) ?? null)
+    : null;
+  if (!configured()) return demo;
   const client = publicClient();
   const [{ data: vendor }, { data: verification }] = await Promise.all([
     client
@@ -93,13 +119,14 @@ export async function getPublicVendor(id: string): Promise<PublicVendor | null> 
       .limit(1)
       .maybeSingle(),
   ]);
-  if (!vendor) return null;
+  if (!vendor) return demo;
   const { service_packages, ...row } = vendor;
   return {
     ...row,
     packages: service_packages.filter((item) => item.active),
     verification: verification ?? null,
     imageUrl: publicImage(row.hero_image_path),
+    isPlaceholder: demoInventoryEnabled && DEMO_VENDOR_IDS.has(row.id),
   };
 }
 

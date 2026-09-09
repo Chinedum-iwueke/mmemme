@@ -3,7 +3,7 @@ set -euo pipefail
 
 api_url="http://127.0.0.1:54321"
 status="$(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN=local-test-token npx supabase status -o json)"
-anon_key="$(jq -r .ANON_KEY <<<"$status")"
+anon_key="$(jq -r '.PUBLISHABLE_KEY // .ANON_KEY' <<<"$status")"
 db_url="$(jq -r .DB_URL <<<"$status")"
 
 curl -fsS "$api_url/auth/v1/otp" \
