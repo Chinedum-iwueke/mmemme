@@ -7,6 +7,7 @@ const discovery = readFileSync("apps/mobile/app/index.tsx", "utf8");
 const request = readFileSync("apps/mobile/app/request/[vendorId].tsx", "utf8");
 const booking = readFileSync("apps/mobile/app/booking/[id].tsx", "utf8");
 const brandLogo = readFileSync("apps/mobile/src/components/brand-logo.tsx", "utf8");
+const vendors = readFileSync("apps/mobile/src/lib/vendors.ts", "utf8");
 for (const treatment of ["green", "lime", "white"])
   if (!existsSync(`apps/mobile/assets/brand/mmemme-stacked-${treatment}.png`)) {
     console.error(`Missing native MMEMME ${treatment} logo treatment`);
@@ -14,6 +15,17 @@ for (const treatment of ["green", "lime", "white"])
   }
 if (!brandLogo.includes('accessibilityLabel="MMEMME"')) {
   console.error("Native logo must expose the accessible product name");
+  process.exit(1);
+}
+for (const image of ["lagoon-house", "the-assembly", "adunni-table", "ife-kitchen"]) {
+  const imagePath = `apps/mobile/assets/editorial/${image}.webp`;
+  if (!existsSync(imagePath) || !vendors.includes(`../../assets/editorial/${image}.webp`)) {
+    console.error(`Missing native demo marketplace image: ${image}`);
+    process.exit(1);
+  }
+}
+if (!vendors.includes("EXPO_PUBLIC_DEMO_MODE && demoVendorHeroSources")) {
+  console.error("Native demo images must remain disabled outside demo mode");
   process.exit(1);
 }
 const components = [

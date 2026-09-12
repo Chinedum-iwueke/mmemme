@@ -236,10 +236,10 @@ export default function HomeScreen() {
               onPress={() => router.push({ pathname: "/vendor/[id]", params: { id: item.id } })}
               style={styles.card}
             >
-              {item.heroUrl ? (
+              {item.heroSource ? (
                 <Image
                   accessibilityLabel={`${item.name} portfolio image`}
-                  source={{ uri: item.heroUrl }}
+                  source={item.heroSource}
                   style={styles.image}
                 />
               ) : (

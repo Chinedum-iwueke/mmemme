@@ -1,10 +1,18 @@
 import type { PackageRow, VendorRow, VerificationDisclosure } from "./database.types";
-import { isSupabaseConfigured, supabase } from "./supabase";
+import type { ImageSourcePropType } from "react-native";
+import { isSupabaseConfigured, mobileEnvironment, supabase } from "./supabase";
+
+const demoVendorHeroSources: Record<string, ImageSourcePropType> = {
+  "10000000-0000-4000-8000-000000000001": require("../../assets/editorial/lagoon-house.webp"),
+  "10000000-0000-4000-8000-000000000002": require("../../assets/editorial/the-assembly.webp"),
+  "10000000-0000-4000-8000-000000000003": require("../../assets/editorial/adunni-table.webp"),
+  "10000000-0000-4000-8000-000000000004": require("../../assets/editorial/ife-kitchen.webp"),
+};
 
 export type Vendor = VendorRow & {
   packages: PackageRow[];
   verification: VerificationDisclosure | null;
-  heroUrl: string | null;
+  heroSource: ImageSourcePropType | null;
 };
 export type VendorFilters = {
   category?: "venue" | "caterer";
@@ -47,10 +55,14 @@ export async function listVendors(filters: VendorFilters = {}): Promise<Vendor[]
       (disclosures as VerificationDisclosure[] | null)?.find(
         (item) => item.vendor_id === vendor.id,
       ) ?? null,
-    heroUrl: vendor.hero_image_path
-      ? supabase.storage.from("vendor-portfolios").getPublicUrl(vendor.hero_image_path).data
-          .publicUrl
-      : null,
+    heroSource:
+      (mobileEnvironment.EXPO_PUBLIC_DEMO_MODE && demoVendorHeroSources[vendor.id]) ||
+      (vendor.hero_image_path
+        ? {
+            uri: supabase.storage.from("vendor-portfolios").getPublicUrl(vendor.hero_image_path)
+              .data.publicUrl,
+          }
+        : null),
   }));
 }
 

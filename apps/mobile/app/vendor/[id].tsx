@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   Pressable,
   SafeAreaView,
@@ -89,23 +88,11 @@ export default function VendorDetail() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        {vendor.heroUrl ? (
-          <FlatList
-            data={[vendor.heroUrl]}
-            horizontal
-            pagingEnabled
-            initialNumToRender={1}
-            maxToRenderPerBatch={2}
-            windowSize={3}
-            keyExtractor={(item) => item}
-            accessibilityLabel={`${vendor.name} portfolio gallery`}
-            renderItem={({ item }) => (
-              <Image
-                accessibilityLabel={`${vendor.name} portfolio image`}
-                source={{ uri: item }}
-                style={styles.hero}
-              />
-            )}
+        {vendor.heroSource ? (
+          <Image
+            accessibilityLabel={`${vendor.name} portfolio image`}
+            source={vendor.heroSource}
+            style={styles.hero}
           />
         ) : (
           <View style={[styles.hero, { backgroundColor: colors.rose }]}>
