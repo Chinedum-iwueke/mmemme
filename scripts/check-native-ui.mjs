@@ -8,6 +8,11 @@ const request = readFileSync("apps/mobile/app/request/[vendorId].tsx", "utf8");
 const booking = readFileSync("apps/mobile/app/booking/[id].tsx", "utf8");
 const brandLogo = readFileSync("apps/mobile/src/components/brand-logo.tsx", "utf8");
 const vendors = readFileSync("apps/mobile/src/lib/vendors.ts", "utf8");
+const vendorGateway = readFileSync("apps/mobile/app/for-vendors.tsx", "utf8");
+const auth = readFileSync("apps/mobile/app/auth.tsx", "utf8");
+const profile = readFileSync("apps/mobile/app/profile.tsx", "utf8");
+const authProvider = readFileSync("apps/mobile/src/lib/auth.tsx", "utf8");
+const vendorWeb = readFileSync("apps/mobile/src/lib/vendor-web.ts", "utf8");
 for (const treatment of ["green", "lime", "white"])
   if (!existsSync(`apps/mobile/assets/brand/mmemme-stacked-${treatment}.png`)) {
     console.error(`Missing native MMEMME ${treatment} logo treatment`);
@@ -27,6 +32,20 @@ for (const image of ["lagoon-house", "the-assembly", "adunni-table", "ife-kitche
 if (!vendors.includes("EXPO_PUBLIC_DEMO_MODE && demoVendorHeroSources")) {
   console.error("Native demo images must remain disabled outside demo mode");
   process.exit(1);
+}
+for (const contract of [
+  "Are you a venue or caterer?",
+  "List your business",
+  "How verification works",
+  "/vendor/apply",
+  "/vendor/workspace",
+  "openBrowserAsync",
+  "vendor_memberships",
+]) {
+  if (!(auth + profile + vendorGateway + vendorWeb + authProvider).includes(contract)) {
+    console.error(`Native vendor gateway contract missing: ${contract}`);
+    process.exit(1);
+  }
 }
 const components = [
   "SafeScreen",

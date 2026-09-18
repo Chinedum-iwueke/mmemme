@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseEnvironment, ServerEnvironment } from "../src/index";
+import { parseEnvironment, PublicMobileEnvironment, ServerEnvironment } from "../src/index";
 
 const valid = {
   MMEMME_ENV: "staging",
@@ -28,4 +28,21 @@ describe("environment contract", () => {
         "server",
       ),
     ).toThrow(/PAYSTACK_SECRET_KEY/));
+  it("requires HTTPS for production mobile-to-web handoff", () =>
+    expect(() =>
+      parseEnvironment(
+        PublicMobileEnvironment,
+        {
+          EXPO_PUBLIC_MMEMME_ENV: "production",
+          EXPO_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: "publishable-key-at-least-20",
+          EXPO_PUBLIC_WEB_URL: "http://mmemme.com",
+          EXPO_PUBLIC_REQUESTS_ENABLED: "true",
+          EXPO_PUBLIC_PAYMENTS_SANDBOX_ENABLED: "false",
+          EXPO_PUBLIC_PAYMENTS_LIVE_ENABLED: "false",
+          EXPO_PUBLIC_DEMO_MODE: "false",
+        },
+        "mobile public",
+      ),
+    ).toThrow(/EXPO_PUBLIC_WEB_URL/));
 });

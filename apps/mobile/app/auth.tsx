@@ -163,6 +163,25 @@ export default function AuthScreen() {
               >
                 {busy ? "Sending…" : "Send my code"}
               </PrimaryButton>
+              <View style={styles.vendorPrompt}>
+                <View style={styles.vendorPromptIcon}>
+                  <Ionicons name="storefront-outline" size={22} color={colors.plum} />
+                </View>
+                <View style={styles.vendorPromptCopy}>
+                  <Text style={styles.vendorPromptTitle}>Are you a venue or caterer?</Text>
+                  <Text style={styles.vendorPromptText}>
+                    Apply to join MMEMME through our private verification workspace.
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Learn about listing your venue or catering business"
+                  onPress={() => router.push("/for-vendors" as never)}
+                  style={styles.vendorPromptAction}
+                >
+                  <Ionicons name="arrow-forward" size={21} color={colors.plum} />
+                </Pressable>
+              </View>
             </>
           )}
           {step === "code" && (
@@ -313,6 +332,34 @@ const styles = StyleSheet.create({
   },
   prefix: { fontSize: 17, fontWeight: "800", paddingLeft: 16, paddingRight: 8, color: colors.ink },
   phoneInput: { flex: 1, fontSize: 17, color: colors.ink, paddingRight: 16 },
+  vendorPrompt: {
+    marginTop: 20,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    backgroundColor: colors.rose,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  vendorPromptIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  vendorPromptCopy: { flex: 1 },
+  vendorPromptTitle: { color: colors.ink, fontSize: 14, fontWeight: "900" },
+  vendorPromptText: { color: colors.muted, fontSize: 12, lineHeight: 17, marginTop: 3 },
+  vendorPromptAction: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   resend: { minHeight: 46, alignItems: "center", justifyContent: "center" },
   resendText: { color: colors.plum, fontWeight: "800" },
   error: {

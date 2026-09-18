@@ -13,15 +13,28 @@ export const PublicWebEnvironment = z.object({
   NEXT_PUBLIC_REQUESTS_ENABLED: booleanFlag,
 });
 
-export const PublicMobileEnvironment = z.object({
-  EXPO_PUBLIC_MMEMME_ENV: RuntimeEnvironment,
-  EXPO_PUBLIC_SUPABASE_URL: url,
-  EXPO_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
-  EXPO_PUBLIC_REQUESTS_ENABLED: booleanFlag,
-  EXPO_PUBLIC_PAYMENTS_SANDBOX_ENABLED: booleanFlag,
-  EXPO_PUBLIC_PAYMENTS_LIVE_ENABLED: booleanFlag,
-  EXPO_PUBLIC_DEMO_MODE: booleanFlag,
-});
+export const PublicMobileEnvironment = z
+  .object({
+    EXPO_PUBLIC_MMEMME_ENV: RuntimeEnvironment,
+    EXPO_PUBLIC_SUPABASE_URL: url,
+    EXPO_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
+    EXPO_PUBLIC_WEB_URL: url,
+    EXPO_PUBLIC_REQUESTS_ENABLED: booleanFlag,
+    EXPO_PUBLIC_PAYMENTS_SANDBOX_ENABLED: booleanFlag,
+    EXPO_PUBLIC_PAYMENTS_LIVE_ENABLED: booleanFlag,
+    EXPO_PUBLIC_DEMO_MODE: booleanFlag,
+  })
+  .superRefine((env, context) => {
+    if (
+      env.EXPO_PUBLIC_MMEMME_ENV === "production" &&
+      !env.EXPO_PUBLIC_WEB_URL.startsWith("https://")
+    )
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["EXPO_PUBLIC_WEB_URL"],
+        message: "Production vendor links require HTTPS",
+      });
+  });
 
 export const ServerEnvironment = z
   .object({

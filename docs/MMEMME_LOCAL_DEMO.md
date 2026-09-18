@@ -11,7 +11,9 @@ This demo uses local Supabase, a fixed local OTP and an explicitly gated payment
 4. Copy `supabase/.env.demo.example` to an untracked local env file, keep
    `PAYMENTS_DEMO_MODE=true`, and serve functions with
    `npx supabase functions serve --env-file supabase/.env.local`.
-5. Set `EXPO_PUBLIC_DEMO_MODE=true` in `apps/mobile/.env.local`.
+5. Set `EXPO_PUBLIC_DEMO_MODE=true` and `EXPO_PUBLIC_WEB_URL` to the web app's
+   LAN address (for example `http://192.168.1.20:3000`) in
+   `apps/mobile/.env.local`. A physical phone cannot use `localhost` for this link.
 6. Start the app with `npm run dev:mobile`. Start operations in a second terminal with `ADMIN_REQUIRE_AAL2=false npm run dev:admin`.
 
 Before presenting, run `scripts/local-demo-smoke.sh`. A successful result reports
