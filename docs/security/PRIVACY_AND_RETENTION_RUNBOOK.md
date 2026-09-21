@@ -6,4 +6,10 @@ Deletion removes drafts, shortlist entries, push tokens and preferences; anonymi
 
 The scheduled retention task deletes drafts after 30 days and notifications after 365 days, anonymizes analytics after 180 days and removes expired rate-limit counters. Vendor evidence is deleted after its approved verification/dispute window. Financial and audit retention requires counsel/accounting approval before production.
 
+MMEMME must not store identity-document images, selfies or facial templates for the
+account trust workflow. Capture stays with the approved hosted provider under the
+DPIA-approved minimum retention window. MMEMME retains consent, provider/session
+references, boolean outcomes, a coarse confidence band, timestamps and review
+decisions only. Provider deletion evidence must be auditable before production.
+
 Exports exclude administrator flags and raw provider status. Analytics must never include free text, names, email, phone, object paths, payment references, NIN/BVN values or message bodies. Consent history is append-only.

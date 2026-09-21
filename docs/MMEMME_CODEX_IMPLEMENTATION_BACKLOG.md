@@ -1021,14 +1021,43 @@ chat, source control or a client-visible environment variable.
 
 ### 7.5 Vendor identity, bank-name and evidence providers
 
+- [ ] Register MMEMME as a NINAuth enterprise and select a partner from NIMC's
+      approved Verification Partner/Aggregator register. Execute the commercial and
+      data-processing agreements; record NIMC/partner approval evidence and owners.
 - [ ] Select providers covering the approved Nigerian identity and bank-name checks;
       execute commercial and data-processing agreements and document availability,
       retention, sub-processors, data residency, manual review and breach contacts.
-- [ ] Obtain sandbox and production approval/credentials; configure
-      `VERIFICATION_PROVIDER_URL`/`VERIFICATION_PROVIDER_KEY`, callback/IP rules if
-      required, consent wording and provider outage escalation.
+- [ ] Obtain NINAuth sandbox and production approval/credentials; register the exact
+      callback allowlist and configure `NINAUTH_AUTHORIZATION_URL`,
+      `NINAUTH_TOKEN_URL`, `NINAUTH_JWKS_URL`, `NINAUTH_ISSUER`,
+      `NINAUTH_CLIENT_ID`, `NINAUTH_CLIENT_SECRET`, `NINAUTH_APP_ID`,
+      `NINAUTH_REDIRECT_URI`, `NINAUTH_SCOPES` and a rotated 32-byte base64
+      `NINAUTH_SESSION_ENCRYPTION_KEY` in the server secret store only.
+- [ ] Configure the separate bank-name provider through
+      `VERIFICATION_PROVIDER_URL`/`VERIFICATION_PROVIDER_KEY`, including callback/IP
+      rules if required, approved consent wording and provider outage escalation.
 - [ ] Confirm the integration exchanges provider tokens/references rather than raw
       NIN/BVN values and that provider payloads are redacted from logs and analytics.
+- [ ] Have Nigerian counsel/DPO approve the identity purpose, consent version,
+      privacy notice, DPIA/processing register, data-subject request path, retention
+      schedule and incident notification duties under the NDPA and provider terms.
+- [ ] Certify authorization-code + PKCE success, denial, expiry, replay, state/nonce
+      mismatch, invalid issuer/audience/signature, key rotation, outage and callback
+      retry paths in the provider sandbox. A sandbox result never authorizes a live
+      vendor approval.
+- [ ] Select an approved hosted document-authenticity, selfie-liveness and face-match
+      provider. Configure `IDENTITY_PROOFING_PROVIDER_URL`,
+      `IDENTITY_PROOFING_PROVIDER_KEY`, `IDENTITY_PROOFING_CALLBACK_URL`,
+      `IDENTITY_PROOFING_HOSTED_ORIGIN` and `IDENTITY_PROOFING_WEBHOOK_SECRET`;
+      prohibit secondary biometric use/model
+      training and require the shortest approved raw-media retention.
+- [ ] Complete the biometric DPIA before enabling the provider. Counsel/DPO must
+      approve explicit consent, alternative/manual review, accessibility, age/minor
+      controls, false-match handling, deletion, transfers and subprocessors.
+- [ ] Certify document failure, spoof/liveness failure, face mismatch, low-confidence
+      review, duplicate/reordered/forged webhook, provider outage and deletion
+      evidence. Retain outcomes and references only—not ID images, selfies, facial
+      templates or raw provider payloads.
 - [ ] Select a malware/document scanner, approve its privacy/data-location terms,
       configure `MALWARE_SCANNER_URL`/`MALWARE_SCANNER_KEY`, file/time limits and
       fail-closed behavior; test clean, infected, timeout and unavailable outcomes.
