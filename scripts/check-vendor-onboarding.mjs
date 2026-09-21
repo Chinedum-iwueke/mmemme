@@ -9,6 +9,20 @@ const evidenceRoute = readFileSync(
 );
 const scanner = readFileSync("supabase/functions/scan-vendor-evidence/index.ts", "utf8");
 const provider = readFileSync("supabase/functions/vendor-provider-check/index.ts", "utf8");
+const identityStart = readFileSync(
+  "supabase/functions/start-vendor-nin-verification/index.ts",
+  "utf8",
+);
+const identityCallback = readFileSync("supabase/functions/ninauth-callback/index.ts", "utf8");
+const proofingStart = readFileSync("supabase/functions/start-account-proofing/index.ts", "utf8");
+const proofingWebhook = readFileSync(
+  "supabase/functions/identity-proofing-webhook/index.ts",
+  "utf8",
+);
+const identityMigration = readFileSync(
+  "supabase/migrations/202609180012_ninauth_vendor_verification.sql",
+  "utf8",
+);
 const notifications = readFileSync("supabase/functions/dispatch-notifications/index.ts", "utf8");
 for (const [surface, source, contracts] of [
   [
@@ -67,8 +81,30 @@ for (const [surface, source, contracts] of [
   ],
   [
     "identity boundary",
-    provider,
-    ["providerToken", "VERIFICATION_PROVIDER_URL", "result_summary", "PROVIDER_UNAVAILABLE"],
+    identityStart + identityCallback + identityMigration,
+    [
+      "code_challenge_method",
+      "NINAUTH_SESSION_ENCRYPTION_KEY",
+      "consentAccepted",
+      "nonce_hash",
+      "createRemoteJWKSet",
+      "claims_verified",
+      "PROVIDER_UNAVAILABLE",
+    ],
+  ],
+  ["bank boundary", provider, ["providerToken", "VERIFICATION_PROVIDER_URL", "result_summary"]],
+  [
+    "account proofing boundary",
+    proofingStart + proofingWebhook,
+    [
+      "document_authenticity",
+      "selfie_liveness",
+      "face_match",
+      "IDENTITY_PROOFING_HOSTED_ORIGIN",
+      "x-mmemme-signature",
+      "payload_sha256",
+      "if (!transitioned) return",
+    ],
   ],
   [
     "communications",
@@ -82,7 +118,12 @@ for (const [surface, source, contracts] of [
       process.exit(1);
     }
 for (const forbidden of ["raw_nin", "raw_bvn", "nin_value", "bvn_value"])
-  if (migration.toLowerCase().includes(forbidden) || provider.toLowerCase().includes(forbidden)) {
+  if (
+    migration.toLowerCase().includes(forbidden) ||
+    provider.toLowerCase().includes(forbidden) ||
+    identityStart.toLowerCase().includes(forbidden) ||
+    identityCallback.toLowerCase().includes(forbidden)
+  ) {
     console.error(`Forbidden identity storage contract found: ${forbidden}`);
     process.exit(1);
   }

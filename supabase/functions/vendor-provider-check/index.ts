@@ -6,7 +6,7 @@ import { adminClient, userClient } from "../_shared/supabase.ts";
 const Input = z
   .object({
     applicationId: z.string().uuid(),
-    kind: z.enum(["identity", "bank_name"]),
+    kind: z.literal("bank_name"),
     providerToken: z.string().min(8).max(200),
     consentVersion: z.string().min(1).max(40),
   })
@@ -68,7 +68,7 @@ Deno.serve(async (request) => {
       {
         application_id: application.id,
         kind: parsed.data.kind,
-        provider: sandbox ? "mmemme-sandbox" : "configured-provider",
+        provider: sandbox ? "mmemme-sandbox-bank" : "configured-bank-provider",
         provider_request_id: providerRequestId,
         status,
         result_summary: resultSummary,

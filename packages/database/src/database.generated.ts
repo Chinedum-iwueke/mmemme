@@ -9,6 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      account_identity_verifications: {
+        Row: {
+          checked_at: string | null
+          confidence_band: string | null
+          created_at: string
+          document_verified_at: string | null
+          email_verified_at: string | null
+          expires_at: string | null
+          face_match_verified_at: string | null
+          failure_reason: string | null
+          national_identity_expires_at: string | null
+          national_identity_verified_at: string | null
+          provider: string | null
+          provider_reference: string | null
+          selfie_liveness_verified_at: string | null
+          status: Database["public"]["Enums"]["account_identity_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          checked_at?: string | null
+          confidence_band?: string | null
+          created_at?: string
+          document_verified_at?: string | null
+          email_verified_at?: string | null
+          expires_at?: string | null
+          face_match_verified_at?: string | null
+          failure_reason?: string | null
+          national_identity_expires_at?: string | null
+          national_identity_verified_at?: string | null
+          provider?: string | null
+          provider_reference?: string | null
+          selfie_liveness_verified_at?: string | null
+          status?: Database["public"]["Enums"]["account_identity_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          checked_at?: string | null
+          confidence_band?: string | null
+          created_at?: string
+          document_verified_at?: string | null
+          email_verified_at?: string | null
+          expires_at?: string | null
+          face_match_verified_at?: string | null
+          failure_reason?: string | null
+          national_identity_expires_at?: string | null
+          national_identity_verified_at?: string | null
+          provider?: string | null
+          provider_reference?: string | null
+          selfie_liveness_verified_at?: string | null
+          status?: Database["public"]["Enums"]["account_identity_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_identity_verifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_access: {
         Row: {
           active: boolean
@@ -690,6 +755,94 @@ export type Database = {
           {
             foreignKeyName: "financial_alerts_assigned_to_fkey"
             columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      identity_proofing_events: {
+        Row: {
+          id: string
+          payload_sha256: string
+          provider: string
+          provider_event_id: string
+          received_at: string
+          session_id: string
+        }
+        Insert: {
+          id?: string
+          payload_sha256: string
+          provider: string
+          provider_event_id: string
+          received_at?: string
+          session_id: string
+        }
+        Update: {
+          id?: string
+          payload_sha256?: string
+          provider?: string
+          provider_event_id?: string
+          received_at?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_proofing_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "identity_proofing_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      identity_proofing_sessions: {
+        Row: {
+          completed_at: string | null
+          consent_version: string
+          consented_at: string
+          created_at: string
+          expires_at: string
+          id: string
+          provider: string
+          provider_session_id: string | null
+          purpose: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          consent_version: string
+          consented_at: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          provider: string
+          provider_session_id?: string | null
+          purpose: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          consent_version?: string
+          consented_at?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          provider?: string
+          provider_session_id?: string | null
+          purpose?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_proofing_sessions_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2487,6 +2640,91 @@ export type Database = {
           },
         ]
       }
+      vendor_identity_sessions: {
+        Row: {
+          application_id: string | null
+          consent_purpose: string
+          consent_version: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          failure_code: string | null
+          id: string
+          nonce_hash: string
+          provider: string
+          provider_request_id: string | null
+          requested_by: string
+          state_hash: string
+          status: string
+          subject_user_id: string
+          updated_at: string
+          verifier_ciphertext: string
+          verifier_iv: string
+        }
+        Insert: {
+          application_id?: string | null
+          consent_purpose: string
+          consent_version: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at: string
+          failure_code?: string | null
+          id?: string
+          nonce_hash: string
+          provider?: string
+          provider_request_id?: string | null
+          requested_by: string
+          state_hash: string
+          status?: string
+          subject_user_id: string
+          updated_at?: string
+          verifier_ciphertext: string
+          verifier_iv: string
+        }
+        Update: {
+          application_id?: string | null
+          consent_purpose?: string
+          consent_version?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          failure_code?: string | null
+          id?: string
+          nonce_hash?: string
+          provider?: string
+          provider_request_id?: string | null
+          requested_by?: string
+          state_hash?: string
+          status?: string
+          subject_user_id?: string
+          updated_at?: string
+          verifier_ciphertext?: string
+          verifier_iv?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_identity_sessions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_identity_sessions_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_identity_sessions_subject_user_id_fkey"
+            columns: ["subject_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_inspections: {
         Row: {
           acknowledged_at: string | null
@@ -3103,6 +3341,10 @@ export type Database = {
         }
       }
       accept_vendor_invitation: { Args: { p_token: string }; Returns: string }
+      account_has_verified_identity: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       admin_approve_payout: {
         Args: { p_payout_id: string; p_reason: string }
         Returns: {
@@ -3842,6 +4084,13 @@ export type Database = {
       }
     }
     Enums: {
+      account_identity_status:
+        | "not_started"
+        | "in_progress"
+        | "manual_review"
+        | "verified"
+        | "failed"
+        | "expired"
       admin_role:
         | "owner"
         | "operations"
@@ -4043,6 +4292,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_identity_status: [
+        "not_started",
+        "in_progress",
+        "manual_review",
+        "verified",
+        "failed",
+        "expired",
+      ],
       admin_role: [
         "owner",
         "operations",

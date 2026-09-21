@@ -10,6 +10,8 @@ insert into public.admin_access(user_id,role) values('51000000-0000-0000-0000-00
 insert into public.wedding_briefs(id,customer_id,wedding_date,area,guest_count,budget_min_kobo,budget_max_kobo,priorities) values
  ('52000000-0000-0000-0000-000000000001','51000000-0000-0000-0000-000000000001',current_date+90,'Lekki',100,100,200,array['venue']::public.vendor_category[]),
  ('52000000-0000-0000-0000-000000000002','51000000-0000-0000-0000-000000000002',current_date+90,'Ikeja',100,100,200,array['venue']::public.vendor_category[]);
+insert into public.account_identity_verifications(user_id,status,email_verified_at)
+values('51000000-0000-0000-0000-000000000001','in_progress',now());
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub','51000000-0000-0000-0000-000000000001',true);
@@ -46,12 +48,28 @@ reset role;
 do $$ begin
  if (select email is not null or privacy_deleted_at is null from public.profiles where id='51000000-0000-0000-0000-000000000001') then raise exception 'profile was not pseudonymized'; end if;
  if not (select banned_until='infinity'::timestamptz from auth.users where id='51000000-0000-0000-0000-000000000001') then raise exception 'deleted auth account remains active'; end if;
+ if exists(select 1 from public.account_identity_verifications where user_id='51000000-0000-0000-0000-000000000001') then raise exception 'identity trust survived privacy deletion'; end if;
 end $$;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','51000000-0000-0000-0000-000000000001',true);
 do $$ begin begin update public.profiles set full_name='Resurrected' where id='51000000-0000-0000-0000-000000000001'; raise exception 'deleted profile reactivated'; exception when others then if sqlerrm='deleted profile reactivated' then raise; end if; end; end $$;
 
 reset role;
+do $$ begin
+ if has_table_privilege('authenticated','public.vendor_identity_sessions','select')
+    or has_table_privilege('authenticated','public.vendor_identity_sessions','insert')
+    or has_table_privilege('anon','public.vendor_identity_sessions','select') then
+   raise exception 'identity session secrets are client accessible';
+ end if;
+ if has_column_privilege('authenticated','public.account_identity_verifications','provider_reference','select')
+    or has_column_privilege('authenticated','public.account_identity_verifications','confidence_band','select')
+    or has_table_privilege('authenticated','public.identity_proofing_events','select') then
+   raise exception 'private proofing metadata is client accessible';
+ end if;
+ if not has_column_privilege('authenticated','public.account_identity_verifications','status','select') then
+   raise exception 'safe identity status is not readable';
+ end if;
+end $$;
 do $$ declare v_rls_without_policy integer; begin
  select count(*) into v_rls_without_policy from pg_class c join pg_namespace n on n.oid=c.relnamespace
  where n.nspname='public' and c.relkind='r' and c.relrowsecurity=false;

@@ -6,6 +6,12 @@ const allowed = [
   "paystack-webhook",
   "process-refund",
   "dispatch-notifications",
+  "start-vendor-nin-verification",
+  "ninauth-callback",
+  "vendor-provider-check",
+  "start-account-proofing",
+  "identity-proofing-webhook",
+  "sync-account-email-verification",
 ];
 for (const name of allowed) {
   const result = spawnSync("npx", ["--yes", "supabase@2.116.0", "functions", "deploy", name], {
