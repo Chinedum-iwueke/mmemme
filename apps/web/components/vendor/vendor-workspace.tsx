@@ -113,6 +113,7 @@ export function VendorWorkspace({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [attested, setAttested] = useState(false);
+  const [identityConsent, setIdentityConsent] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const saving = useRef(false);
@@ -219,6 +220,14 @@ export function VendorWorkspace({
   useEffect(() => {
     load().catch(() => setError("We could not load your vendor workspace."));
   }, [load]);
+  useEffect(() => {
+    const outcome = new URLSearchParams(location.search).get("identity_verification");
+    if (outcome === "completed") setNotice("NINAuth confirmed your identity successfully.");
+    if (outcome === "failed")
+      setError("NINAuth could not complete the check. No identity data was retained by MMEMME.");
+    if (outcome === "expired")
+      setError("That secure verification session expired. Start a new check when you are ready.");
+  }, []);
   useEffect(() => {
     if (
       !application ||
@@ -409,6 +418,21 @@ export function VendorWorkspace({
   };
   const providerCheck = async (kind: "identity" | "bank_name") => {
     if (!application) return;
+    if (kind === "identity") {
+      const { data, error } = await client.functions.invoke("start-vendor-nin-verification", {
+        body: {
+          applicationId: application.id,
+          consentVersion: "nin-verification-2026-09",
+          consentAccepted: identityConsent,
+        },
+      });
+      if (error) throw error;
+      const authorizationUrl = data?.data?.authorizationUrl;
+      if (typeof authorizationUrl !== "string")
+        throw new Error("The identity provider is not configured yet. Please contact MMEMME.");
+      location.assign(authorizationUrl);
+      return;
+    }
     const { error } = await client.functions.invoke("vendor-provider-check", {
       body: {
         applicationId: application.id,
@@ -782,8 +806,20 @@ export function VendorWorkspace({
         {step === 5 && (
           <Panel
             title="Identity and bank-name checks"
-            intro="MMEMME stores provider request IDs and result summaries—not raw NIN or BVN values. Provider downtime never implies approval."
+            intro="Identity checks happen securely with NINAuth. MMEMME never asks you to type or upload your NIN and stores only consent evidence, a provider reference and the verification outcome."
           >
+            <div className="vendor-check-card">
+              <div>
+                <h3>Personal trust verification</h3>
+                <p>
+                  Verify your email, identity document and selfie liveness through the shared
+                  account flow. The provider captures the files; MMEMME keeps only the results.
+                </p>
+              </div>
+              <a className="button secondary" href="/account/verification">
+                Open personal verification
+              </a>
+            </div>
             {requirements
               .filter((item) => item.evidence_kind === "provider")
               .map((requirement) => (
@@ -797,9 +833,25 @@ export function VendorWorkspace({
                     {requirement.description} MMEMME stores only the provider summary and request
                     ID.
                   </p>
+                  {requirement.code === "identity" && (
+                    <label className="vendor-consent">
+                      <input
+                        type="checkbox"
+                        checked={identityConsent}
+                        onChange={(event) => setIdentityConsent(event.target.checked)}
+                      />
+                      <span>
+                        I consent to NINAuth confirming that I have a valid Nigerian identity for
+                        this vendor application. MMEMME will not receive or store my NIN or full
+                        identity profile. This authorization expires after ten minutes.
+                      </span>
+                    </label>
+                  )}
                   <button
                     className="button secondary"
-                    disabled={!editable || busy}
+                    disabled={
+                      !editable || busy || (requirement.code === "identity" && !identityConsent)
+                    }
                     onClick={() =>
                       run(
                         () => providerCheck(requirement.code as "identity" | "bank_name"),
@@ -807,7 +859,9 @@ export function VendorWorkspace({
                       )
                     }
                   >
-                    Start secure provider check
+                    {requirement.code === "identity"
+                      ? "Continue securely to NINAuth"
+                      : "Start secure bank-name check"}
                   </button>
                 </div>
               ))}

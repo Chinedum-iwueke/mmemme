@@ -1,7 +1,7 @@
 import * as WebBrowser from "expo-web-browser";
 import { mobileEnvironment } from "./supabase";
 
-export type VendorWebDestination = "/vendor/apply" | "/vendor/workspace";
+export type VendorWebDestination = "/vendor/apply" | "/vendor/workspace" | "/account/verification";
 
 export function vendorWebUrl(destination: VendorWebDestination) {
   return new URL(

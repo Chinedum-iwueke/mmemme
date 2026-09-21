@@ -337,6 +337,32 @@
   display: grid;
   align-items: start;
 }
+
+.vendor-consent {
+  align-items: flex-start;
+  background: color-mix(in srgb, var(--mm-brand-lime) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--mm-brand-lime) 48%, var(--mm-semantic-border-default));
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  gap: 0.75rem;
+  line-height: 1.55;
+  margin: 1rem 0;
+  padding: 1rem;
+}
+
+.vendor-consent input {
+  accent-color: var(--mm-semantic-action-primary);
+  flex: 0 0 auto;
+  height: 1.15rem;
+  margin-top: 0.2rem;
+  width: 1.15rem;
+}
+
+.vendor-consent:focus-within {
+  outline: 3px solid color-mix(in srgb, var(--mm-brand-lime) 55%, transparent);
+  outline-offset: 2px;
+}
 .vendor-summary {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

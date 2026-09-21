@@ -45,6 +45,12 @@ export default function ProfileScreen() {
           </View>
           <PrimaryButton onPress={() => router.push("/bookings")}>View my bookings</PrimaryButton>
           <PrimaryButton
+            style={{ marginTop: 10 }}
+            onPress={() => openVendorWeb("/account/verification")}
+          >
+            Verify my identity
+          </PrimaryButton>
+          <PrimaryButton
             style={{ marginTop: 10, backgroundColor: colors.coral }}
             onPress={() => router.push("/brief")}
           >

@@ -1404,6 +1404,50 @@ p {
   background: var(--mm-semantic-error-surface);
   color: var(--mm-semantic-error);
 }
+.identity-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.identity-grid > .success-banner {
+  grid-column: 1/-1;
+}
+.identity-card {
+  align-content: start;
+  background: var(--mm-semantic-surface);
+  border: 1px solid var(--mm-semantic-border-default);
+  border-radius: var(--mm-radius-lg);
+  display: grid;
+  gap: 18px;
+  padding: clamp(20px, 3vw, 28px);
+}
+.identity-card-head {
+  align-items: start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+.identity-card h2,
+.identity-card p {
+  margin: 0;
+}
+.identity-card > label:not(.acknowledgement) {
+  display: grid;
+  font-weight: 700;
+  gap: 7px;
+}
+.identity-card input[type="email"] {
+  background: var(--mm-semantic-surface);
+  border: 1px solid var(--mm-semantic-border-strong);
+  border-radius: var(--mm-radius-md);
+  min-height: 48px;
+  padding: 11px 13px;
+}
+@media (max-width: 900px) {
+  .identity-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .booking-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.7fr);
